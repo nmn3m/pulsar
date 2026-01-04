@@ -52,6 +52,19 @@ import type {
 	ListEscalationRulesResponse,
 	ListEscalationTargetsResponse
 } from '$lib/types/escalation';
+import type {
+	NotificationChannel,
+	UserNotificationPreference,
+	NotificationLog,
+	CreateNotificationChannelRequest,
+	UpdateNotificationChannelRequest,
+	CreateUserNotificationPreferenceRequest,
+	UpdateUserNotificationPreferenceRequest,
+	SendNotificationRequest,
+	ListNotificationChannelsResponse,
+	ListUserNotificationPreferencesResponse,
+	ListNotificationLogsResponse
+} from '$lib/types/notification';
 
 const API_URL = browser ? import.meta.env.VITE_API_URL || 'http://localhost:8080' : 'http://backend:8080';
 
@@ -595,6 +608,129 @@ class APIClient {
 			{
 				method: 'DELETE'
 			}
+		);
+	}
+
+	// ==================== Notification Channels ====================
+
+	async listNotificationChannels(): Promise<ListNotificationChannelsResponse> {
+		return this.request<ListNotificationChannelsResponse>('/api/v1/notifications/channels');
+	}
+
+	async createNotificationChannel(
+		data: CreateNotificationChannelRequest
+	): Promise<NotificationChannel> {
+		return this.request<NotificationChannel>('/api/v1/notifications/channels', {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async getNotificationChannel(id: string): Promise<NotificationChannel> {
+		return this.request<NotificationChannel>(`/api/v1/notifications/channels/${id}`);
+	}
+
+	async updateNotificationChannel(
+		id: string,
+		data: UpdateNotificationChannelRequest
+	): Promise<NotificationChannel> {
+		return this.request<NotificationChannel>(`/api/v1/notifications/channels/${id}`, {
+			method: 'PATCH',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async deleteNotificationChannel(id: string): Promise<void> {
+		await this.request(`/api/v1/notifications/channels/${id}`, {
+			method: 'DELETE'
+		});
+	}
+
+	// ==================== User Notification Preferences ====================
+
+	async listUserNotificationPreferences(): Promise<ListUserNotificationPreferencesResponse> {
+		return this.request<ListUserNotificationPreferencesResponse>(
+			'/api/v1/notifications/preferences'
+		);
+	}
+
+	async createUserNotificationPreference(
+		data: CreateUserNotificationPreferenceRequest
+	): Promise<UserNotificationPreference> {
+		return this.request<UserNotificationPreference>('/api/v1/notifications/preferences', {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async getUserNotificationPreference(id: string): Promise<UserNotificationPreference> {
+		return this.request<UserNotificationPreference>(`/api/v1/notifications/preferences/${id}`);
+	}
+
+	async updateUserNotificationPreference(
+		id: string,
+		data: UpdateUserNotificationPreferenceRequest
+	): Promise<UserNotificationPreference> {
+		return this.request<UserNotificationPreference>(
+			`/api/v1/notifications/preferences/${id}`,
+			{
+				method: 'PATCH',
+				body: JSON.stringify(data)
+			}
+		);
+	}
+
+	async deleteUserNotificationPreference(id: string): Promise<void> {
+		await this.request(`/api/v1/notifications/preferences/${id}`, {
+			method: 'DELETE'
+		});
+	}
+
+	// ==================== Sending Notifications ====================
+
+	async sendNotification(data: SendNotificationRequest): Promise<NotificationLog> {
+		return this.request<NotificationLog>('/api/v1/notifications/send', {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	// ==================== Notification Logs ====================
+
+	async listNotificationLogs(limit?: number, offset?: number): Promise<ListNotificationLogsResponse> {
+		const params = new URLSearchParams();
+		if (limit) params.append('limit', limit.toString());
+		if (offset) params.append('offset', offset.toString());
+
+		const queryString = params.toString();
+		const endpoint = queryString ? `/api/v1/notifications/logs?${queryString}` : '/api/v1/notifications/logs';
+
+		return this.request<ListNotificationLogsResponse>(endpoint);
+	}
+
+	async getNotificationLog(id: string): Promise<NotificationLog> {
+		return this.request<NotificationLog>(`/api/v1/notifications/logs/${id}`);
+	}
+
+	async listNotificationLogsByUser(
+		limit?: number,
+		offset?: number
+	): Promise<ListNotificationLogsResponse> {
+		const params = new URLSearchParams();
+		if (limit) params.append('limit', limit.toString());
+		if (offset) params.append('offset', offset.toString());
+
+		const queryString = params.toString();
+		const endpoint = queryString
+			? `/api/v1/notifications/logs/user/me?${queryString}`
+			: '/api/v1/notifications/logs/user/me';
+
+		return this.request<ListNotificationLogsResponse>(endpoint);
+	}
+
+	async listNotificationLogsByAlert(alertId: string): Promise<ListNotificationLogsResponse> {
+		return this.request<ListNotificationLogsResponse>(
+			`/api/v1/notifications/logs/alert/${alertId}`
 		);
 	}
 }

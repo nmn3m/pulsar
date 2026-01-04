@@ -56,6 +56,7 @@ func main() {
 	teamRepo := postgres.NewTeamRepository(db)
 	scheduleRepo := postgres.NewScheduleRepository(db)
 	escalationRepo := postgres.NewEscalationPolicyRepository(db)
+	notificationRepo := postgres.NewNotificationRepository(db)
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, orgRepo, cfg)
@@ -64,6 +65,7 @@ func main() {
 	userService := service.NewUserService(orgRepo)
 	scheduleService := service.NewScheduleService(scheduleRepo, userRepo)
 	escalationService := service.NewEscalationService(escalationRepo, alertRepo)
+	notificationService := service.NewNotificationService(notificationRepo)
 
 	// Initialize handlers
 	authHandler := rest.NewAuthHandler(authService)
@@ -72,6 +74,7 @@ func main() {
 	userHandler := rest.NewUserHandler(userService)
 	scheduleHandler := rest.NewScheduleHandler(scheduleService)
 	escalationHandler := rest.NewEscalationHandler(escalationService)
+	notificationHandler := rest.NewNotificationHandler(notificationService)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret)
@@ -194,6 +197,33 @@ func main() {
 				escalations.GET("/:id/rules/:ruleId/targets", escalationHandler.ListTargets)
 				escalations.POST("/:id/rules/:ruleId/targets", escalationHandler.AddTarget)
 				escalations.DELETE("/:id/rules/:ruleId/targets/:targetId", escalationHandler.RemoveTarget)
+			}
+
+			// Notification routes
+			notifications := protected.Group("/notifications")
+			{
+				// Channel routes
+				notifications.GET("/channels", notificationHandler.ListChannels)
+				notifications.POST("/channels", notificationHandler.CreateChannel)
+				notifications.GET("/channels/:id", notificationHandler.GetChannel)
+				notifications.PATCH("/channels/:id", notificationHandler.UpdateChannel)
+				notifications.DELETE("/channels/:id", notificationHandler.DeleteChannel)
+
+				// User preference routes
+				notifications.GET("/preferences", notificationHandler.ListUserPreferences)
+				notifications.POST("/preferences", notificationHandler.CreatePreference)
+				notifications.GET("/preferences/:id", notificationHandler.GetPreference)
+				notifications.PATCH("/preferences/:id", notificationHandler.UpdatePreference)
+				notifications.DELETE("/preferences/:id", notificationHandler.DeletePreference)
+
+				// Sending notifications
+				notifications.POST("/send", notificationHandler.SendNotification)
+
+				// Notification logs
+				notifications.GET("/logs", notificationHandler.ListLogs)
+				notifications.GET("/logs/:id", notificationHandler.GetLog)
+				notifications.GET("/logs/user/me", notificationHandler.ListLogsByUser)
+				notifications.GET("/logs/alert/:alertId", notificationHandler.ListLogsByAlert)
 			}
 		}
 	}
