@@ -18,6 +18,40 @@ import type {
 	AddTeamMemberRequest,
 	UpdateTeamMemberRoleRequest
 } from '$lib/types/team';
+import type {
+	Schedule,
+	ScheduleWithRotations,
+	ScheduleRotation,
+	ScheduleOverride,
+	OnCallUser,
+	ParticipantWithUser,
+	CreateScheduleRequest,
+	UpdateScheduleRequest,
+	CreateRotationRequest,
+	UpdateRotationRequest,
+	AddParticipantRequest,
+	ReorderParticipantsRequest,
+	CreateOverrideRequest,
+	UpdateOverrideRequest,
+	ListSchedulesResponse,
+	ListRotationsResponse,
+	ListParticipantsResponse,
+	ListOverridesResponse
+} from '$lib/types/schedule';
+import type {
+	EscalationPolicy,
+	EscalationPolicyWithRules,
+	EscalationRule,
+	EscalationTarget,
+	CreateEscalationPolicyRequest,
+	UpdateEscalationPolicyRequest,
+	CreateEscalationRuleRequest,
+	UpdateEscalationRuleRequest,
+	AddEscalationTargetRequest,
+	ListEscalationPoliciesResponse,
+	ListEscalationRulesResponse,
+	ListEscalationTargetsResponse
+} from '$lib/types/escalation';
 
 const API_URL = browser ? import.meta.env.VITE_API_URL || 'http://localhost:8080' : 'http://backend:8080';
 
@@ -289,6 +323,279 @@ class APIClient {
 
 	async listTeamMembers(teamId: string): Promise<{ members: User[] }> {
 		return this.request<{ members: User[] }>(`/api/v1/teams/${teamId}/members`);
+	}
+
+	// Schedule endpoints
+	async listSchedules(page = 1, pageSize = 20): Promise<ListSchedulesResponse> {
+		return this.request<ListSchedulesResponse>(
+			`/api/v1/schedules?page=${page}&page_size=${pageSize}`
+		);
+	}
+
+	async createSchedule(data: CreateScheduleRequest): Promise<Schedule> {
+		return this.request<Schedule>('/api/v1/schedules', {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async getSchedule(id: string): Promise<ScheduleWithRotations> {
+		return this.request<ScheduleWithRotations>(`/api/v1/schedules/${id}`);
+	}
+
+	async updateSchedule(id: string, data: UpdateScheduleRequest): Promise<Schedule> {
+		return this.request<Schedule>(`/api/v1/schedules/${id}`, {
+			method: 'PATCH',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async deleteSchedule(id: string): Promise<void> {
+		await this.request(`/api/v1/schedules/${id}`, {
+			method: 'DELETE'
+		});
+	}
+
+	async getOnCallUser(scheduleId: string, at?: string): Promise<OnCallUser> {
+		const params = at ? `?at=${encodeURIComponent(at)}` : '';
+		return this.request<OnCallUser>(`/api/v1/schedules/${scheduleId}/oncall${params}`);
+	}
+
+	// Rotation endpoints
+	async listRotations(scheduleId: string): Promise<ListRotationsResponse> {
+		return this.request<ListRotationsResponse>(`/api/v1/schedules/${scheduleId}/rotations`);
+	}
+
+	async createRotation(scheduleId: string, data: CreateRotationRequest): Promise<ScheduleRotation> {
+		return this.request<ScheduleRotation>(`/api/v1/schedules/${scheduleId}/rotations`, {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async getRotation(scheduleId: string, rotationId: string): Promise<ScheduleRotation> {
+		return this.request<ScheduleRotation>(
+			`/api/v1/schedules/${scheduleId}/rotations/${rotationId}`
+		);
+	}
+
+	async updateRotation(
+		scheduleId: string,
+		rotationId: string,
+		data: UpdateRotationRequest
+	): Promise<ScheduleRotation> {
+		return this.request<ScheduleRotation>(
+			`/api/v1/schedules/${scheduleId}/rotations/${rotationId}`,
+			{
+				method: 'PATCH',
+				body: JSON.stringify(data)
+			}
+		);
+	}
+
+	async deleteRotation(scheduleId: string, rotationId: string): Promise<void> {
+		await this.request(`/api/v1/schedules/${scheduleId}/rotations/${rotationId}`, {
+			method: 'DELETE'
+		});
+	}
+
+	// Participant endpoints
+	async listParticipants(scheduleId: string, rotationId: string): Promise<ListParticipantsResponse> {
+		return this.request<ListParticipantsResponse>(
+			`/api/v1/schedules/${scheduleId}/rotations/${rotationId}/participants`
+		);
+	}
+
+	async addParticipant(
+		scheduleId: string,
+		rotationId: string,
+		data: AddParticipantRequest
+	): Promise<void> {
+		await this.request(`/api/v1/schedules/${scheduleId}/rotations/${rotationId}/participants`, {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async removeParticipant(
+		scheduleId: string,
+		rotationId: string,
+		userId: string
+	): Promise<void> {
+		await this.request(
+			`/api/v1/schedules/${scheduleId}/rotations/${rotationId}/participants/${userId}`,
+			{
+				method: 'DELETE'
+			}
+		);
+	}
+
+	async reorderParticipants(
+		scheduleId: string,
+		rotationId: string,
+		data: ReorderParticipantsRequest
+	): Promise<void> {
+		await this.request(
+			`/api/v1/schedules/${scheduleId}/rotations/${rotationId}/participants/reorder`,
+			{
+				method: 'PUT',
+				body: JSON.stringify(data)
+			}
+		);
+	}
+
+	// Override endpoints
+	async listOverrides(scheduleId: string, start?: string, end?: string): Promise<ListOverridesResponse> {
+		const params = new URLSearchParams();
+		if (start) params.append('start', start);
+		if (end) params.append('end', end);
+		const queryString = params.toString();
+		return this.request<ListOverridesResponse>(
+			`/api/v1/schedules/${scheduleId}/overrides${queryString ? '?' + queryString : ''}`
+		);
+	}
+
+	async createOverride(scheduleId: string, data: CreateOverrideRequest): Promise<ScheduleOverride> {
+		return this.request<ScheduleOverride>(`/api/v1/schedules/${scheduleId}/overrides`, {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async getOverride(scheduleId: string, overrideId: string): Promise<ScheduleOverride> {
+		return this.request<ScheduleOverride>(
+			`/api/v1/schedules/${scheduleId}/overrides/${overrideId}`
+		);
+	}
+
+	async updateOverride(
+		scheduleId: string,
+		overrideId: string,
+		data: UpdateOverrideRequest
+	): Promise<ScheduleOverride> {
+		return this.request<ScheduleOverride>(
+			`/api/v1/schedules/${scheduleId}/overrides/${overrideId}`,
+			{
+				method: 'PATCH',
+				body: JSON.stringify(data)
+			}
+		);
+	}
+
+	async deleteOverride(scheduleId: string, overrideId: string): Promise<void> {
+		await this.request(`/api/v1/schedules/${scheduleId}/overrides/${overrideId}`, {
+			method: 'DELETE'
+		});
+	}
+
+	// Escalation policy endpoints
+	async listEscalationPolicies(page = 1, pageSize = 20): Promise<ListEscalationPoliciesResponse> {
+		return this.request<ListEscalationPoliciesResponse>(
+			`/api/v1/escalation-policies?page=${page}&page_size=${pageSize}`
+		);
+	}
+
+	async createEscalationPolicy(data: CreateEscalationPolicyRequest): Promise<EscalationPolicy> {
+		return this.request<EscalationPolicy>('/api/v1/escalation-policies', {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async getEscalationPolicy(id: string): Promise<EscalationPolicyWithRules> {
+		return this.request<EscalationPolicyWithRules>(`/api/v1/escalation-policies/${id}`);
+	}
+
+	async updateEscalationPolicy(
+		id: string,
+		data: UpdateEscalationPolicyRequest
+	): Promise<EscalationPolicy> {
+		return this.request<EscalationPolicy>(`/api/v1/escalation-policies/${id}`, {
+			method: 'PATCH',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async deleteEscalationPolicy(id: string): Promise<void> {
+		await this.request(`/api/v1/escalation-policies/${id}`, {
+			method: 'DELETE'
+		});
+	}
+
+	// Escalation rule endpoints
+	async listEscalationRules(policyId: string): Promise<ListEscalationRulesResponse> {
+		return this.request<ListEscalationRulesResponse>(
+			`/api/v1/escalation-policies/${policyId}/rules`
+		);
+	}
+
+	async createEscalationRule(
+		policyId: string,
+		data: CreateEscalationRuleRequest
+	): Promise<EscalationRule> {
+		return this.request<EscalationRule>(`/api/v1/escalation-policies/${policyId}/rules`, {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async getEscalationRule(policyId: string, ruleId: string): Promise<EscalationRule> {
+		return this.request<EscalationRule>(
+			`/api/v1/escalation-policies/${policyId}/rules/${ruleId}`
+		);
+	}
+
+	async updateEscalationRule(
+		policyId: string,
+		ruleId: string,
+		data: UpdateEscalationRuleRequest
+	): Promise<EscalationRule> {
+		return this.request<EscalationRule>(
+			`/api/v1/escalation-policies/${policyId}/rules/${ruleId}`,
+			{
+				method: 'PATCH',
+				body: JSON.stringify(data)
+			}
+		);
+	}
+
+	async deleteEscalationRule(policyId: string, ruleId: string): Promise<void> {
+		await this.request(`/api/v1/escalation-policies/${policyId}/rules/${ruleId}`, {
+			method: 'DELETE'
+		});
+	}
+
+	// Escalation target endpoints
+	async listEscalationTargets(
+		policyId: string,
+		ruleId: string
+	): Promise<ListEscalationTargetsResponse> {
+		return this.request<ListEscalationTargetsResponse>(
+			`/api/v1/escalation-policies/${policyId}/rules/${ruleId}/targets`
+		);
+	}
+
+	async addEscalationTarget(
+		policyId: string,
+		ruleId: string,
+		data: AddEscalationTargetRequest
+	): Promise<EscalationTarget> {
+		return this.request<EscalationTarget>(
+			`/api/v1/escalation-policies/${policyId}/rules/${ruleId}/targets`,
+			{
+				method: 'POST',
+				body: JSON.stringify(data)
+			}
+		);
+	}
+
+	async removeEscalationTarget(policyId: string, ruleId: string, targetId: string): Promise<void> {
+		await this.request(
+			`/api/v1/escalation-policies/${policyId}/rules/${ruleId}/targets/${targetId}`,
+			{
+				method: 'DELETE'
+			}
+		);
 	}
 }
 

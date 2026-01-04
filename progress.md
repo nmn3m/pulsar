@@ -477,26 +477,245 @@ This document tracks the detailed progress of building Pulsar, an Opsgenie repla
 
 ---
 
-## Summary of Phases 1-3
+## Phase 4: On-Call Schedules ✅ COMPLETED
+
+**Goal**: Manage on-call rotations and determine who is on-call
+
+### Backend Implementation
+
+#### Database Schema
+- **File**: `backend/migrations/000003_schedules.up.sql`
+  - Created `schedules` table with timezone support
+  - Created `schedule_rotations` table - rotation patterns (daily/weekly/custom)
+  - Created `schedule_rotation_participants` table - users in rotations with position
+  - Created `schedule_overrides` table - temporary schedule changes
+  - Comprehensive indexes for performance
+
+#### Domain Models
+- **File**: `backend/internal/domain/schedule.go`
+  - Schedule, ScheduleRotation, ScheduleRotationParticipant, ScheduleOverride structs
+  - RotationType: daily, weekly, custom
+  - ScheduleWithRotations, RotationWithParticipants, OnCallUser helper structs
+  - ParticipantWithUser for joined queries
+
+#### Repository Layer
+- **File**: `backend/internal/repository/postgres/schedule_repo.go`
+  - Full CRUD for schedules, rotations, participants, overrides
+  - Participant reordering with transactions
+  - Override listing with time range filtering
+  - On-call user calculation foundation
+  - Complex JOIN queries for participants with user details
+
+#### Service Layer
+- **File**: `backend/internal/service/schedule_service.go`
+  - Complete schedule and rotation management
+  - Time parsing and validation (dates, times, timezones)
+  - Participant management with position tracking
+  - Override creation with time validation
+  - On-call calculation algorithm:
+    - Checks overrides first (priority)
+    - Falls back to rotation-based calculation
+    - Supports daily, weekly, and custom rotation types
+    - Handles participant rotation based on position and length
+
+#### Handler Layer
+- **File**: `backend/internal/handler/rest/schedule_handler.go`
+  - 20+ endpoints for complete schedule management
+  - Schedule CRUD operations
+  - Rotation management (create, update, delete, list)
+  - Participant operations (add, remove, reorder)
+  - Override management with time range queries
+  - On-call lookup with optional time parameter
+
+#### Route Integration
+- **File**: `backend/cmd/api/main.go`
+  - `/api/v1/schedules` - schedule CRUD
+  - `/api/v1/schedules/:id/oncall` - current on-call user
+  - `/api/v1/schedules/:id/rotations/**` - rotation management
+  - `/api/v1/schedules/:id/rotations/:rotationId/participants/**` - participant management
+  - `/api/v1/schedules/:id/overrides/**` - override management
+
+### Frontend Implementation
+
+#### Type Definitions
+- **File**: `frontend/src/lib/types/schedule.ts`
+  - Complete schedule, rotation, participant, override types
+  - Request/response types for all operations
+  - OnCallUser type for current on-call display
+
+#### API Client Extensions
+- **File**: `frontend/src/lib/api/client.ts`
+  - Schedule management methods
+  - Rotation CRUD operations
+  - Participant management with reordering
+  - Override operations with time range support
+  - On-call user lookup
+
+#### State Management
+- **File**: `frontend/src/lib/stores/schedules.ts`
+  - Schedule list state management
+  - Load, create, update, delete operations
+  - Error and loading states
+
+#### Pages
+- **File**: `frontend/src/routes/(app)/schedules/+page.svelte`
+  - Grid view of all schedules
+  - Create schedule form with timezone selector
+  - Delete schedule with confirmation
+  - Navigation to schedule details
+
+- **File**: `frontend/src/routes/(app)/schedules/[id]/+page.svelte`
+  - Currently on-call user display with override indicator
+  - Rotation list with type, length, timing details
+  - Create rotation form (daily/weekly/custom, delays, handoff times)
+  - Delete rotation functionality
+  - Visual rotation management
+
+### Deliverables ✅
+- ✅ Create and manage schedules with timezone support
+- ✅ Define rotation patterns (daily, weekly, custom) with configurable lengths
+- ✅ Manage rotation participants with position-based ordering
+- ✅ Temporary overrides for schedule changes
+- ✅ On-call calculation with override priority
+- ✅ Multi-rotation support per schedule
+- ✅ Clean, intuitive schedule management UI
+
+---
+
+## Phase 5: Escalation Policies ✅ COMPLETED
+
+**Goal**: Automatically escalate unacknowledged alerts through notification levels
+
+### Backend Implementation
+
+#### Database Schema
+- **File**: `backend/migrations/000004_escalation_policies.up.sql`
+  - Created `escalation_policies` table with repeat configuration
+  - Created `escalation_rules` table - escalation levels with delays
+  - Created `escalation_targets` table - who to notify (user/team/schedule)
+  - Created `alert_escalation_events` table - tracks escalation state
+  - Added `escalation_policy_id` to alerts table
+  - Comprehensive indexes for escalation tracking
+
+#### Domain Models
+- **File**: `backend/internal/domain/escalation.go`
+  - EscalationPolicy, EscalationRule, EscalationTarget structs
+  - AlertEscalationEvent for tracking escalation progress
+  - EscalationTargetType: user, team, schedule
+  - EscalationEventType: triggered, acknowledged, completed, stopped
+  - EscalationPolicyWithRules, EscalationRuleWithTargets helper structs
+
+- **File**: `backend/internal/domain/errors.go`
+  - Added ErrInvalidEscalationTarget error
+
+#### Repository Layer
+- **File**: `backend/internal/repository/postgres/escalation_repo.go`
+  - Full CRUD for policies, rules, and targets
+  - GetWithRules for complete policy retrieval
+  - Event tracking (create, update, get latest)
+  - ListPendingEscalations for processing queue
+  - Complex queries with proper type handling
+
+#### Service Layer
+- **File**: `backend/internal/service/escalation_service.go`
+  - Policy and rule management
+  - Target validation and management
+  - StartEscalation - initiates escalation for alerts
+  - ProcessPendingEscalations - background escalation processor
+  - Escalation logic:
+    - Progresses through rules by position
+    - Respects escalation delays
+    - Supports repeat with configurable count
+    - Handles acknowledgment to stop escalation
+  - StopEscalation when alert is acknowledged
+
+#### Handler Layer
+- **File**: `backend/internal/handler/rest/escalation_handler.go`
+  - Policy CRUD endpoints
+  - Rule management endpoints
+  - Target management endpoints
+  - Proper validation and error handling
+
+#### Route Integration
+- **File**: `backend/cmd/api/main.go`
+  - `/api/v1/escalation-policies` - policy CRUD
+  - `/api/v1/escalation-policies/:id/rules` - rule management
+  - `/api/v1/escalation-policies/:id/rules/:ruleId/targets` - target management
+
+### Frontend Implementation
+
+#### Type Definitions
+- **File**: `frontend/src/lib/types/escalation.ts`
+  - Complete escalation policy, rule, target types
+  - EscalationTargetType: user, team, schedule
+  - Request/response types for all operations
+  - EscalationPolicyWithRules for nested data
+
+#### API Client Extensions
+- **File**: `frontend/src/lib/api/client.ts`
+  - Policy management methods
+  - Rule CRUD operations
+  - Target add/remove operations
+  - Type-safe request/response handling
+
+#### State Management
+- **File**: `frontend/src/lib/stores/escalations.ts`
+  - Escalation policy list state
+  - Load, create, update, delete operations
+  - Error and loading states
+
+#### Pages
+- **File**: `frontend/src/routes/(app)/escalation-policies/+page.svelte`
+  - Grid view of all escalation policies
+  - Create policy form with repeat configuration
+  - Policy cards showing repeat settings
+  - Delete policy with confirmation
+  - Navigation to policy details
+
+- **File**: `frontend/src/routes/(app)/escalation-policies/[id]/+page.svelte`
+  - Policy settings display (repeat configuration)
+  - Escalation rules list ordered by position
+  - Create rule form (position, delay)
+  - Rule display with targets
+  - Quick-add target dropdowns (users, teams, schedules)
+  - Remove target functionality
+  - Delete rule with confirmation
+  - Visual level-based display (Level 1, Level 2, etc.)
+
+### Deliverables ✅
+- ✅ Create and manage escalation policies
+- ✅ Define multi-level escalation rules with delays
+- ✅ Flexible targets (users, teams, on-call schedules)
+- ✅ Repeat escalation with configurable limits
+- ✅ Escalation event tracking
+- ✅ Integration foundation with alert system
+- ✅ Clean, intuitive policy management UI
+- ✅ Visual rule builder with target management
+
+---
+
+## Summary of Phases 1-5
 
 ### Total Files Created/Modified
 
 #### Backend (Go)
-- **Migrations**: 2 files
+- **Migrations**: 4 files
   - Initial schema (users, organizations)
   - Alerts and teams tables
+  - Schedules and rotations
+  - Escalation policies
 
-- **Domain Models**: 4 files
-  - user.go, organization.go, alert.go, team.go
+- **Domain Models**: 7 files
+  - user.go, organization.go, alert.go, team.go, schedule.go, escalation.go, errors.go
 
-- **Repositories**: 5 files
-  - db.go, user_repo.go, organization_repo.go, alert_repo.go, team_repo.go
+- **Repositories**: 7 files
+  - db.go, user_repo.go, organization_repo.go, alert_repo.go, team_repo.go, schedule_repo.go, escalation_repo.go
 
-- **Services**: 4 files
-  - auth_service.go, alert_service.go, team_service.go, user_service.go
+- **Services**: 6 files
+  - auth_service.go, alert_service.go, team_service.go, user_service.go, schedule_service.go, escalation_service.go
 
-- **Handlers**: 4 files
-  - auth_handler.go, alert_handler.go, team_handler.go, user_handler.go
+- **Handlers**: 6 files
+  - auth_handler.go, alert_handler.go, team_handler.go, user_handler.go, schedule_handler.go, escalation_handler.go
 
 - **Middleware**: 3 files
   - auth.go, cors.go, logger.go
@@ -511,19 +730,21 @@ This document tracks the detailed progress of building Pulsar, an Opsgenie repla
 - **API Client**: 1 file
   - lib/api/client.ts
 
-- **Types**: 3 files
-  - user.ts, alert.ts, team.ts
+- **Types**: 5 files
+  - user.ts, alert.ts, team.ts, schedule.ts, escalation.ts
 
-- **Stores**: 3 files
-  - auth.ts, alerts.ts, teams.ts
+- **Stores**: 5 files
+  - auth.ts, alerts.ts, teams.ts, schedules.ts, escalations.ts
 
 - **UI Components**: 3 files
   - Button.svelte, Input.svelte, AlertCard.svelte
 
-- **Pages**: 7 files
+- **Pages**: 11 files
   - login, register, dashboard
   - alerts list, alert detail
   - teams list, team detail
+  - schedules list, schedule detail
+  - escalation policies list, escalation policy detail
 
 #### Infrastructure
 - **Docker**: 1 file
@@ -540,12 +761,18 @@ This document tracks the detailed progress of building Pulsar, an Opsgenie repla
 
 ### Testing Status
 - ⏳ **Pending**: Full end-to-end testing scheduled for later
-- ✅ **Code Complete**: All three phases fully implemented
+- ✅ **Code Complete**: Five phases fully implemented (Foundation through Escalation)
 - ✅ **Integrated**: Backend and frontend connected via API
+- ✅ **Feature-Rich**: Alert management, teams, schedules, and escalation policies working
+
+### Completed Phases
+1. ✅ **Phase 1**: Foundation & Authentication
+2. ✅ **Phase 2**: Alert Management
+3. ✅ **Phase 3**: Team Management
+4. ✅ **Phase 4**: On-Call Schedules
+5. ✅ **Phase 5**: Escalation Policies
 
 ### Next Phases Remaining
-- **Phase 4**: On-Call Schedules
-- **Phase 5**: Escalation Policies
 - **Phase 6**: Notifications (Email, Slack, Teams)
 - **Phase 7**: Incident Management
 - **Phase 8**: Real-time Updates (WebSocket)
@@ -554,5 +781,5 @@ This document tracks the detailed progress of building Pulsar, an Opsgenie repla
 
 ---
 
-*Last Updated: Phase 3 completion*
-*Ready to proceed with Phase 4: On-Call Schedules*
+*Last Updated: Phase 5 completion*
+*Ready to proceed with Phase 6: Notifications*

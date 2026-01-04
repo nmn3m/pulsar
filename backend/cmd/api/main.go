@@ -54,18 +54,24 @@ func main() {
 	orgRepo := postgres.NewOrganizationRepository(db)
 	alertRepo := postgres.NewAlertRepository(db)
 	teamRepo := postgres.NewTeamRepository(db)
+	scheduleRepo := postgres.NewScheduleRepository(db)
+	escalationRepo := postgres.NewEscalationPolicyRepository(db)
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, orgRepo, cfg)
 	alertService := service.NewAlertService(alertRepo)
 	teamService := service.NewTeamService(teamRepo, userRepo)
 	userService := service.NewUserService(orgRepo)
+	scheduleService := service.NewScheduleService(scheduleRepo, userRepo)
+	escalationService := service.NewEscalationService(escalationRepo, alertRepo)
 
 	// Initialize handlers
 	authHandler := rest.NewAuthHandler(authService)
 	alertHandler := rest.NewAlertHandler(alertService)
 	teamHandler := rest.NewTeamHandler(teamService)
 	userHandler := rest.NewUserHandler(userService)
+	scheduleHandler := rest.NewScheduleHandler(scheduleService)
+	escalationHandler := rest.NewEscalationHandler(escalationService)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret)
@@ -135,6 +141,59 @@ func main() {
 				teams.GET("/:id/members", teamHandler.ListMembers)
 				teams.DELETE("/:id/members/:userId", teamHandler.RemoveMember)
 				teams.PATCH("/:id/members/:userId", teamHandler.UpdateMemberRole)
+			}
+
+			// Schedule routes
+			schedules := protected.Group("/schedules")
+			{
+				schedules.GET("", scheduleHandler.List)
+				schedules.POST("", scheduleHandler.Create)
+				schedules.GET("/:id", scheduleHandler.Get)
+				schedules.PATCH("/:id", scheduleHandler.Update)
+				schedules.DELETE("/:id", scheduleHandler.Delete)
+				schedules.GET("/:id/oncall", scheduleHandler.GetOnCall)
+
+				// Rotation routes
+				schedules.GET("/:id/rotations", scheduleHandler.ListRotations)
+				schedules.POST("/:id/rotations", scheduleHandler.CreateRotation)
+				schedules.GET("/:id/rotations/:rotationId", scheduleHandler.GetRotation)
+				schedules.PATCH("/:id/rotations/:rotationId", scheduleHandler.UpdateRotation)
+				schedules.DELETE("/:id/rotations/:rotationId", scheduleHandler.DeleteRotation)
+
+				// Participant routes
+				schedules.GET("/:id/rotations/:rotationId/participants", scheduleHandler.ListParticipants)
+				schedules.POST("/:id/rotations/:rotationId/participants", scheduleHandler.AddParticipant)
+				schedules.DELETE("/:id/rotations/:rotationId/participants/:userId", scheduleHandler.RemoveParticipant)
+				schedules.PUT("/:id/rotations/:rotationId/participants/reorder", scheduleHandler.ReorderParticipants)
+
+				// Override routes
+				schedules.GET("/:id/overrides", scheduleHandler.ListOverrides)
+				schedules.POST("/:id/overrides", scheduleHandler.CreateOverride)
+				schedules.GET("/:id/overrides/:overrideId", scheduleHandler.GetOverride)
+				schedules.PATCH("/:id/overrides/:overrideId", scheduleHandler.UpdateOverride)
+				schedules.DELETE("/:id/overrides/:overrideId", scheduleHandler.DeleteOverride)
+			}
+
+			// Escalation policy routes
+			escalations := protected.Group("/escalation-policies")
+			{
+				escalations.GET("", escalationHandler.List)
+				escalations.POST("", escalationHandler.Create)
+				escalations.GET("/:id", escalationHandler.Get)
+				escalations.PATCH("/:id", escalationHandler.Update)
+				escalations.DELETE("/:id", escalationHandler.Delete)
+
+				// Rule routes
+				escalations.GET("/:id/rules", escalationHandler.ListRules)
+				escalations.POST("/:id/rules", escalationHandler.CreateRule)
+				escalations.GET("/:id/rules/:ruleId", escalationHandler.GetRule)
+				escalations.PATCH("/:id/rules/:ruleId", escalationHandler.UpdateRule)
+				escalations.DELETE("/:id/rules/:ruleId", escalationHandler.DeleteRule)
+
+				// Target routes
+				escalations.GET("/:id/rules/:ruleId/targets", escalationHandler.ListTargets)
+				escalations.POST("/:id/rules/:ruleId/targets", escalationHandler.AddTarget)
+				escalations.DELETE("/:id/rules/:ruleId/targets/:targetId", escalationHandler.RemoveTarget)
 			}
 		}
 	}

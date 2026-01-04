@@ -63,3 +63,64 @@ type TeamRepository interface {
 	ListMembers(ctx context.Context, teamID uuid.UUID) ([]*domain.UserWithTeamRole, error)
 	ListUserTeams(ctx context.Context, userID uuid.UUID) ([]*domain.Team, error)
 }
+
+type ScheduleRepository interface {
+	// Schedule CRUD
+	Create(ctx context.Context, schedule *domain.Schedule) error
+	GetByID(ctx context.Context, id uuid.UUID) (*domain.Schedule, error)
+	Update(ctx context.Context, schedule *domain.Schedule) error
+	Delete(ctx context.Context, id uuid.UUID) error
+	List(ctx context.Context, orgID uuid.UUID, limit, offset int) ([]*domain.Schedule, error)
+	GetWithRotations(ctx context.Context, id uuid.UUID) (*domain.ScheduleWithRotations, error)
+
+	// Rotation CRUD
+	CreateRotation(ctx context.Context, rotation *domain.ScheduleRotation) error
+	GetRotation(ctx context.Context, id uuid.UUID) (*domain.ScheduleRotation, error)
+	UpdateRotation(ctx context.Context, rotation *domain.ScheduleRotation) error
+	DeleteRotation(ctx context.Context, id uuid.UUID) error
+	ListRotations(ctx context.Context, scheduleID uuid.UUID) ([]*domain.ScheduleRotation, error)
+
+	// Rotation participants
+	AddParticipant(ctx context.Context, participant *domain.ScheduleRotationParticipant) error
+	RemoveParticipant(ctx context.Context, rotationID, userID uuid.UUID) error
+	ListParticipants(ctx context.Context, rotationID uuid.UUID) ([]*domain.ParticipantWithUser, error)
+	ReorderParticipants(ctx context.Context, rotationID uuid.UUID, userIDs []uuid.UUID) error
+
+	// Overrides
+	CreateOverride(ctx context.Context, override *domain.ScheduleOverride) error
+	GetOverride(ctx context.Context, id uuid.UUID) (*domain.ScheduleOverride, error)
+	UpdateOverride(ctx context.Context, override *domain.ScheduleOverride) error
+	DeleteOverride(ctx context.Context, id uuid.UUID) error
+	ListOverrides(ctx context.Context, scheduleID uuid.UUID, start, end time.Time) ([]*domain.ScheduleOverride, error)
+
+	// On-call calculation
+	GetOnCallUser(ctx context.Context, scheduleID uuid.UUID, at time.Time) (*domain.OnCallUser, error)
+}
+
+type EscalationPolicyRepository interface {
+	// Policy CRUD
+	Create(ctx context.Context, policy *domain.EscalationPolicy) error
+	GetByID(ctx context.Context, id uuid.UUID) (*domain.EscalationPolicy, error)
+	Update(ctx context.Context, policy *domain.EscalationPolicy) error
+	Delete(ctx context.Context, id uuid.UUID) error
+	List(ctx context.Context, orgID uuid.UUID, limit, offset int) ([]*domain.EscalationPolicy, error)
+	GetWithRules(ctx context.Context, id uuid.UUID) (*domain.EscalationPolicyWithRules, error)
+
+	// Rule CRUD
+	CreateRule(ctx context.Context, rule *domain.EscalationRule) error
+	GetRule(ctx context.Context, id uuid.UUID) (*domain.EscalationRule, error)
+	UpdateRule(ctx context.Context, rule *domain.EscalationRule) error
+	DeleteRule(ctx context.Context, id uuid.UUID) error
+	ListRules(ctx context.Context, policyID uuid.UUID) ([]*domain.EscalationRule, error)
+
+	// Target CRUD
+	AddTarget(ctx context.Context, target *domain.EscalationTarget) error
+	RemoveTarget(ctx context.Context, id uuid.UUID) error
+	ListTargets(ctx context.Context, ruleID uuid.UUID) ([]*domain.EscalationTarget, error)
+
+	// Escalation events
+	CreateEvent(ctx context.Context, event *domain.AlertEscalationEvent) error
+	GetLatestEvent(ctx context.Context, alertID uuid.UUID) (*domain.AlertEscalationEvent, error)
+	UpdateEvent(ctx context.Context, event *domain.AlertEscalationEvent) error
+	ListPendingEscalations(ctx context.Context, before time.Time) ([]*domain.AlertEscalationEvent, error)
+}
