@@ -60,12 +60,17 @@ func main() {
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, orgRepo, cfg)
-	alertService := service.NewAlertService(alertRepo)
 	teamService := service.NewTeamService(teamRepo, userRepo)
 	userService := service.NewUserService(orgRepo)
 	scheduleService := service.NewScheduleService(scheduleRepo, userRepo)
-	escalationService := service.NewEscalationService(escalationRepo, alertRepo)
 	notificationService := service.NewNotificationService(notificationRepo)
+
+	// Initialize alert notifier with dependencies
+	alertNotifier := service.NewAlertNotifier(notificationService, userRepo, teamRepo, scheduleService)
+
+	// Initialize alert and escalation services with notifier
+	alertService := service.NewAlertService(alertRepo, alertNotifier)
+	escalationService := service.NewEscalationService(escalationRepo, alertRepo, alertNotifier)
 
 	// Initialize handlers
 	authHandler := rest.NewAuthHandler(authService)
@@ -245,10 +250,35 @@ func main() {
 		}
 	}()
 
+	// Start background worker for processing escalations
+	escalationWorkerQuit := make(chan bool)
+	go func() {
+		ticker := time.NewTicker(30 * time.Second) // Process escalations every 30 seconds
+		defer ticker.Stop()
+
+		log.Info("Escalation worker started")
+
+		for {
+			select {
+			case <-ticker.C:
+				ctx := context.Background()
+				if err := escalationService.ProcessPendingEscalations(ctx); err != nil {
+					log.Error("Failed to process pending escalations", zap.Error(err))
+				}
+			case <-escalationWorkerQuit:
+				log.Info("Escalation worker stopped")
+				return
+			}
+		}
+	}()
+
 	// Wait for interrupt signal to gracefully shutdown the server
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
+
+	// Stop escalation worker
+	escalationWorkerQuit <- true
 
 	log.Info("Shutting down server...")
 

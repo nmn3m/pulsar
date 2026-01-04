@@ -11,12 +11,14 @@ import (
 )
 
 type AlertService struct {
-	alertRepo repository.AlertRepository
+	alertRepo    repository.AlertRepository
+	alertNotifier *AlertNotifier
 }
 
-func NewAlertService(alertRepo repository.AlertRepository) *AlertService {
+func NewAlertService(alertRepo repository.AlertRepository, alertNotifier *AlertNotifier) *AlertService {
 	return &AlertService{
-		alertRepo: alertRepo,
+		alertRepo:    alertRepo,
+		alertNotifier: alertNotifier,
 	}
 }
 
@@ -108,6 +110,16 @@ func (s *AlertService) CreateAlert(ctx context.Context, orgID uuid.UUID, req *Cr
 
 	if err := s.alertRepo.Create(ctx, alert); err != nil {
 		return nil, fmt.Errorf("failed to create alert: %w", err)
+	}
+
+	// Send notification for new alert (async, don't fail if notification fails)
+	if s.alertNotifier != nil {
+		go func() {
+			if err := s.alertNotifier.NotifyAlertCreated(context.Background(), alert); err != nil {
+				// Log error but don't fail alert creation
+				fmt.Printf("Failed to send alert creation notification: %v\n", err)
+			}
+		}()
 	}
 
 	return alert, nil
@@ -233,12 +245,36 @@ func (s *AlertService) AcknowledgeAlert(ctx context.Context, id, userID uuid.UUI
 		return fmt.Errorf("failed to acknowledge alert: %w", err)
 	}
 
+	// Send notification for acknowledged alert (async)
+	if s.alertNotifier != nil {
+		go func() {
+			alert, err := s.alertRepo.GetByID(context.Background(), id)
+			if err == nil {
+				if err := s.alertNotifier.NotifyAlertAcknowledged(context.Background(), alert, userID); err != nil {
+					fmt.Printf("Failed to send alert acknowledgment notification: %v\n", err)
+				}
+			}
+		}()
+	}
+
 	return nil
 }
 
 func (s *AlertService) CloseAlert(ctx context.Context, id, userID uuid.UUID, reason string) error {
 	if err := s.alertRepo.Close(ctx, id, userID, reason); err != nil {
 		return fmt.Errorf("failed to close alert: %w", err)
+	}
+
+	// Send notification for closed alert (async)
+	if s.alertNotifier != nil {
+		go func() {
+			alert, err := s.alertRepo.GetByID(context.Background(), id)
+			if err == nil {
+				if err := s.alertNotifier.NotifyAlertClosed(context.Background(), alert, userID, reason); err != nil {
+					fmt.Printf("Failed to send alert closure notification: %v\n", err)
+				}
+			}
+		}()
 	}
 
 	return nil

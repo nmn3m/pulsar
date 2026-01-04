@@ -13,15 +13,18 @@ import (
 type EscalationService struct {
 	escalationRepo repository.EscalationPolicyRepository
 	alertRepo      repository.AlertRepository
+	alertNotifier  *AlertNotifier
 }
 
 func NewEscalationService(
 	escalationRepo repository.EscalationPolicyRepository,
 	alertRepo repository.AlertRepository,
+	alertNotifier *AlertNotifier,
 ) *EscalationService {
 	return &EscalationService{
 		escalationRepo: escalationRepo,
 		alertRepo:      alertRepo,
+		alertNotifier:  alertNotifier,
 	}
 }
 
@@ -336,7 +339,10 @@ func (s *EscalationService) processEscalation(ctx context.Context, event *domain
 			return fmt.Errorf("failed to update event: %w", err)
 		}
 
-		// TODO: Trigger notifications to targets in nextRule
+		// Trigger notifications to targets in nextRule
+		if err := s.sendEscalationNotifications(ctx, event, nextRule); err != nil {
+			fmt.Printf("Failed to send escalation notifications for alert %s: %v\n", event.AlertID, err)
+		}
 
 	} else if policy.RepeatEnabled {
 		// Check if we should repeat
@@ -354,7 +360,10 @@ func (s *EscalationService) processEscalation(ctx context.Context, event *domain
 				return fmt.Errorf("failed to update event: %w", err)
 			}
 
-			// TODO: Trigger notifications to targets in firstRule
+			// Trigger notifications to targets in firstRule (repeat cycle)
+			if err := s.sendEscalationNotifications(ctx, event, firstRule); err != nil {
+				fmt.Printf("Failed to send escalation notifications for alert %s (repeat): %v\n", event.AlertID, err)
+			}
 		} else {
 			// Max repeats reached, mark as completed
 			event.EventType = domain.EscalationEventCompleted
@@ -372,6 +381,40 @@ func (s *EscalationService) processEscalation(ctx context.Context, event *domain
 		if err := s.escalationRepo.UpdateEvent(ctx, event); err != nil {
 			return fmt.Errorf("failed to update event: %w", err)
 		}
+	}
+
+	return nil
+}
+
+func (s *EscalationService) sendEscalationNotifications(ctx context.Context, event *domain.AlertEscalationEvent, rule domain.EscalationRule) error {
+	// Only send notifications if alertNotifier is configured
+	if s.alertNotifier == nil {
+		return nil
+	}
+
+	// Get the alert
+	alert, err := s.alertRepo.GetByID(ctx, event.AlertID)
+	if err != nil {
+		return fmt.Errorf("failed to get alert: %w", err)
+	}
+
+	// Get targets for this rule
+	targets, err := s.escalationRepo.ListTargets(ctx, rule.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get targets: %w", err)
+	}
+
+	if len(targets) == 0 {
+		return nil // No targets configured
+	}
+
+	// Update alert escalation level
+	alert.EscalationLevel = event.CurrentLevel
+	alert.LastEscalatedAt = &event.TriggeredAt
+
+	// Send notifications to all targets
+	if err := s.alertNotifier.NotifyAlertEscalated(ctx, alert, &rule, targets); err != nil {
+		return fmt.Errorf("failed to send notifications: %w", err)
 	}
 
 	return nil
