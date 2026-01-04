@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pulsar-postgres
+    environment:
+      POSTGRES_DB: pulsar
+      POSTGRES_USER: pulsar
+      POSTGRES_PASSWORD: pulsar_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pulsar"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pulsar-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: pulsar-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgres://pulsar:pulsar_dev_password@postgres:5432/pulsar?sslmode=disable
+      - JWT_SECRET=dev_jwt_secret_change_in_production_min_32_chars
+      - JWT_REFRESH_SECRET=dev_refresh_secret_change_in_production_min_32_chars
+      - SERVER_PORT=8080
+      - ENV=development
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - go_modules:/go/pkg/mod
+    networks:
+      - pulsar-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: pulsar-frontend
+    ports:
+      - "3000:3000"
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8080
+      - NODE_ENV=development
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - pulsar-network
+
+volumes:
+  postgres_data:
+  go_modules:
+
+networks:
+  pulsar-network:
+    driver: bridge

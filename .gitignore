@@ -1,0 +1,36 @@
+# Environment variables
+.env
+.env.local
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+/backend/tmp/
+
+# Frontend
+node_modules/
+.svelte-kit/
+build/
+dist/
+.DS_Store
+*.log
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Database
+*.db
+*.sqlite
+
+# OS
+.DS_Store
+Thumbs.db
