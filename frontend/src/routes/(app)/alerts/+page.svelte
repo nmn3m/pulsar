@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { alertsStore } from '$lib/stores/alerts';
+	import { wsStore } from '$lib/stores/websocket';
 	import AlertCard from '$lib/components/alerts/AlertCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import type { AlertStatus, AlertPriority } from '$lib/types/alert';
@@ -19,8 +20,42 @@
 	let createError = '';
 	let creatingAlert = false;
 
+	let unsubscribeWS: (() => void)[] = [];
+
 	onMount(() => {
 		loadAlerts();
+
+		// Listen for WebSocket alert events
+		unsubscribeWS.push(
+			wsStore.on('alert.created', () => {
+				loadAlerts(); // Refresh alerts list
+			})
+		);
+		unsubscribeWS.push(
+			wsStore.on('alert.updated', () => {
+				loadAlerts();
+			})
+		);
+		unsubscribeWS.push(
+			wsStore.on('alert.acknowledged', () => {
+				loadAlerts();
+			})
+		);
+		unsubscribeWS.push(
+			wsStore.on('alert.closed', () => {
+				loadAlerts();
+			})
+		);
+		unsubscribeWS.push(
+			wsStore.on('alert.deleted', () => {
+				loadAlerts();
+			})
+		);
+	});
+
+	onDestroy(() => {
+		// Unsubscribe from WebSocket events
+		unsubscribeWS.forEach((unsub) => unsub());
 	});
 
 	function loadAlerts() {

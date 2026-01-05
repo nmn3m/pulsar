@@ -13,12 +13,14 @@ import (
 type AlertService struct {
 	alertRepo     repository.AlertRepository
 	alertNotifier *AlertNotifier
+	wsService     *WebSocketService
 }
 
-func NewAlertService(alertRepo repository.AlertRepository, alertNotifier *AlertNotifier) *AlertService {
+func NewAlertService(alertRepo repository.AlertRepository, alertNotifier *AlertNotifier, wsService *WebSocketService) *AlertService {
 	return &AlertService{
 		alertRepo:     alertRepo,
 		alertNotifier: alertNotifier,
+		wsService:     wsService,
 	}
 }
 
@@ -122,6 +124,11 @@ func (s *AlertService) CreateAlert(ctx context.Context, orgID uuid.UUID, req *Cr
 		}()
 	}
 
+	// Broadcast WebSocket event
+	if s.wsService != nil {
+		s.wsService.BroadcastAlertEvent(domain.WSEventAlertCreated, orgID, alert)
+	}
+
 	return alert, nil
 }
 
@@ -167,6 +174,11 @@ func (s *AlertService) UpdateAlert(ctx context.Context, id uuid.UUID, req *Updat
 
 	if err := s.alertRepo.Update(ctx, alert); err != nil {
 		return nil, fmt.Errorf("failed to update alert: %w", err)
+	}
+
+	// Broadcast WebSocket event
+	if s.wsService != nil {
+		s.wsService.BroadcastAlertEvent(domain.WSEventAlertUpdated, alert.OrganizationID, alert)
 	}
 
 	return alert, nil
@@ -257,6 +269,14 @@ func (s *AlertService) AcknowledgeAlert(ctx context.Context, id, userID uuid.UUI
 		}()
 	}
 
+	// Broadcast WebSocket event
+	if s.wsService != nil {
+		alert, err := s.alertRepo.GetByID(ctx, id)
+		if err == nil {
+			s.wsService.BroadcastAlertEvent(domain.WSEventAlertAcknowledged, alert.OrganizationID, alert)
+		}
+	}
+
 	return nil
 }
 
@@ -275,6 +295,14 @@ func (s *AlertService) CloseAlert(ctx context.Context, id, userID uuid.UUID, rea
 				}
 			}
 		}()
+	}
+
+	// Broadcast WebSocket event
+	if s.wsService != nil {
+		alert, err := s.alertRepo.GetByID(ctx, id)
+		if err == nil {
+			s.wsService.BroadcastAlertEvent(domain.WSEventAlertClosed, alert.OrganizationID, alert)
+		}
 	}
 
 	return nil

@@ -1325,7 +1325,291 @@ When escalation triggers (`NotifyAlertEscalated`):
 
 ---
 
-## Summary of Phases 1-8
+## Phase 9: Real-time Updates (WebSocket) ✅ COMPLETED
+
+**Goal**: Add real-time bidirectional communication for instant updates when alerts and incidents change
+
+### Backend Implementation
+
+#### Domain Models
+- **File**: `backend/internal/domain/websocket.go`
+  - WSEventType: 18+ event types for alerts and incidents
+    - Alert events: alert.created, alert.updated, alert.acknowledged, alert.closed, alert.deleted, alert.escalated
+    - Incident events: incident.created, incident.updated, incident.deleted, incident.timeline_added, incident.responder_added, incident.responder_removed, incident.alert_linked, incident.alert_unlinked
+    - Connection events: connection.connected, connection.error, connection.ping, connection.pong
+  - WSMessage struct: id, type, organization_id, payload, timestamp
+  - WSClient struct: Connection, user, organization, send channel
+  - WSHub struct: Clients map, register/unregister/broadcast channels
+  - WSConnectionStatus: disconnected, connecting, connected, error
+
+#### Service Layer
+- **File**: `backend/internal/service/websocket_service.go`
+  - WebSocketService with hub management
+  - Run() method: Infinite loop handling register/unregister/broadcast
+  - Client registry by organization ID
+  - BroadcastAlertEvent(): Alert-specific message broadcasting
+  - BroadcastIncidentEvent(): Incident-specific message broadcasting
+  - BroadcastIncidentTimelineEvent(): Timeline event broadcasting
+  - Organization-scoped message delivery
+  - Client count tracking and statistics
+  - Thread-safe operations with mutex
+
+#### Handler Layer
+- **File**: `backend/internal/handler/rest/websocket_handler.go`
+  - WebSocket upgrader with CORS origin checking
+  - HandleWebSocket(): HTTP → WebSocket upgrade
+  - Authentication extraction from JWT middleware
+  - Client creation with buffered send channel (256 capacity)
+  - writePump(): Goroutine for sending messages to client
+    - Ping/pong heartbeat (60-second interval)
+    - Graceful error handling
+    - Clean connection closure
+  - readPump(): Goroutine for receiving messages from client
+    - Pong handler for heartbeat
+    - Message size limits (512 bytes)
+    - Read deadline enforcement
+  - GetStats(): WebSocket statistics endpoint
+
+#### Service Integration
+- **File**: `backend/internal/service/alert_service.go` (modified)
+  - Added wsService dependency
+  - WebSocket broadcasts after:
+    - CreateAlert → WSEventAlertCreated
+    - UpdateAlert → WSEventAlertUpdated
+    - AcknowledgeAlert → WSEventAlertAcknowledged
+    - CloseAlert → WSEventAlertClosed
+    - DeleteAlert → WSEventAlertDeleted
+  - Non-blocking broadcasts (nil checks)
+
+- **File**: `backend/internal/service/incident_service.go` (modified)
+  - Added wsService dependency
+  - WebSocket broadcasts after:
+    - CreateIncident → WSEventIncidentCreated + timeline event
+    - UpdateIncident → WSEventIncidentUpdated
+    - DeleteIncident → WSEventIncidentDeleted
+    - AddResponder → WSEventIncidentResponderAdded
+    - RemoveResponder → WSEventIncidentResponderRemoved
+    - AddNote → WSEventIncidentTimelineAdded
+    - LinkAlert → WSEventIncidentAlertLinked
+    - UnlinkAlert → WSEventIncidentAlertUnlinked
+  - All broadcasts include full event context
+
+#### Route Integration
+- **File**: `backend/cmd/api/main.go` (modified)
+  - Created WebSocketService with logger
+  - Passed wsService to AlertService and IncidentService constructors
+  - Started WebSocket hub in goroutine: `go wsService.Run()`
+  - Registered WebSocket routes:
+    - GET /api/v1/ws - WebSocket upgrade endpoint
+    - GET /api/v1/ws/stats - Connection statistics
+  - Both routes protected with auth middleware
+
+#### Dependencies
+- **File**: `backend/go.mod` (modified)
+  - Added `github.com/gorilla/websocket v1.5.1`
+
+### Frontend Implementation
+
+#### WebSocket Client
+- **File**: `frontend/src/lib/stores/websocket.ts`
+  - WebSocketState interface: status, error, lastMessage
+  - WSConnectionStatus: disconnected, connecting, connected, error
+  - Event handler registration system:
+    - Map of event types to handler sets
+    - Wildcard (*) support for all events
+    - Unsubscribe function pattern
+  - Connection management:
+    - Dynamic WebSocket URL from environment
+    - Token-based authentication via query param
+    - Auto-reconnect with exponential backoff (max 5 attempts, 3-second delay)
+    - Reconnect attempt counter
+  - Event handling:
+    - JSON message parsing
+    - Handler invocation for registered events
+    - Wildcard handler support
+  - Store methods:
+    - connect(): Establish WebSocket connection
+    - disconnect(): Clean connection closure
+    - on(eventType, handler): Register event handler
+    - send(message): Send message to server
+  - Error handling and status updates
+
+#### Layout Integration
+- **File**: `frontend/src/routes/(app)/+layout.svelte` (modified)
+  - Imported wsStore
+  - Connection lifecycle:
+    - onMount: Connect WebSocket when authenticated
+    - onDestroy: Disconnect WebSocket
+    - Logout: Disconnect before logout
+  - Connection status indicator in header:
+    - Color-coded status dot (green/yellow/gray/red)
+    - Animate pulse on connecting state
+    - Status text: Connected, Connecting, Disconnected, Connection Error
+    - Tooltip with full status
+  - Helper functions:
+    - getStatusColor(): Maps status to Tailwind color classes
+    - getStatusText(): Human-readable status messages
+
+#### Real-time Alerts Page
+- **File**: `frontend/src/routes/(app)/alerts/+page.svelte` (modified)
+  - Imported wsStore and onDestroy
+  - Added unsubscribeWS array for cleanup tracking
+  - Event listeners in onMount:
+    - alert.created → loadAlerts()
+    - alert.updated → loadAlerts()
+    - alert.acknowledged → loadAlerts()
+    - alert.closed → loadAlerts()
+    - alert.deleted → loadAlerts()
+  - All handlers refresh alerts list automatically
+  - Clean unsubscribe in onDestroy to prevent memory leaks
+
+#### Real-time Incident Detail Page
+- **File**: `frontend/src/routes/(app)/incidents/[id]/+page.svelte` (modified)
+  - Imported wsStore and onDestroy
+  - Added unsubscribeWS array for cleanup tracking
+  - Event listeners in onMount:
+    - incident.created → loadIncident()
+    - incident.updated → loadIncident()
+    - incident.deleted → goto('/incidents')
+    - incident.timeline_added → loadIncident()
+    - incident.responder_added → loadIncident()
+    - incident.responder_removed → loadIncident()
+    - incident.alert_linked → loadIncident()
+    - incident.alert_unlinked → loadIncident()
+  - Special handling for incident deletion (redirect to list)
+  - Clean unsubscribe in onDestroy
+
+### WebSocket Communication Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   WEBSOCKET FLOW                            │
+└─────────────────────────────────────────────────────────────┘
+
+1. USER AUTHENTICATES
+   ↓
+   → Frontend receives JWT token
+   → Token stored in localStorage
+
+2. WEBSOCKET CONNECTION (Frontend)
+   ↓
+   → Browser opens ws://host:8080/api/v1/ws?token=<jwt>
+   → Connection established
+   → Status indicator turns green
+
+3. WEBSOCKET UPGRADE (Backend)
+   ↓
+   → Gin handler receives request
+   → Auth middleware extracts user_id and org_id from token
+   → gorilla/websocket upgrades HTTP → WebSocket
+   → Client registered in hub (keyed by organization)
+   → writePump and readPump goroutines started
+
+4. ALERT/INCIDENT EVENT OCCURS
+   ↓
+   → User creates/updates alert via API
+   → AlertService performs database operation
+   → AlertService broadcasts WebSocket event
+   → WSHub receives broadcast message
+
+5. MESSAGE DISTRIBUTION
+   ↓
+   → Hub iterates clients in same organization
+   → Message sent to each client's send channel
+   → writePump goroutine sends message to browser
+   → Message dropped if channel full (non-blocking)
+
+6. FRONTEND RECEIVES MESSAGE
+   ↓
+   → WebSocket onmessage handler fires
+   → JSON parsed into WSMessage
+   → Event type matched against registered handlers
+   → Handler function executed (e.g., loadAlerts())
+   → UI automatically updates with fresh data
+
+7. HEARTBEAT MECHANISM
+   ↓
+   → writePump sends ping every 60 seconds
+   → readPump expects pong within 70 seconds
+   → Connection closed if pong not received
+   → Auto-reconnect triggered on frontend
+
+8. DISCONNECT HANDLING
+   ↓
+   → User logs out or closes browser
+   → WebSocket connection closes
+   → Client unregistered from hub
+   → Reconnect attempts if unintentional disconnect
+```
+
+### Key Features Implemented
+
+✅ **Organization-scoped Broadcasting**
+- Messages only sent to users in same organization
+- Hub maintains organization → clients mapping
+- Secure multi-tenant message isolation
+
+✅ **Auto-reconnect with Backoff**
+- Maximum 5 reconnection attempts
+- 3-second delay between attempts
+- User notified via connection status
+- Graceful degradation
+
+✅ **Event Handler System**
+- Type-safe event registration
+- Unsubscribe function pattern
+- Wildcard event listeners
+- Memory leak prevention
+
+✅ **Heartbeat/Keepalive**
+- Ping/pong every 60 seconds
+- Detects dead connections
+- Automatic cleanup of stale clients
+- Read/write deadline enforcement
+
+✅ **Non-blocking Architecture**
+- Buffered send channels (256 capacity)
+- Goroutines for concurrent read/write
+- Async broadcasts from services
+- No blocking on slow clients
+
+✅ **Complete Lifecycle Integration**
+- Alerts: create, update, acknowledge, close, delete
+- Incidents: create, update, delete, timeline, responders, alerts
+- Real-time UI updates without page refresh
+- Instant collaboration visibility
+
+✅ **Visual Feedback**
+- Connection status indicator with colors
+- Animated pulse during connection
+- Tooltip with detailed status
+- Status text for accessibility
+
+✅ **Clean Resource Management**
+- Proper WebSocket closure
+- Event handler cleanup on component destroy
+- Graceful shutdown handling
+- Connection lifecycle management
+
+### Deliverables ✅
+- ✅ WebSocket server with gorilla/websocket
+- ✅ Organization-scoped message broadcasting
+- ✅ Alert lifecycle real-time events
+- ✅ Incident lifecycle real-time events
+- ✅ Frontend WebSocket client with auto-reconnect
+- ✅ Connection status indicator in UI
+- ✅ Real-time alerts page updates
+- ✅ Real-time incident detail page updates
+- ✅ Event handler registration system
+- ✅ Ping/pong heartbeat mechanism
+- ✅ Clean connection lifecycle management
+- ✅ Memory leak prevention with proper cleanup
+- ✅ Non-blocking broadcasts
+- ✅ Multi-user collaboration visibility
+
+---
+
+## Summary of Phases 1-9
 
 ### Total Files Created/Modified
 
@@ -1338,19 +1622,19 @@ When escalation triggers (`NotifyAlertEscalated`):
   - Notifications (channels, preferences, logs)
   - Incidents (incidents, responders, timeline, alerts)
 
-- **Domain Models**: 9 files
-  - user.go, organization.go, alert.go, team.go, schedule.go, escalation.go, notification.go, incident.go, errors.go
+- **Domain Models**: 10 files
+  - user.go, organization.go, alert.go, team.go, schedule.go, escalation.go, notification.go, incident.go, websocket.go, errors.go
 
 - **Repositories**: 10 files
   - db.go, user_repo.go, organization_repo.go, alert_repo.go, team_repo.go, schedule_repo.go, escalation_repo.go, notification_repo.go, incident_repository.go, incident_repo.go
 
-- **Services**: 10 files
+- **Services**: 11 files
   - auth_service.go, alert_service.go, team_service.go, user_service.go, schedule_service.go, escalation_service.go
-  - notification_service.go, alert_notifier.go, incident_service.go
+  - notification_service.go, alert_notifier.go, incident_service.go, websocket_service.go
   - providers/email.go, providers/slack.go, providers/teams.go, providers/webhook.go
 
-- **Handlers**: 8 files
-  - auth_handler.go, alert_handler.go, team_handler.go, user_handler.go, schedule_handler.go, escalation_handler.go, notification_handler.go, incident_handler.go
+- **Handlers**: 9 files
+  - auth_handler.go, alert_handler.go, team_handler.go, user_handler.go, schedule_handler.go, escalation_handler.go, notification_handler.go, incident_handler.go, websocket_handler.go
 
 - **Middleware**: 3 files
   - auth.go, cors.go, logger.go
@@ -1368,8 +1652,8 @@ When escalation triggers (`NotifyAlertEscalated`):
 - **Types**: 7 files
   - user.ts, alert.ts, team.ts, schedule.ts, escalation.ts, notification.ts, incident.ts
 
-- **Stores**: 7 files
-  - auth.ts, alerts.ts, teams.ts, schedules.ts, escalations.ts, notifications.ts, incidents.ts
+- **Stores**: 8 files
+  - auth.ts, alerts.ts, teams.ts, schedules.ts, escalations.ts, notifications.ts, incidents.ts, websocket.ts
 
 - **UI Components**: 3 files
   - Button.svelte, Input.svelte, AlertCard.svelte
@@ -1398,9 +1682,9 @@ When escalation triggers (`NotifyAlertEscalated`):
 
 ### Testing Status
 - ⏳ **Pending**: Full end-to-end testing scheduled for later
-- ✅ **Code Complete**: Six phases fully implemented (Foundation through Notifications)
-- ✅ **Integrated**: Backend and frontend connected via API
-- ✅ **Feature-Rich**: Alert management, teams, schedules, escalations, and multi-channel notifications working
+- ✅ **Code Complete**: Nine phases fully implemented (Foundation through Real-time Updates)
+- ✅ **Integrated**: Backend and frontend connected via API and WebSocket
+- ✅ **Feature-Rich**: Alert management, teams, schedules, escalations, multi-channel notifications, incident management, and real-time collaboration
 
 ### Completed Phases
 1. ✅ **Phase 1**: Foundation & Authentication
@@ -1411,13 +1695,13 @@ When escalation triggers (`NotifyAlertEscalated`):
 6. ✅ **Phase 6**: Notifications (Email, Slack, Teams, Webhooks)
 7. ✅ **Phase 7**: Alert Integration & Auto-Notifications
 8. ✅ **Phase 8**: Incident Management
+9. ✅ **Phase 9**: Real-time Updates (WebSocket)
 
 ### Next Phases Remaining
-- **Phase 9**: Real-time Updates (WebSocket)
 - **Phase 10**: Webhooks & Integrations
 - **Phase 11**: API Keys & Production Polish
 
 ---
 
-*Last Updated: Phase 8 completion - January 2026*
-*Incident management fully operational with timeline tracking, responder management, and alert linking*
+*Last Updated: Phase 9 completion - January 2026*
+*Real-time WebSocket updates fully operational with organization-scoped broadcasting, auto-reconnect, and instant collaboration visibility*

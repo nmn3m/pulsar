@@ -65,13 +65,14 @@ func main() {
 	userService := service.NewUserService(orgRepo)
 	scheduleService := service.NewScheduleService(scheduleRepo, userRepo)
 	notificationService := service.NewNotificationService(notificationRepo)
-	incidentService := service.NewIncidentService(incidentRepo)
+	wsService := service.NewWebSocketService(log)
+	incidentService := service.NewIncidentService(incidentRepo, wsService)
 
 	// Initialize alert notifier with dependencies
 	alertNotifier := service.NewAlertNotifier(notificationService, userRepo, teamRepo, scheduleService)
 
 	// Initialize alert and escalation services with notifier
-	alertService := service.NewAlertService(alertRepo, alertNotifier)
+	alertService := service.NewAlertService(alertRepo, alertNotifier, wsService)
 	escalationService := service.NewEscalationService(escalationRepo, alertRepo, alertNotifier)
 
 	// Initialize handlers
@@ -83,6 +84,7 @@ func main() {
 	escalationHandler := rest.NewEscalationHandler(escalationService)
 	notificationHandler := rest.NewNotificationHandler(notificationService)
 	incidentHandler := rest.NewIncidentHandler(incidentService)
+	wsHandler := rest.NewWebSocketHandler(wsService, log)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret)
@@ -258,6 +260,10 @@ func main() {
 				incidents.POST("/:id/alerts", incidentHandler.LinkAlert)
 				incidents.DELETE("/:id/alerts/:alertId", incidentHandler.UnlinkAlert)
 			}
+
+			// WebSocket route
+			protected.GET("/ws", wsHandler.HandleWebSocket)
+			protected.GET("/ws/stats", wsHandler.GetStats)
 		}
 	}
 
@@ -269,6 +275,10 @@ func main() {
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
+
+	// Start WebSocket hub
+	go wsService.Run()
+	log.Info("WebSocket hub started")
 
 	// Start server in a goroutine
 	go func() {

@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { api } from '$lib/api/client';
+	import { wsStore } from '$lib/stores/websocket';
 	import Button from '$lib/components/ui/Button.svelte';
 	import type {
 		IncidentWithDetails,
@@ -42,11 +43,61 @@
 	let selectedAlertId = '';
 	let availableAlerts: any[] = [];
 
+	let unsubscribeWS: (() => void)[] = [];
+
 	$: incidentId = $page.params.id;
 
 	onMount(async () => {
 		await loadIncident();
 		await loadAvailableUsers();
+
+		// Listen for WebSocket incident events
+		unsubscribeWS.push(
+			wsStore.on('incident.created', () => {
+				loadIncident(); // Refresh incident data
+			})
+		);
+		unsubscribeWS.push(
+			wsStore.on('incident.updated', () => {
+				loadIncident();
+			})
+		);
+		unsubscribeWS.push(
+			wsStore.on('incident.deleted', () => {
+				// Redirect to incidents list if this incident was deleted
+				goto('/incidents');
+			})
+		);
+		unsubscribeWS.push(
+			wsStore.on('incident.timeline_added', () => {
+				loadIncident();
+			})
+		);
+		unsubscribeWS.push(
+			wsStore.on('incident.responder_added', () => {
+				loadIncident();
+			})
+		);
+		unsubscribeWS.push(
+			wsStore.on('incident.responder_removed', () => {
+				loadIncident();
+			})
+		);
+		unsubscribeWS.push(
+			wsStore.on('incident.alert_linked', () => {
+				loadIncident();
+			})
+		);
+		unsubscribeWS.push(
+			wsStore.on('incident.alert_unlinked', () => {
+				loadIncident();
+			})
+		);
+	});
+
+	onDestroy(() => {
+		// Unsubscribe from WebSocket events
+		unsubscribeWS.forEach((unsub) => unsub());
 	});
 
 	async function loadIncident() {

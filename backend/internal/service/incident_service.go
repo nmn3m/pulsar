@@ -12,11 +12,13 @@ import (
 
 type IncidentService struct {
 	incidentRepo repository.IncidentRepository
+	wsService    *WebSocketService
 }
 
-func NewIncidentService(incidentRepo repository.IncidentRepository) *IncidentService {
+func NewIncidentService(incidentRepo repository.IncidentRepository, wsService *WebSocketService) *IncidentService {
 	return &IncidentService{
 		incidentRepo: incidentRepo,
+		wsService:    wsService,
 	}
 }
 
@@ -117,6 +119,12 @@ func (s *IncidentService) CreateIncident(ctx context.Context, orgID, userID uuid
 	if err := s.incidentRepo.AddTimelineEvent(ctx, timelineEvent); err != nil {
 		// Log error but don't fail the incident creation
 		fmt.Printf("Failed to add timeline event: %v\n", err)
+	}
+
+	// Broadcast WebSocket events
+	if s.wsService != nil {
+		s.wsService.BroadcastIncidentEvent(domain.WSEventIncidentCreated, orgID, incident)
+		s.wsService.BroadcastIncidentTimelineEvent(orgID, incident.ID, timelineEvent)
 	}
 
 	return incident, nil
@@ -241,6 +249,11 @@ func (s *IncidentService) UpdateIncident(ctx context.Context, id, userID uuid.UU
 
 	if err := s.incidentRepo.Update(ctx, incident); err != nil {
 		return nil, fmt.Errorf("failed to update incident: %w", err)
+	}
+
+	// Broadcast WebSocket event
+	if s.wsService != nil {
+		s.wsService.BroadcastIncidentEvent(domain.WSEventIncidentUpdated, incident.OrganizationID, incident)
 	}
 
 	return incident, nil
@@ -411,6 +424,14 @@ func (s *IncidentService) AddNote(ctx context.Context, incidentID, userID uuid.U
 
 	if err := s.incidentRepo.AddTimelineEvent(ctx, event); err != nil {
 		return nil, fmt.Errorf("failed to add note: %w", err)
+	}
+
+	// Broadcast WebSocket event
+	if s.wsService != nil {
+		incident, err := s.incidentRepo.GetByID(ctx, incidentID)
+		if err == nil {
+			s.wsService.BroadcastIncidentTimelineEvent(incident.OrganizationID, incidentID, event)
+		}
 	}
 
 	return event, nil
