@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/yourusername/pulsar/backend/internal/domain"
-	"github.com/yourusername/pulsar/backend/internal/service/providers"
+	"github.com/nmn3m/pulsar/backend/internal/domain"
+	"github.com/nmn3m/pulsar/backend/internal/service/providers"
 )
 
 type NotificationRepository interface {

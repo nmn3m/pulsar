@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/yourusername/pulsar/backend/internal/domain"
+	"github.com/nmn3m/pulsar/backend/internal/domain"
 )
 
 // AlertNotifier handles sending notifications for alert events
