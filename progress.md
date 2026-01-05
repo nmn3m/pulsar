@@ -1609,32 +1609,330 @@ When escalation triggers (`NotifyAlertEscalated`):
 
 ---
 
-## Summary of Phases 1-9
+## Phase 10: Webhooks & Integrations ✅ COMPLETED
+
+**Goal**: Send events to external services and receive alerts from monitoring tools
+
+### Backend Implementation
+
+#### Database Schema
+- **File**: `backend/migrations/000007_webhooks.up.sql`
+  - Created `webhook_endpoints` table:
+    - Event filters for alerts and incidents
+    - Custom headers and HTTP configuration
+    - Retry configuration (max retries, delay)
+    - Timeout settings
+    - Organization-scoped
+  - Created `webhook_deliveries` table:
+    - Delivery status tracking (pending, success, failed)
+    - Retry tracking with next_retry_at
+    - Response status and body capture
+    - Error message logging
+  - Created `incoming_webhook_tokens` table:
+    - Integration type support (generic, prometheus, grafana, datadog)
+    - Default priority and tags
+    - Usage tracking (last_used_at, request_count)
+    - Token-based authentication
+  - Comprehensive indexes and triggers
+
+#### Domain Models
+- **File**: `backend/internal/domain/webhook.go`
+  - WebhookEndpoint with event filter flags
+  - WebhookDelivery with retry state
+  - IncomingWebhookToken with integration types
+  - WebhookPayload structure for outgoing webhooks
+  - ShouldTriggerEvent() helper method
+  - Request/response types for all operations
+
+#### Repository Layer
+- **File**: `backend/internal/repository/webhook.go` + `postgres/webhook_repo.go`
+  - Full CRUD for webhook endpoints
+  - Delivery creation and updates
+  - GetPendingDeliveries for background processing
+  - Incoming token management by token string
+  - UpdateIncomingTokenUsage for statistics
+  - JSONB handling for headers, tags, and payloads
+
+#### Service Layer
+- **File**: `backend/internal/service/webhook_service.go`
+  - HMAC SHA-256 signature generation for security
+  - TriggerWebhooks() - async webhook broadcasting
+  - deliverWebhook() - HTTP POST with custom headers
+  - Retry logic with exponential backoff
+  - ProcessPendingDeliveries() - background worker method
+  - Timeout configuration per endpoint
+  - Response capture and error tracking
+  - generateSecret() - secure random token generation
+  - VerifyWebhookSignature() - HMAC verification
+
+#### Alert & Incident Integration
+- **File**: `backend/internal/service/alert_service.go` (modified)
+  - Added webhookService dependency
+  - Webhook triggers on:
+    - CreateAlert → alert.created
+    - UpdateAlert → alert.updated
+    - AcknowledgeAlert → alert.acknowledged
+    - CloseAlert → alert.closed
+  - Payload includes alert details (id, source, priority, status, message, etc.)
+
+#### Incoming Webhook Handler
+- **File**: `backend/internal/handler/rest/incoming_webhook_handler.go`
+  - Public endpoint: POST /api/v1/webhook/:token
+  - Token-based authentication
+  - Usage statistics tracking
+  - Integration-specific parsers:
+    - parsePrometheusWebhook() - Prometheus Alertmanager format
+    - parseGrafanaWebhook() - Grafana alert format
+    - parseGenericWebhook() - Simple JSON format
+  - Auto-creates alerts from external sources
+  - Applies default priority and tags
+  - Merges webhook tags with default tags
+
+#### Webhook Handler
+- **File**: `backend/internal/handler/rest/webhook_handler.go`
+  - Outgoing endpoints:
+    - GET /api/v1/webhooks/endpoints - List endpoints
+    - POST /api/v1/webhooks/endpoints - Create endpoint
+    - GET /api/v1/webhooks/endpoints/:id - Get endpoint
+    - PATCH /api/v1/webhooks/endpoints/:id - Update endpoint
+    - DELETE /api/v1/webhooks/endpoints/:id - Delete endpoint
+  - Delivery logs:
+    - GET /api/v1/webhooks/deliveries - List deliveries with pagination
+  - Incoming tokens:
+    - GET /api/v1/webhooks/incoming - List tokens
+    - POST /api/v1/webhooks/incoming - Create token
+    - DELETE /api/v1/webhooks/incoming/:id - Delete token
+
+#### Background Worker
+- **File**: `backend/cmd/api/main.go` (modified)
+  - Webhook delivery worker runs every 30 seconds
+  - Processes pending deliveries with retry logic
+  - Graceful shutdown with channel coordination
+  - Separate goroutine from HTTP server and escalation worker
+
+### Frontend Implementation
+
+#### Type Definitions
+- **File**: `frontend/src/lib/types/webhook.ts`
+  - WebhookEndpoint interface
+  - WebhookDelivery interface with status tracking
+  - IncomingWebhookToken interface
+  - CreateWebhookEndpointRequest with all event flags
+  - UpdateWebhookEndpointRequest for partial updates
+  - CreateIncomingWebhookTokenRequest
+  - ListWebhookDeliveriesResponse with pagination
+
+#### API Client Extensions
+- **File**: `frontend/src/lib/api/client.ts` (modified)
+  - listWebhookEndpoints(), createWebhookEndpoint()
+  - getWebhookEndpoint(), updateWebhookEndpoint(), deleteWebhookEndpoint()
+  - listWebhookDeliveries() with pagination
+  - listIncomingWebhookTokens(), createIncomingWebhookToken()
+  - deleteIncomingWebhookToken()
+
+#### Webhook Endpoints Management Page
+- **File**: `frontend/src/routes/(app)/webhooks/endpoints/+page.svelte`
+  - Grid view of all webhook endpoints
+  - Create endpoint form:
+    - Name and URL inputs
+    - Enabled toggle
+    - Event trigger checkboxes (8 event types)
+    - Custom headers with add/remove
+    - Timeout, max retries, retry delay configuration
+  - Endpoint cards showing:
+    - Name, URL, enabled status
+    - Event filters as badges
+    - Configuration summary
+    - Delete button
+  - Quick enable/disable toggle
+  - Form validation
+
+#### Incoming Webhooks Management Page
+- **File**: `frontend/src/routes/(app)/webhooks/incoming/+page.svelte`
+  - Grid view of incoming webhook tokens
+  - Create token form:
+    - Name input
+    - Integration type selector (generic, prometheus, grafana, datadog)
+    - Default priority selector
+    - Default tags input
+  - Token cards showing:
+    - Name, integration type, enabled status
+    - Default priority and tags
+    - Usage statistics (request count, last used)
+    - Webhook URL with copy button
+    - Integration-specific configuration examples
+  - Prometheus configuration snippet
+  - Grafana setup instructions
+  - Delete functionality
+
+#### Webhook Deliveries Viewer
+- **File**: `frontend/src/routes/(app)/webhooks/deliveries/+page.svelte`
+  - List view of webhook deliveries
+  - Status-based color coding (success/failed/pending)
+  - Expandable delivery details:
+    - Full payload JSON
+    - Response body
+    - Error messages
+    - Metadata (delivery ID, endpoint ID)
+  - Delivery information:
+    - Event type
+    - HTTP status code
+    - Attempt count
+    - Timestamps (created, last attempt, next retry)
+  - Pagination controls
+  - Refresh button
+  - Relative time display
+
+#### Webhooks Navigation
+- **File**: `frontend/src/routes/(app)/webhooks/+layout.svelte`
+  - Tab navigation between sections:
+    - Outgoing Endpoints
+    - Incoming Webhooks
+    - Delivery Logs
+  - Active tab highlighting
+
+- **File**: `frontend/src/routes/(app)/+layout.svelte` (modified)
+  - Added "Webhooks" link to main navigation
+
+### Webhook Security
+
+**HMAC Signature**:
+- SHA-256 HMAC signatures on all outgoing webhooks
+- Signature sent in X-Pulsar-Signature header
+- Format: "sha256=<hex_encoded_signature>"
+- Secret auto-generated (64 hex characters)
+- Recipients can verify webhook authenticity
+
+**Headers Sent**:
+- X-Pulsar-Signature: HMAC signature
+- X-Pulsar-Event: Event type
+- X-Pulsar-Delivery: Delivery ID
+- Content-Type: application/json
+- User-Agent: Pulsar-Webhooks/1.0
+- Custom headers configured by user
+
+**Incoming Security**:
+- Token-based authentication
+- Unique random tokens (64 hex characters)
+- Token passed in URL path
+- Organization isolation
+- Enable/disable per token
+
+### Integration Examples
+
+**Prometheus Alertmanager**:
+```yaml
+receivers:
+  - name: 'pulsar'
+    webhook_configs:
+      - url: 'https://pulsar.example.com/api/v1/webhook/<token>'
+        send_resolved: false
+```
+
+**Grafana**:
+- Add webhook URL as notification channel
+- Alerts automatically converted to Pulsar alerts
+- Priority based on alert state
+
+**Generic Webhook**:
+```json
+POST /api/v1/webhook/<token>
+{
+  "message": "Database backup failed",
+  "description": "Backup job failed on prod-db-01",
+  "priority": "P2",
+  "tags": ["database", "backup", "production"]
+}
+```
+
+### Key Features Implemented
+
+✅ **Outgoing Webhooks**
+- Event-based triggering (8 event types)
+- Custom HTTP headers
+- Configurable timeouts and retries
+- HMAC signature authentication
+- Async delivery (non-blocking)
+- Background retry processing
+
+✅ **Incoming Webhooks**
+- Token-based authentication
+- Multiple integration types
+- Prometheus Alertmanager support
+- Grafana support
+- Generic JSON webhooks
+- Auto-alert creation
+- Default priority and tags
+
+✅ **Delivery Tracking**
+- Complete audit trail
+- Status tracking (pending/success/failed)
+- Response capture
+- Error logging
+- Retry scheduling
+- Attempt counting
+
+✅ **Frontend UI**
+- Endpoint management
+- Token management
+- Delivery logs viewer
+- Copy-to-clipboard functionality
+- Integration configuration examples
+- Tab-based navigation
+
+✅ **Background Processing**
+- 30-second processing interval
+- Automatic retry handling
+- Graceful shutdown
+- Independent worker thread
+
+### Deliverables ✅
+- ✅ Create and manage outgoing webhook endpoints
+- ✅ Configure event triggers per endpoint
+- ✅ Custom headers and timeout configuration
+- ✅ HMAC signature-based authentication
+- ✅ Automatic retry with exponential backoff
+- ✅ Complete delivery logging and monitoring
+- ✅ Create incoming webhook tokens
+- ✅ Prometheus Alertmanager integration
+- ✅ Grafana webhook integration
+- ✅ Generic webhook support
+- ✅ Token-based authentication for incoming webhooks
+- ✅ Auto-alert creation from external sources
+- ✅ Usage statistics tracking
+- ✅ Clean, intuitive webhook management UI
+- ✅ Delivery logs viewer with filtering
+- ✅ Integration configuration examples
+
+---
+
+## Summary of Phases 1-10
 
 ### Total Files Created/Modified
 
 #### Backend (Go)
-- **Migrations**: 6 files
+- **Migrations**: 7 files
   - Initial schema (users, organizations)
   - Alerts and teams tables
   - Schedules and rotations
   - Escalation policies
   - Notifications (channels, preferences, logs)
   - Incidents (incidents, responders, timeline, alerts)
+  - Webhooks (endpoints, deliveries, incoming tokens)
 
-- **Domain Models**: 10 files
-  - user.go, organization.go, alert.go, team.go, schedule.go, escalation.go, notification.go, incident.go, websocket.go, errors.go
+- **Domain Models**: 11 files
+  - user.go, organization.go, alert.go, team.go, schedule.go, escalation.go, notification.go, incident.go, websocket.go, webhook.go, errors.go
 
-- **Repositories**: 10 files
-  - db.go, user_repo.go, organization_repo.go, alert_repo.go, team_repo.go, schedule_repo.go, escalation_repo.go, notification_repo.go, incident_repository.go, incident_repo.go
+- **Repositories**: 11 files
+  - db.go, user_repo.go, organization_repo.go, alert_repo.go, team_repo.go, schedule_repo.go, escalation_repo.go, notification_repo.go, incident_repository.go, incident_repo.go, webhook_repo.go
 
-- **Services**: 11 files
+- **Services**: 12 files
   - auth_service.go, alert_service.go, team_service.go, user_service.go, schedule_service.go, escalation_service.go
-  - notification_service.go, alert_notifier.go, incident_service.go, websocket_service.go
+  - notification_service.go, alert_notifier.go, incident_service.go, websocket_service.go, webhook_service.go
   - providers/email.go, providers/slack.go, providers/teams.go, providers/webhook.go
 
-- **Handlers**: 9 files
-  - auth_handler.go, alert_handler.go, team_handler.go, user_handler.go, schedule_handler.go, escalation_handler.go, notification_handler.go, incident_handler.go, websocket_handler.go
+- **Handlers**: 11 files
+  - auth_handler.go, alert_handler.go, team_handler.go, user_handler.go, schedule_handler.go, escalation_handler.go, notification_handler.go, incident_handler.go, websocket_handler.go, webhook_handler.go, incoming_webhook_handler.go
 
 - **Middleware**: 3 files
   - auth.go, cors.go, logger.go

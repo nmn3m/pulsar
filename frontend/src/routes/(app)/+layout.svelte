@@ -85,6 +85,9 @@
 							<a href="/schedules" class="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">
 								Schedules
 							</a>
+							<a href="/webhooks/endpoints" class="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">
+								Webhooks
+							</a>
 						</nav>
 					</div>
 
