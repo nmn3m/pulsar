@@ -6,18 +6,18 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/pulsar/backend/internal/domain"
-	"github.com/pulsar/backend/internal/repository"
+	"github.com/nmn3m/pulsar/backend/internal/domain"
+	"github.com/nmn3m/pulsar/backend/internal/repository"
 )
 
 type AlertService struct {
-	alertRepo    repository.AlertRepository
+	alertRepo     repository.AlertRepository
 	alertNotifier *AlertNotifier
 }
 
 func NewAlertService(alertRepo repository.AlertRepository, alertNotifier *AlertNotifier) *AlertService {
 	return &AlertService{
-		alertRepo:    alertRepo,
+		alertRepo:     alertRepo,
 		alertNotifier: alertNotifier,
 	}
 }
@@ -33,10 +33,10 @@ type CreateAlertRequest struct {
 }
 
 type UpdateAlertRequest struct {
-	Priority    *string                 `json:"priority"`
-	Message     *string                 `json:"message"`
-	Description *string                 `json:"description"`
-	Tags        []string                `json:"tags"`
+	Priority     *string                `json:"priority"`
+	Message      *string                `json:"message"`
+	Description  *string                `json:"description"`
+	Tags         []string               `json:"tags"`
 	CustomFields map[string]interface{} `json:"custom_fields"`
 }
 
@@ -59,21 +59,21 @@ type AssignAlertRequest struct {
 }
 
 type ListAlertsRequest struct {
-	Status         []string    `form:"status"`
-	Priority       []string    `form:"priority"`
-	AssignedToUser *uuid.UUID  `form:"assigned_to_user"`
-	AssignedToTeam *uuid.UUID  `form:"assigned_to_team"`
-	Source         *string     `form:"source"`
-	Search         *string     `form:"search"`
-	Page           int         `form:"page"`
-	PageSize       int         `form:"page_size"`
+	Status         []string   `form:"status"`
+	Priority       []string   `form:"priority"`
+	AssignedToUser *uuid.UUID `form:"assigned_to_user"`
+	AssignedToTeam *uuid.UUID `form:"assigned_to_team"`
+	Source         *string    `form:"source"`
+	Search         *string    `form:"search"`
+	Page           int        `form:"page"`
+	PageSize       int        `form:"page_size"`
 }
 
 type ListAlertsResponse struct {
-	Alerts []*domain.Alert `json:"alerts"`
-	Total  int             `json:"total"`
-	Page   int             `json:"page"`
-	PageSize int           `json:"page_size"`
+	Alerts   []*domain.Alert `json:"alerts"`
+	Total    int             `json:"total"`
+	Page     int             `json:"page"`
+	PageSize int             `json:"page_size"`
 }
 
 func (s *AlertService) CreateAlert(ctx context.Context, orgID uuid.UUID, req *CreateAlertRequest) (*domain.Alert, error) {
@@ -95,16 +95,16 @@ func (s *AlertService) CreateAlert(ctx context.Context, orgID uuid.UUID, req *Cr
 	}
 
 	alert := &domain.Alert{
-		ID:             uuid.New(),
-		OrganizationID: orgID,
-		Source:         req.Source,
-		SourceID:       req.SourceID,
-		Priority:       priority,
-		Status:         domain.AlertStatusOpen,
-		Message:        req.Message,
-		Description:    req.Description,
-		Tags:           tags,
-		CustomFields:   customFields,
+		ID:              uuid.New(),
+		OrganizationID:  orgID,
+		Source:          req.Source,
+		SourceID:        req.SourceID,
+		Priority:        priority,
+		Status:          domain.AlertStatusOpen,
+		Message:         req.Message,
+		Description:     req.Description,
+		Tags:            tags,
+		CustomFields:    customFields,
 		EscalationLevel: 0,
 	}
 

@@ -11,6 +11,22 @@ import type {
 	UpdateAlertRequest
 } from '$lib/types/alert';
 import type {
+	Incident,
+	IncidentWithDetails,
+	CreateIncidentRequest,
+	UpdateIncidentRequest,
+	AddResponderRequest,
+	UpdateResponderRoleRequest,
+	AddNoteRequest,
+	LinkAlertRequest,
+	ListIncidentsParams,
+	ListIncidentsResponse,
+	ResponderWithUser,
+	TimelineEventWithUser,
+	IncidentAlertWithDetails,
+	IncidentTimelineEvent
+} from '$lib/types/incident';
+import type {
 	Team,
 	TeamWithMembers,
 	CreateTeamRequest,
@@ -732,6 +748,118 @@ class APIClient {
 		return this.request<ListNotificationLogsResponse>(
 			`/api/v1/notifications/logs/alert/${alertId}`
 		);
+	}
+
+	// Incident methods
+	async listIncidents(params?: ListIncidentsParams): Promise<ListIncidentsResponse> {
+		const queryParams = new URLSearchParams();
+
+		if (params?.status && params.status.length > 0) {
+			params.status.forEach(s => queryParams.append('status', s));
+		}
+		if (params?.severity && params.severity.length > 0) {
+			params.severity.forEach(s => queryParams.append('severity', s));
+		}
+		if (params?.assigned_to_team_id) {
+			queryParams.append('assigned_to_team_id', params.assigned_to_team_id);
+		}
+		if (params?.search) {
+			queryParams.append('search', params.search);
+		}
+		if (params?.page) {
+			queryParams.append('page', params.page.toString());
+		}
+		if (params?.page_size) {
+			queryParams.append('page_size', params.page_size.toString());
+		}
+
+		const queryString = queryParams.toString();
+		const endpoint = queryString ? `/api/v1/incidents?${queryString}` : '/api/v1/incidents';
+
+		return this.request<ListIncidentsResponse>(endpoint);
+	}
+
+	async createIncident(data: CreateIncidentRequest): Promise<Incident> {
+		return this.request<Incident>('/api/v1/incidents', {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async getIncident(id: string): Promise<IncidentWithDetails> {
+		return this.request<IncidentWithDetails>(`/api/v1/incidents/${id}`);
+	}
+
+	async updateIncident(id: string, data: UpdateIncidentRequest): Promise<Incident> {
+		return this.request<Incident>(`/api/v1/incidents/${id}`, {
+			method: 'PATCH',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async deleteIncident(id: string): Promise<void> {
+		await this.request(`/api/v1/incidents/${id}`, {
+			method: 'DELETE'
+		});
+	}
+
+	// Incident responders
+	async listIncidentResponders(incidentId: string): Promise<ResponderWithUser[]> {
+		return this.request<ResponderWithUser[]>(`/api/v1/incidents/${incidentId}/responders`);
+	}
+
+	async addIncidentResponder(incidentId: string, data: AddResponderRequest): Promise<ResponderWithUser> {
+		return this.request<ResponderWithUser>(`/api/v1/incidents/${incidentId}/responders`, {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async removeIncidentResponder(incidentId: string, responderId: string): Promise<void> {
+		await this.request(`/api/v1/incidents/${incidentId}/responders/${responderId}`, {
+			method: 'DELETE'
+		});
+	}
+
+	async updateIncidentResponderRole(
+		incidentId: string,
+		responderId: string,
+		data: UpdateResponderRoleRequest
+	): Promise<void> {
+		await this.request(`/api/v1/incidents/${incidentId}/responders/${responderId}`, {
+			method: 'PATCH',
+			body: JSON.stringify(data)
+		});
+	}
+
+	// Incident timeline
+	async getIncidentTimeline(incidentId: string): Promise<TimelineEventWithUser[]> {
+		return this.request<TimelineEventWithUser[]>(`/api/v1/incidents/${incidentId}/timeline`);
+	}
+
+	async addIncidentNote(incidentId: string, data: AddNoteRequest): Promise<IncidentTimelineEvent> {
+		return this.request<IncidentTimelineEvent>(`/api/v1/incidents/${incidentId}/notes`, {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	// Incident alerts
+	async listIncidentAlerts(incidentId: string): Promise<IncidentAlertWithDetails[]> {
+		return this.request<IncidentAlertWithDetails[]>(`/api/v1/incidents/${incidentId}/alerts`);
+	}
+
+	async linkAlertToIncident(incidentId: string, data: LinkAlertRequest): Promise<IncidentAlertWithDetails> {
+		return this.request<IncidentAlertWithDetails>(`/api/v1/incidents/${incidentId}/alerts`, {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async unlinkAlertFromIncident(incidentId: string, alertId: string): Promise<void> {
+		await this.request(`/api/v1/incidents/${incidentId}/alerts/${alertId}`, {
+			method: 'DELETE'
+		});
 	}
 }
 

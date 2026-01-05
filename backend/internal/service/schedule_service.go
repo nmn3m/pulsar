@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/pulsar/backend/internal/domain"
-	"github.com/pulsar/backend/internal/repository"
+	"github.com/nmn3m/pulsar/backend/internal/domain"
+	"github.com/nmn3m/pulsar/backend/internal/repository"
 )
 
 type ScheduleService struct {
@@ -39,14 +39,14 @@ type UpdateScheduleRequest struct {
 }
 
 type CreateRotationRequest struct {
-	Name           string     `json:"name" binding:"required"`
-	RotationType   string     `json:"rotation_type" binding:"required"`
-	RotationLength int        `json:"rotation_length" binding:"required"`
-	StartDate      string     `json:"start_date" binding:"required"`
-	StartTime      string     `json:"start_time"`
-	EndTime        *string    `json:"end_time"`
-	HandoffDay     *int       `json:"handoff_day"`
-	HandoffTime    string     `json:"handoff_time"`
+	Name           string  `json:"name" binding:"required"`
+	RotationType   string  `json:"rotation_type" binding:"required"`
+	RotationLength int     `json:"rotation_length" binding:"required"`
+	StartDate      string  `json:"start_date" binding:"required"`
+	StartTime      string  `json:"start_time"`
+	EndTime        *string `json:"end_time"`
+	HandoffDay     *int    `json:"handoff_day"`
+	HandoffTime    string  `json:"handoff_time"`
 }
 
 type UpdateRotationRequest struct {

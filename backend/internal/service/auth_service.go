@@ -8,10 +8,10 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/pulsar/backend/internal/config"
-	"github.com/pulsar/backend/internal/domain"
-	"github.com/pulsar/backend/internal/middleware"
-	"github.com/pulsar/backend/internal/repository"
+	"github.com/nmn3m/pulsar/backend/internal/config"
+	"github.com/nmn3m/pulsar/backend/internal/domain"
+	"github.com/nmn3m/pulsar/backend/internal/middleware"
+	"github.com/nmn3m/pulsar/backend/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -34,10 +34,10 @@ func NewAuthService(
 }
 
 type RegisterRequest struct {
-	Email          string `json:"email" binding:"required,email"`
-	Username       string `json:"username" binding:"required,min=3,max=50"`
-	Password       string `json:"password" binding:"required,min=8"`
-	FullName       string `json:"full_name"`
+	Email            string `json:"email" binding:"required,email"`
+	Username         string `json:"username" binding:"required,min=3,max=50"`
+	Password         string `json:"password" binding:"required,min=8"`
+	FullName         string `json:"full_name"`
 	OrganizationName string `json:"organization_name" binding:"required"`
 }
 

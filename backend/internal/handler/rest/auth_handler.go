@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pulsar/backend/internal/middleware"
-	"github.com/pulsar/backend/internal/service"
+	"github.com/nmn3m/pulsar/backend/internal/middleware"
+	"github.com/nmn3m/pulsar/backend/internal/service"
 )
 
 type AuthHandler struct {

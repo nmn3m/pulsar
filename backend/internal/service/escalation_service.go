@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/pulsar/backend/internal/domain"
-	"github.com/pulsar/backend/internal/repository"
+	"github.com/nmn3m/pulsar/backend/internal/domain"
+	"github.com/nmn3m/pulsar/backend/internal/repository"
 )
 
 type EscalationService struct {
@@ -31,10 +31,10 @@ func NewEscalationService(
 // Request/Response types
 
 type CreateEscalationPolicyRequest struct {
-	Name          string `json:"name" binding:"required"`
+	Name          string  `json:"name" binding:"required"`
 	Description   *string `json:"description"`
-	RepeatEnabled bool   `json:"repeat_enabled"`
-	RepeatCount   *int   `json:"repeat_count"`
+	RepeatEnabled bool    `json:"repeat_enabled"`
+	RepeatCount   *int    `json:"repeat_count"`
 }
 
 type UpdateEscalationPolicyRequest struct {

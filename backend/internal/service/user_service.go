@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/pulsar/backend/internal/domain"
-	"github.com/pulsar/backend/internal/repository"
+	"github.com/nmn3m/pulsar/backend/internal/domain"
+	"github.com/nmn3m/pulsar/backend/internal/repository"
 )
 
 type UserService struct {

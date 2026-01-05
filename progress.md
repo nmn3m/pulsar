@@ -1091,31 +1091,266 @@ When escalation triggers (`NotifyAlertEscalated`):
 
 ---
 
-## Summary of Phases 1-7
+## Phase 8: Incident Management ✅ COMPLETED
+
+**Goal**: Track and manage incidents with timeline, responders, and alert linking
+
+### Backend Implementation
+
+#### Database Schema
+- **File**: `backend/migrations/000006_incidents.up.sql`
+  - Created `incidents` table with:
+    - Severity levels: critical, high, medium, low
+    - Status: investigating, identified, monitoring, resolved
+    - Priority (reuses AlertPriority: P1-P5)
+    - Assignment to teams
+    - Created by user tracking
+    - Started and resolved timestamps
+  - Created `incident_responders` table:
+    - Links users to incidents
+    - Role: incident_commander, responder
+    - Multiple responders per incident
+  - Created `incident_timeline` table:
+    - Event tracking for incident history
+    - Event types: created, status_changed, severity_changed, responder_added, responder_removed, note_added, alert_linked, alert_unlinked, resolved
+    - JSONB metadata for flexible event data
+    - User attribution for events
+  - Created `incident_alerts` table:
+    - Links alerts to incidents
+    - Many-to-many relationship
+    - Tracks who linked and when
+  - Comprehensive indexes for filtering and performance
+  - Automatic updated_at trigger
+
+#### Domain Models
+- **File**: `backend/internal/domain/incident.go`
+  - Incident struct with all fields
+  - IncidentSeverity type (critical, high, medium, low) with validation
+  - IncidentStatus type (investigating, identified, monitoring, resolved)
+  - ResponderRole type (incident_commander, responder)
+  - TimelineEventType with 9 event types
+  - IncidentResponder, IncidentTimelineEvent, IncidentAlert structs
+  - Helper structs: ResponderWithUser, TimelineEventWithUser, IncidentAlertWithDetails
+  - IncidentFilter for list queries
+  - IncidentWithDetails for complete incident view
+
+#### Repository Layer
+- **File**: `backend/internal/repository/postgres/incident_repo.go`
+  - Full CRUD for incidents
+  - Dynamic filtering by status, severity, team assignment, search
+  - Pagination support
+  - Responder management:
+    - AddResponder, RemoveResponder, UpdateResponderRole
+    - ListResponders with JOIN to get user details
+  - Timeline management:
+    - AddTimelineEvent with JSONB metadata
+    - GetTimeline with user details and chronological ordering
+  - Alert linking:
+    - LinkAlert, UnlinkAlert, ListAlerts
+    - Includes full alert details in results
+  - GetWithDetails: Complete incident with responders, alerts, and timeline
+  - Complex JOIN queries for related data
+
+#### Service Layer
+- **File**: `backend/internal/service/incident_service.go`
+  - CreateIncident: Validates severity and priority, auto-creates timeline event
+  - UpdateIncident: Partial updates with automatic timeline events
+    - Tracks severity changes
+    - Tracks status changes
+    - Auto-sets resolved_at when status = resolved
+  - ListIncidents: Pagination, filtering, search
+  - Responder operations:
+    - AddResponder with role validation
+    - RemoveResponder, UpdateResponderRole
+    - Automatic timeline events for responder changes
+  - Timeline operations:
+    - AddNote: User-generated timeline entries
+    - GetTimeline: Chronological event history
+  - Alert linking:
+    - LinkAlert, UnlinkAlert with timeline tracking
+    - ListAlerts with full alert details
+
+#### Handler Layer
+- **File**: `backend/internal/handler/rest/incident_handler.go`
+  - GET /api/v1/incidents - List with filters
+  - POST /api/v1/incidents - Create
+  - GET /api/v1/incidents/:id - Get with full details
+  - PATCH /api/v1/incidents/:id - Update
+  - DELETE /api/v1/incidents/:id - Delete
+  - Responder routes:
+    - GET /api/v1/incidents/:id/responders
+    - POST /api/v1/incidents/:id/responders
+    - DELETE /api/v1/incidents/:id/responders/:responderId
+    - PATCH /api/v1/incidents/:id/responders/:responderId
+  - Timeline routes:
+    - GET /api/v1/incidents/:id/timeline
+    - POST /api/v1/incidents/:id/notes
+  - Alert linking routes:
+    - GET /api/v1/incidents/:id/alerts
+    - POST /api/v1/incidents/:id/alerts
+    - DELETE /api/v1/incidents/:id/alerts/:alertId
+
+#### Route Integration
+- **File**: `backend/cmd/api/main.go`
+  - Initialized incidentRepo, incidentService, incidentHandler
+  - Registered all incident routes under /api/v1/incidents
+  - All routes protected with auth middleware
+
+### Frontend Implementation
+
+#### Type Definitions
+- **File**: `frontend/src/lib/types/incident.ts`
+  - Complete incident types matching backend
+  - IncidentSeverity, IncidentStatus, ResponderRole enums
+  - TimelineEventType with all 9 event types
+  - Incident, IncidentWithDetails interfaces
+  - IncidentResponder, ResponderWithUser interfaces
+  - IncidentTimelineEvent, TimelineEventWithUser interfaces
+  - IncidentAlert, IncidentAlertWithDetails interfaces
+  - Request/response types for all operations
+
+#### API Client Extensions
+- **File**: `frontend/src/lib/api/client.ts`
+  - listIncidents(): With filtering support
+  - createIncident(), getIncident(), updateIncident(), deleteIncident()
+  - Responder management:
+    - listIncidentResponders(), addIncidentResponder()
+    - removeIncidentResponder(), updateIncidentResponderRole()
+  - Timeline operations:
+    - getIncidentTimeline(), addIncidentNote()
+  - Alert linking:
+    - listIncidentAlerts(), linkAlertToIncident(), unlinkAlertFromIncident()
+
+#### State Management
+- **File**: `frontend/src/lib/stores/incidents.ts`
+  - Incidents store with list state
+  - load(): Fetch with filtering
+  - create(): Add new incident
+  - update(): Modify incident
+  - delete(): Remove incident
+  - Error and loading states
+  - Pagination info tracking
+
+#### Pages
+- **File**: `frontend/src/routes/(app)/incidents/+page.svelte`
+  - Incidents grid view
+  - Create incident form:
+    - Title, description, severity, priority
+    - Form validation
+  - Filter panel:
+    - Status multi-select (investigating, identified, monitoring, resolved)
+    - Severity multi-select (critical, high, medium, low)
+    - Search input
+  - Incident cards showing:
+    - Severity, status, priority badges with color coding
+    - Title and description
+    - Started/resolved timestamps
+    - Relative time display
+  - Empty state handling
+  - Click to view details
+
+- **File**: `frontend/src/routes/(app)/incidents/[id]/+page.svelte`
+  - Complete incident details view
+  - Header with severity, status, priority badges
+  - Edit incident inline form
+  - Delete incident with confirmation
+  - Timeline section:
+    - Chronological event list
+    - Event icons for different types
+    - Add note functionality
+    - User attribution for events
+    - Timestamps for all events
+  - Responders sidebar:
+    - Incident commanders section
+    - Responders section
+    - Add responder with role selection
+    - Remove responder functionality
+  - Linked alerts section:
+    - List of linked alerts with details
+    - Unlink alert functionality
+  - Back navigation to list
+
+### Key Features Implemented
+
+✅ **Complete Incident Lifecycle**
+- Create incidents with severity and priority
+- Update status through investigation stages
+- Automatic resolution timestamp tracking
+- Comprehensive incident details view
+
+✅ **Responder Management**
+- Incident commanders and responders
+- Role-based responder assignment
+- Add/remove responders
+- User details integration
+
+✅ **Timeline Tracking**
+- Automatic event logging for all changes
+- User-generated notes
+- Event type categorization
+- Chronological history with user attribution
+
+✅ **Alert Integration**
+- Link multiple alerts to incidents
+- Unlink alerts as needed
+- Full alert details in incident view
+- Timeline events for linking actions
+
+✅ **Filtering and Search**
+- Filter by status (multi-select)
+- Filter by severity (multi-select)
+- Search across title and description
+- Pagination support
+
+✅ **Visual Design**
+- Color-coded severity levels
+- Status-based color coding
+- Timeline with event icons
+- Responsive layout
+- Clean, professional UI
+
+### Deliverables ✅
+- ✅ Create and manage incidents with severity and status
+- ✅ Assign incident commanders and responders
+- ✅ Track incident timeline with automatic and manual events
+- ✅ Link/unlink alerts to incidents
+- ✅ Filter incidents by status, severity, and search
+- ✅ Update incident details and status
+- ✅ Visual timeline with event categorization
+- ✅ Complete audit trail for all incident actions
+- ✅ Multi-user collaboration support
+- ✅ Team assignment for incidents
+- ✅ Priority-based incident management
+- ✅ Clean, intuitive incident management UI
+
+---
+
+## Summary of Phases 1-8
 
 ### Total Files Created/Modified
 
 #### Backend (Go)
-- **Migrations**: 5 files
+- **Migrations**: 6 files
   - Initial schema (users, organizations)
   - Alerts and teams tables
   - Schedules and rotations
   - Escalation policies
   - Notifications (channels, preferences, logs)
+  - Incidents (incidents, responders, timeline, alerts)
 
-- **Domain Models**: 8 files
-  - user.go, organization.go, alert.go, team.go, schedule.go, escalation.go, notification.go, errors.go
+- **Domain Models**: 9 files
+  - user.go, organization.go, alert.go, team.go, schedule.go, escalation.go, notification.go, incident.go, errors.go
 
-- **Repositories**: 8 files
-  - db.go, user_repo.go, organization_repo.go, alert_repo.go, team_repo.go, schedule_repo.go, escalation_repo.go, notification_repo.go
+- **Repositories**: 10 files
+  - db.go, user_repo.go, organization_repo.go, alert_repo.go, team_repo.go, schedule_repo.go, escalation_repo.go, notification_repo.go, incident_repository.go, incident_repo.go
 
-- **Services**: 9 files
+- **Services**: 10 files
   - auth_service.go, alert_service.go, team_service.go, user_service.go, schedule_service.go, escalation_service.go
-  - notification_service.go, alert_notifier.go
+  - notification_service.go, alert_notifier.go, incident_service.go
   - providers/email.go, providers/slack.go, providers/teams.go, providers/webhook.go
 
-- **Handlers**: 7 files
-  - auth_handler.go, alert_handler.go, team_handler.go, user_handler.go, schedule_handler.go, escalation_handler.go, notification_handler.go
+- **Handlers**: 8 files
+  - auth_handler.go, alert_handler.go, team_handler.go, user_handler.go, schedule_handler.go, escalation_handler.go, notification_handler.go, incident_handler.go
 
 - **Middleware**: 3 files
   - auth.go, cors.go, logger.go
@@ -1130,22 +1365,23 @@ When escalation triggers (`NotifyAlertEscalated`):
 - **API Client**: 1 file
   - lib/api/client.ts
 
-- **Types**: 6 files
-  - user.ts, alert.ts, team.ts, schedule.ts, escalation.ts, notification.ts
+- **Types**: 7 files
+  - user.ts, alert.ts, team.ts, schedule.ts, escalation.ts, notification.ts, incident.ts
 
-- **Stores**: 6 files
-  - auth.ts, alerts.ts, teams.ts, schedules.ts, escalations.ts, notifications.ts
+- **Stores**: 7 files
+  - auth.ts, alerts.ts, teams.ts, schedules.ts, escalations.ts, notifications.ts, incidents.ts
 
 - **UI Components**: 3 files
   - Button.svelte, Input.svelte, AlertCard.svelte
 
-- **Pages**: 13 files
+- **Pages**: 15 files
   - login, register, dashboard
   - alerts list, alert detail
   - teams list, team detail
   - schedules list, schedule detail
   - escalation policies list, escalation policy detail
   - notification channels, notification preferences
+  - incidents list, incident detail
 
 #### Infrastructure
 - **Docker**: 1 file
@@ -1173,15 +1409,15 @@ When escalation triggers (`NotifyAlertEscalated`):
 4. ✅ **Phase 4**: On-Call Schedules
 5. ✅ **Phase 5**: Escalation Policies
 6. ✅ **Phase 6**: Notifications (Email, Slack, Teams, Webhooks)
+7. ✅ **Phase 7**: Alert Integration & Auto-Notifications
+8. ✅ **Phase 8**: Incident Management
 
 ### Next Phases Remaining
-- **Phase 7**: Alert Integration (Auto-notifications on alert lifecycle)
-- **Phase 8**: Incident Management
 - **Phase 9**: Real-time Updates (WebSocket)
 - **Phase 10**: Webhooks & Integrations
 - **Phase 11**: API Keys & Production Polish
 
 ---
 
-*Last Updated: Phase 6 completion - January 2026*
-*Notification system fully operational with 4 providers and complete user preference management*
+*Last Updated: Phase 8 completion - January 2026*
+*Incident management fully operational with timeline tracking, responder management, and alert linking*

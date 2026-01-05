@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pulsar/backend/internal/config"
-	"github.com/pulsar/backend/internal/handler/rest"
-	"github.com/pulsar/backend/internal/middleware"
-	"github.com/pulsar/backend/internal/pkg/logger"
-	"github.com/pulsar/backend/internal/repository/postgres"
-	"github.com/pulsar/backend/internal/service"
+	"github.com/nmn3m/pulsar/backend/internal/config"
+	"github.com/nmn3m/pulsar/backend/internal/handler/rest"
+	"github.com/nmn3m/pulsar/backend/internal/middleware"
+	"github.com/nmn3m/pulsar/backend/internal/pkg/logger"
+	"github.com/nmn3m/pulsar/backend/internal/repository/postgres"
+	"github.com/nmn3m/pulsar/backend/internal/service"
 	"go.uber.org/zap"
 )
 
@@ -57,6 +57,7 @@ func main() {
 	scheduleRepo := postgres.NewScheduleRepository(db)
 	escalationRepo := postgres.NewEscalationPolicyRepository(db)
 	notificationRepo := postgres.NewNotificationRepository(db)
+	incidentRepo := postgres.NewIncidentRepository(db)
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, orgRepo, cfg)
@@ -64,6 +65,7 @@ func main() {
 	userService := service.NewUserService(orgRepo)
 	scheduleService := service.NewScheduleService(scheduleRepo, userRepo)
 	notificationService := service.NewNotificationService(notificationRepo)
+	incidentService := service.NewIncidentService(incidentRepo)
 
 	// Initialize alert notifier with dependencies
 	alertNotifier := service.NewAlertNotifier(notificationService, userRepo, teamRepo, scheduleService)
@@ -80,6 +82,7 @@ func main() {
 	scheduleHandler := rest.NewScheduleHandler(scheduleService)
 	escalationHandler := rest.NewEscalationHandler(escalationService)
 	notificationHandler := rest.NewNotificationHandler(notificationService)
+	incidentHandler := rest.NewIncidentHandler(incidentService)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret)
@@ -229,6 +232,31 @@ func main() {
 				notifications.GET("/logs/:id", notificationHandler.GetLog)
 				notifications.GET("/logs/user/me", notificationHandler.ListLogsByUser)
 				notifications.GET("/logs/alert/:alertId", notificationHandler.ListLogsByAlert)
+			}
+
+			// Incident routes
+			incidents := protected.Group("/incidents")
+			{
+				incidents.GET("", incidentHandler.List)
+				incidents.POST("", incidentHandler.Create)
+				incidents.GET("/:id", incidentHandler.GetWithDetails)
+				incidents.PATCH("/:id", incidentHandler.Update)
+				incidents.DELETE("/:id", incidentHandler.Delete)
+
+				// Responder routes
+				incidents.GET("/:id/responders", incidentHandler.ListResponders)
+				incidents.POST("/:id/responders", incidentHandler.AddResponder)
+				incidents.DELETE("/:id/responders/:responderId", incidentHandler.RemoveResponder)
+				incidents.PATCH("/:id/responders/:responderId", incidentHandler.UpdateResponderRole)
+
+				// Timeline routes
+				incidents.GET("/:id/timeline", incidentHandler.GetTimeline)
+				incidents.POST("/:id/notes", incidentHandler.AddNote)
+
+				// Alert linking routes
+				incidents.GET("/:id/alerts", incidentHandler.ListAlerts)
+				incidents.POST("/:id/alerts", incidentHandler.LinkAlert)
+				incidents.DELETE("/:id/alerts/:alertId", incidentHandler.UnlinkAlert)
 			}
 		}
 	}

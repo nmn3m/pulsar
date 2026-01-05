@@ -1,4 +1,4 @@
-module github.com/pulsar/backend
+module github.com/nmn3m/pulsar/backend
 
 go 1.21
 
