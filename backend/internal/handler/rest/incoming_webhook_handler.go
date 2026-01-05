@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -63,7 +64,7 @@ func (h *IncomingWebhookHandler) ReceiveWebhook(c *gin.Context) {
 	}
 
 	// Parse based on integration type
-	var alerts []*domain.CreateAlertRequest
+	var alerts []*service.CreateAlertRequest
 
 	switch webhookToken.IntegrationType {
 	case domain.IncomingWebhookPrometheus:
@@ -91,7 +92,7 @@ func (h *IncomingWebhookHandler) ReceiveWebhook(c *gin.Context) {
 	for _, alertReq := range alerts {
 		// Apply default priority and tags
 		if alertReq.Priority == "" {
-			alertReq.Priority = domain.AlertPriority(webhookToken.DefaultPriority)
+			alertReq.Priority = webhookToken.DefaultPriority
 		}
 
 		// Merge default tags
@@ -129,7 +130,7 @@ func (h *IncomingWebhookHandler) ReceiveWebhook(c *gin.Context) {
 	})
 }
 
-func (h *IncomingWebhookHandler) parsePrometheusWebhook(body []byte) ([]*domain.CreateAlertRequest, error) {
+func (h *IncomingWebhookHandler) parsePrometheusWebhook(body []byte) ([]*service.CreateAlertRequest, error) {
 	var payload struct {
 		Alerts []struct {
 			Status      string            `json:"status"`
@@ -140,11 +141,11 @@ func (h *IncomingWebhookHandler) parsePrometheusWebhook(body []byte) ([]*domain.
 		} `json:"alerts"`
 	}
 
-	if err := parseJSON(body, &payload); err != nil {
+	if err := json.Unmarshal(body, &payload); err != nil {
 		return nil, err
 	}
 
-	var alerts []*domain.CreateAlertRequest
+	var alerts []*service.CreateAlertRequest
 	for _, prometheusAlert := range payload.Alerts {
 		// Skip resolved alerts
 		if prometheusAlert.Status == "resolved" {
@@ -162,17 +163,17 @@ func (h *IncomingWebhookHandler) parsePrometheusWebhook(body []byte) ([]*domain.
 		description := prometheusAlert.Annotations["description"]
 
 		// Determine priority based on severity label
-		priority := domain.AlertPriorityP3
+		priority := "P3"
 		if severity, ok := prometheusAlert.Labels["severity"]; ok {
 			switch strings.ToLower(severity) {
 			case "critical":
-				priority = domain.AlertPriorityP1
+				priority = "P1"
 			case "error", "high":
-				priority = domain.AlertPriorityP2
+				priority = "P2"
 			case "warning", "medium":
-				priority = domain.AlertPriorityP3
+				priority = "P3"
 			case "info", "low":
-				priority = domain.AlertPriorityP4
+				priority = "P4"
 			}
 		}
 
@@ -182,7 +183,7 @@ func (h *IncomingWebhookHandler) parsePrometheusWebhook(body []byte) ([]*domain.
 			tags = append(tags, fmt.Sprintf("%s:%s", key, value))
 		}
 
-		alerts = append(alerts, &domain.CreateAlertRequest{
+		alerts = append(alerts, &service.CreateAlertRequest{
 			Source:      "prometheus",
 			Priority:    priority,
 			Message:     message,
@@ -194,7 +195,7 @@ func (h *IncomingWebhookHandler) parsePrometheusWebhook(body []byte) ([]*domain.
 	return alerts, nil
 }
 
-func (h *IncomingWebhookHandler) parseGrafanaWebhook(body []byte) ([]*domain.CreateAlertRequest, error) {
+func (h *IncomingWebhookHandler) parseGrafanaWebhook(body []byte) ([]*service.CreateAlertRequest, error) {
 	var payload struct {
 		Title   string `json:"title"`
 		State   string `json:"state"`
@@ -203,13 +204,13 @@ func (h *IncomingWebhookHandler) parseGrafanaWebhook(body []byte) ([]*domain.Cre
 		Tags    map[string]string `json:"tags"`
 	}
 
-	if err := parseJSON(body, &payload); err != nil {
+	if err := json.Unmarshal(body, &payload); err != nil {
 		return nil, err
 	}
 
 	// Skip resolved alerts
 	if payload.State == "ok" {
-		return []*domain.CreateAlertRequest{}, nil
+		return []*service.CreateAlertRequest{}, nil
 	}
 
 	message := payload.Title
@@ -223,12 +224,12 @@ func (h *IncomingWebhookHandler) parseGrafanaWebhook(body []byte) ([]*domain.Cre
 	}
 
 	// Determine priority based on state
-	priority := domain.AlertPriorityP3
+	priority := "P3"
 	switch payload.State {
 	case "alerting":
-		priority = domain.AlertPriorityP2
+		priority = "P2"
 	case "no_data":
-		priority = domain.AlertPriorityP3
+		priority = "P3"
 	}
 
 	// Convert tags
@@ -237,7 +238,7 @@ func (h *IncomingWebhookHandler) parseGrafanaWebhook(body []byte) ([]*domain.Cre
 		tags = append(tags, fmt.Sprintf("%s:%s", key, value))
 	}
 
-	return []*domain.CreateAlertRequest{
+	return []*service.CreateAlertRequest{
 		{
 			Source:      "grafana",
 			Priority:    priority,
@@ -248,7 +249,7 @@ func (h *IncomingWebhookHandler) parseGrafanaWebhook(body []byte) ([]*domain.Cre
 	}, nil
 }
 
-func (h *IncomingWebhookHandler) parseGenericWebhook(body []byte) ([]*domain.CreateAlertRequest, error) {
+func (h *IncomingWebhookHandler) parseGenericWebhook(body []byte) ([]*service.CreateAlertRequest, error) {
 	var payload struct {
 		Message     string   `json:"message"`
 		Description string   `json:"description"`
@@ -256,7 +257,7 @@ func (h *IncomingWebhookHandler) parseGenericWebhook(body []byte) ([]*domain.Cre
 		Tags        []string `json:"tags"`
 	}
 
-	if err := parseJSON(body, &payload); err != nil {
+	if err := json.Unmarshal(body, &payload); err != nil {
 		return nil, err
 	}
 
@@ -264,9 +265,9 @@ func (h *IncomingWebhookHandler) parseGenericWebhook(body []byte) ([]*domain.Cre
 		payload.Message = "Alert from generic webhook"
 	}
 
-	priority := domain.AlertPriorityP3
+	priority := "P3"
 	if payload.Priority != "" {
-		priority = domain.AlertPriority(payload.Priority)
+		priority = payload.Priority
 	}
 
 	var description *string
@@ -280,7 +281,7 @@ func (h *IncomingWebhookHandler) parseGenericWebhook(body []byte) ([]*domain.Cre
 	}
 	tags = append(tags, "webhook")
 
-	return []*domain.CreateAlertRequest{
+	return []*service.CreateAlertRequest{
 		{
 			Source:      "webhook",
 			Priority:    priority,

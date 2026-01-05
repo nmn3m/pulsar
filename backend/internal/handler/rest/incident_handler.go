@@ -27,8 +27,8 @@ func (h *IncidentHandler) Create(c *gin.Context) {
 		return
 	}
 
-	orgID := middleware.GetOrganizationID(c)
-	userID := middleware.GetUserID(c)
+	orgID, _ := middleware.GetOrganizationID(c)
+	userID, _ := middleware.GetUserID(c)
 
 	incident, err := h.incidentService.CreateIncident(c.Request.Context(), orgID, userID, &req)
 	if err != nil {
@@ -90,7 +90,7 @@ func (h *IncidentHandler) Update(c *gin.Context) {
 		return
 	}
 
-	userID := middleware.GetUserID(c)
+	userID, _ := middleware.GetUserID(c)
 
 	incident, err := h.incidentService.UpdateIncident(c.Request.Context(), id, userID, &req)
 	if err != nil {
@@ -126,7 +126,7 @@ func (h *IncidentHandler) List(c *gin.Context) {
 		return
 	}
 
-	orgID := middleware.GetOrganizationID(c)
+	orgID, _ := middleware.GetOrganizationID(c)
 
 	response, err := h.incidentService.ListIncidents(c.Request.Context(), orgID, &req)
 	if err != nil {
@@ -152,7 +152,7 @@ func (h *IncidentHandler) AddResponder(c *gin.Context) {
 		return
 	}
 
-	userID := middleware.GetUserID(c)
+	userID, _ := middleware.GetUserID(c)
 
 	responder, err := h.incidentService.AddResponder(c.Request.Context(), id, userID, &req)
 	if err != nil {
@@ -179,7 +179,7 @@ func (h *IncidentHandler) RemoveResponder(c *gin.Context) {
 		return
 	}
 
-	userID := middleware.GetUserID(c)
+	userID, _ := middleware.GetUserID(c)
 
 	if err := h.incidentService.RemoveResponder(c.Request.Context(), id, responderID, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -252,7 +252,7 @@ func (h *IncidentHandler) AddNote(c *gin.Context) {
 		return
 	}
 
-	userID := middleware.GetUserID(c)
+	userID, _ := middleware.GetUserID(c)
 
 	event, err := h.incidentService.AddNote(c.Request.Context(), id, userID, &req)
 	if err != nil {
@@ -296,7 +296,7 @@ func (h *IncidentHandler) LinkAlert(c *gin.Context) {
 		return
 	}
 
-	userID := middleware.GetUserID(c)
+	userID, _ := middleware.GetUserID(c)
 
 	link, err := h.incidentService.LinkAlert(c.Request.Context(), id, userID, &req)
 	if err != nil {
@@ -323,7 +323,7 @@ func (h *IncidentHandler) UnlinkAlert(c *gin.Context) {
 		return
 	}
 
-	userID := middleware.GetUserID(c)
+	userID, _ := middleware.GetUserID(c)
 
 	if err := h.incidentService.UnlinkAlert(c.Request.Context(), id, alertID, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

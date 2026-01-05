@@ -56,9 +56,9 @@ func main() {
 	teamRepo := postgres.NewTeamRepository(db)
 	scheduleRepo := postgres.NewScheduleRepository(db)
 	escalationRepo := postgres.NewEscalationPolicyRepository(db)
-	notificationRepo := postgres.NewNotificationRepository(db)
-	incidentRepo := postgres.NewIncidentRepository(db)
-	webhookRepo := postgres.NewWebhookRepository(db)
+	notificationRepo := postgres.NewNotificationRepository(db.DB)
+	incidentRepo := postgres.NewIncidentRepository(db.DB)
+	webhookRepo := postgres.NewWebhookRepository(db.DB)
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, orgRepo, cfg)

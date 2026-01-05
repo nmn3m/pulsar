@@ -268,3 +268,51 @@ func (r *UserRepository) List(ctx context.Context, limit, offset int) ([]*domain
 
 	return users, nil
 }
+
+func (r *UserRepository) ListByTeam(ctx context.Context, teamID uuid.UUID) ([]*domain.User, error) {
+	query := `
+		SELECT u.id, u.email, u.username, u.password_hash, u.full_name, u.phone, u.timezone,
+		       u.notification_preferences, u.is_active, u.created_at, u.updated_at
+		FROM users u
+		JOIN team_members tm ON u.id = tm.user_id
+		WHERE tm.team_id = $1
+		ORDER BY u.created_at DESC
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, teamID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list users by team: %w", err)
+	}
+	defer rows.Close()
+
+	var users []*domain.User
+	for rows.Next() {
+		var user domain.User
+		var prefsJSON []byte
+
+		err := rows.Scan(
+			&user.ID,
+			&user.Email,
+			&user.Username,
+			&user.PasswordHash,
+			&user.FullName,
+			&user.Phone,
+			&user.Timezone,
+			&prefsJSON,
+			&user.IsActive,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan user: %w", err)
+		}
+
+		if err := json.Unmarshal(prefsJSON, &user.NotificationPreferences); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal notification preferences: %w", err)
+		}
+
+		users = append(users, &user)
+	}
+
+	return users, nil
+}

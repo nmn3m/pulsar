@@ -1,8 +1,6 @@
 package service
 
 import (
-	"encoding/json"
-	"fmt"
 	"sync"
 
 	"github.com/google/uuid"
@@ -114,15 +112,6 @@ func (s *WebSocketService) broadcastMessage(message *domain.WSMessage) {
 	if !ok {
 		s.logger.Debug("No clients to broadcast to",
 			zap.String("org_id", message.OrganizationID.String()),
-			zap.String("event_type", string(message.Type)),
-		)
-		return
-	}
-
-	messageJSON, err := json.Marshal(message)
-	if err != nil {
-		s.logger.Error("Failed to marshal WebSocket message",
-			zap.Error(err),
 			zap.String("event_type", string(message.Type)),
 		)
 		return

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/nmn3m/pulsar/backend/internal/domain"
@@ -168,26 +169,24 @@ func (n *AlertNotifier) resolveEscalationTarget(
 		}
 
 	case domain.EscalationTargetTypeSchedule:
-		// Get on-call users for this schedule
+		// Get on-call user for this schedule at current time
 		if n.scheduleService == nil {
 			return nil, fmt.Errorf("schedule service not configured")
 		}
 
-		onCallUsers, err := n.scheduleService.GetOnCallUsers(ctx, target.TargetID)
+		onCallUser, err := n.scheduleService.GetOnCallUser(ctx, target.TargetID, time.Now())
 		if err != nil {
-			return nil, fmt.Errorf("failed to get on-call users: %w", err)
+			return nil, fmt.Errorf("failed to get on-call user: %w", err)
 		}
 
-		for _, onCallUser := range onCallUsers {
+		if onCallUser != nil {
 			user, err := n.userRepo.GetByID(ctx, onCallUser.UserID)
-			if err != nil {
-				continue
+			if err == nil {
+				recipients = append(recipients, RecipientInfo{
+					UserID:      user.ID,
+					ContactInfo: user.Email,
+				})
 			}
-
-			recipients = append(recipients, RecipientInfo{
-				UserID:      user.ID,
-				ContactInfo: user.Email,
-			})
 		}
 	}
 

@@ -52,8 +52,8 @@ func NewWebSocketHandler(wsService *service.WebSocketService, logger *zap.Logger
 // HandleWebSocket handles WebSocket connections
 func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 	// Get user and organization from context (set by auth middleware)
-	userID := middleware.GetUserID(c)
-	orgID := middleware.GetOrganizationID(c)
+	userID, _ := middleware.GetUserID(c)
+	orgID, _ := middleware.GetOrganizationID(c)
 
 	// Upgrade HTTP connection to WebSocket
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
@@ -161,7 +161,7 @@ func (h *WebSocketHandler) handleIncomingMessage(client *domain.WSClient, data [
 
 // GetStats returns WebSocket connection statistics
 func (h *WebSocketHandler) GetStats(c *gin.Context) {
-	orgID := middleware.GetOrganizationID(c)
+	orgID, _ := middleware.GetOrganizationID(c)
 
 	stats := gin.H{
 		"organization_client_count": h.wsService.GetClientCount(orgID),

@@ -19,9 +19,9 @@ up:
 	@echo "Waiting for services to be ready..."
 	@sleep 5
 	@echo "Services started!"
-	@echo "Backend: http://localhost:8080"
-	@echo "Frontend: http://localhost:3000"
-	@echo "Database: localhost:5432"
+	@echo "Backend: http://localhost:8081"
+	@echo "Frontend: http://localhost:5173"
+	@echo "Database: localhost:5433"
 
 down:
 	docker-compose down
@@ -33,10 +33,10 @@ logs:
 	docker-compose logs -f
 
 migrate-up:
-	docker-compose exec backend migrate -path=/app/migrations -database "$${DATABASE_URL}" up
+	docker-compose exec -T backend migrate -path=/app/migrations -database "postgres://pulsar:pulsar_dev_password@postgres:5432/pulsar?sslmode=disable" up
 
 migrate-down:
-	docker-compose exec backend migrate -path=/app/migrations -database "$${DATABASE_URL}" down 1
+	docker-compose exec -T backend migrate -path=/app/migrations -database "postgres://pulsar:pulsar_dev_password@postgres:5432/pulsar?sslmode=disable" down 1
 
 migrate-create:
 	@if [ -z "$(NAME)" ]; then \

@@ -340,13 +340,13 @@ func (r *incidentRepository) GetTimeline(ctx context.Context, incidentID uuid.UU
 			event.User = &domain.User{
 				Email:        userEmail.String,
 				Username:     userUsername.String,
-				FullName:     userFullName.String,
+				FullName:     &userFullName.String,
 				CreatedAt:    userCreatedAt.Time,
 				UpdatedAt:    userUpdatedAt.Time,
 				PasswordHash: "",
 			}
-			if err := uuid.Parse(userID.String); err == nil {
-				userUUID, _ := uuid.Parse(userID.String)
+			userUUID, err := uuid.Parse(userID.String)
+			if err == nil {
 				event.User.ID = userUUID
 			}
 		}
@@ -428,8 +428,8 @@ func (r *incidentRepository) ListAlerts(ctx context.Context, incidentID uuid.UUI
 			&ia.Alert.Priority, &ia.Alert.Status, &ia.Alert.Message, &ia.Alert.Description,
 			&tagsJSON, &customFieldsJSON,
 			&ia.Alert.AssignedToUserID, &ia.Alert.AssignedToTeamID, &ia.Alert.EscalationPolicyID,
-			&ia.Alert.EscalationLevel, &ia.Alert.AcknowledgedAt, &ia.Alert.AcknowledgedByUserID,
-			&ia.Alert.ClosedAt, &ia.Alert.ClosedByUserID, &ia.Alert.CloseReason,
+			&ia.Alert.EscalationLevel, &ia.Alert.AcknowledgedAt, &ia.Alert.AcknowledgedBy,
+			&ia.Alert.ClosedAt, &ia.Alert.ClosedBy, &ia.Alert.CloseReason,
 			&ia.Alert.SnoozedUntil, &ia.Alert.LastEscalatedAt, &ia.Alert.CreatedAt, &ia.Alert.UpdatedAt,
 		)
 		if err != nil {

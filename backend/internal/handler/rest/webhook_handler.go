@@ -2,6 +2,7 @@ package rest
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -23,7 +24,7 @@ func NewWebhookHandler(webhookService *service.WebhookService) *WebhookHandler {
 // Outgoing Webhook Endpoints
 
 func (h *WebhookHandler) CreateEndpoint(c *gin.Context) {
-	orgID := middleware.GetOrganizationID(c)
+	orgID, _ := middleware.GetOrganizationID(c)
 
 	var req domain.CreateWebhookEndpointRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -41,7 +42,7 @@ func (h *WebhookHandler) CreateEndpoint(c *gin.Context) {
 }
 
 func (h *WebhookHandler) GetEndpoint(c *gin.Context) {
-	orgID := middleware.GetOrganizationID(c)
+	orgID, _ := middleware.GetOrganizationID(c)
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid endpoint ID"})
@@ -67,7 +68,7 @@ func (h *WebhookHandler) GetEndpoint(c *gin.Context) {
 }
 
 func (h *WebhookHandler) ListEndpoints(c *gin.Context) {
-	orgID := middleware.GetOrganizationID(c)
+	orgID, _ := middleware.GetOrganizationID(c)
 
 	endpoints, err := h.webhookService.ListEndpoints(c.Request.Context(), orgID)
 	if err != nil {
@@ -79,7 +80,7 @@ func (h *WebhookHandler) ListEndpoints(c *gin.Context) {
 }
 
 func (h *WebhookHandler) UpdateEndpoint(c *gin.Context) {
-	orgID := middleware.GetOrganizationID(c)
+	orgID, _ := middleware.GetOrganizationID(c)
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid endpoint ID"})
@@ -106,7 +107,7 @@ func (h *WebhookHandler) UpdateEndpoint(c *gin.Context) {
 }
 
 func (h *WebhookHandler) DeleteEndpoint(c *gin.Context) {
-	orgID := middleware.GetOrganizationID(c)
+	orgID, _ := middleware.GetOrganizationID(c)
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid endpoint ID"})
@@ -128,19 +129,19 @@ func (h *WebhookHandler) DeleteEndpoint(c *gin.Context) {
 // Webhook Deliveries
 
 func (h *WebhookHandler) ListDeliveries(c *gin.Context) {
-	orgID := middleware.GetOrganizationID(c)
+	orgID, _ := middleware.GetOrganizationID(c)
 
 	limit := 20
 	offset := 0
 
 	if limitStr := c.Query("limit"); limitStr != "" {
-		if parsedLimit, err := parseInt(limitStr); err == nil {
+		if parsedLimit, err := strconv.Atoi(limitStr); err == nil {
 			limit = parsedLimit
 		}
 	}
 
 	if offsetStr := c.Query("offset"); offsetStr != "" {
-		if parsedOffset, err := parseInt(offsetStr); err == nil {
+		if parsedOffset, err := strconv.Atoi(offsetStr); err == nil {
 			offset = parsedOffset
 		}
 	}
@@ -161,7 +162,7 @@ func (h *WebhookHandler) ListDeliveries(c *gin.Context) {
 // Incoming Webhook Tokens
 
 func (h *WebhookHandler) CreateIncomingToken(c *gin.Context) {
-	orgID := middleware.GetOrganizationID(c)
+	orgID, _ := middleware.GetOrganizationID(c)
 
 	var req domain.CreateIncomingWebhookTokenRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -179,7 +180,7 @@ func (h *WebhookHandler) CreateIncomingToken(c *gin.Context) {
 }
 
 func (h *WebhookHandler) ListIncomingTokens(c *gin.Context) {
-	orgID := middleware.GetOrganizationID(c)
+	orgID, _ := middleware.GetOrganizationID(c)
 
 	tokens, err := h.webhookService.ListIncomingTokens(c.Request.Context(), orgID)
 	if err != nil {
@@ -191,7 +192,7 @@ func (h *WebhookHandler) ListIncomingTokens(c *gin.Context) {
 }
 
 func (h *WebhookHandler) DeleteIncomingToken(c *gin.Context) {
-	orgID := middleware.GetOrganizationID(c)
+	orgID, _ := middleware.GetOrganizationID(c)
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid token ID"})

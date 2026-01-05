@@ -386,7 +386,7 @@ func (s *EscalationService) processEscalation(ctx context.Context, event *domain
 	return nil
 }
 
-func (s *EscalationService) sendEscalationNotifications(ctx context.Context, event *domain.AlertEscalationEvent, rule domain.EscalationRule) error {
+func (s *EscalationService) sendEscalationNotifications(ctx context.Context, event *domain.AlertEscalationEvent, rule *domain.EscalationRuleWithTargets) error {
 	// Only send notifications if alertNotifier is configured
 	if s.alertNotifier == nil {
 		return nil
@@ -398,10 +398,15 @@ func (s *EscalationService) sendEscalationNotifications(ctx context.Context, eve
 		return fmt.Errorf("failed to get alert: %w", err)
 	}
 
-	// Get targets for this rule
-	targets, err := s.escalationRepo.ListTargets(ctx, rule.ID)
-	if err != nil {
-		return fmt.Errorf("failed to get targets: %w", err)
+	// Use targets from rule if available, otherwise fetch them
+	var targets []*domain.EscalationTarget
+	if len(rule.Targets) > 0 {
+		targets = rule.Targets
+	} else {
+		targets, err = s.escalationRepo.ListTargets(ctx, rule.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get targets: %w", err)
+		}
 	}
 
 	if len(targets) == 0 {
@@ -410,10 +415,16 @@ func (s *EscalationService) sendEscalationNotifications(ctx context.Context, eve
 
 	// Update alert escalation level
 	alert.EscalationLevel = event.CurrentLevel
-	alert.LastEscalatedAt = &event.TriggeredAt
+	alert.LastEscalatedAt = &event.CreatedAt
+
+	// Convert targets from []*domain.EscalationTarget to []domain.EscalationTarget
+	targetValues := make([]domain.EscalationTarget, len(targets))
+	for i, t := range targets {
+		targetValues[i] = *t
+	}
 
 	// Send notifications to all targets
-	if err := s.alertNotifier.NotifyAlertEscalated(ctx, alert, &rule, targets); err != nil {
+	if err := s.alertNotifier.NotifyAlertEscalated(ctx, alert, &rule.EscalationRule, targetValues); err != nil {
 		return fmt.Errorf("failed to send notifications: %w", err)
 	}
 

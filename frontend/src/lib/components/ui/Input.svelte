@@ -6,6 +6,10 @@
 	export let error = '';
 	export let required = false;
 	export let id = '';
+
+	function handleInput(e: Event) {
+		value = (e.target as HTMLInputElement).value;
+	}
 </script>
 
 <div class="w-full">
@@ -20,7 +24,8 @@
 		{type}
 		{placeholder}
 		{required}
-		bind:value
+		{value}
+		on:input={handleInput}
 		class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent {error ? 'border-red-500' : ''}"
 		on:input
 		on:blur

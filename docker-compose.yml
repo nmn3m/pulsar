@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: pulsar
       POSTGRES_PASSWORD: pulsar_dev_password
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -26,7 +26,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: pulsar-backend
     ports:
-      - "8080:8080"
+      - "8081:8080"
     environment:
       - DATABASE_URL=postgres://pulsar:pulsar_dev_password@postgres:5432/pulsar?sslmode=disable
       - JWT_SECRET=dev_jwt_secret_change_in_production_min_32_chars
@@ -52,7 +52,7 @@ services:
       - "3000:3000"
       - "5173:5173"
     environment:
-      - VITE_API_URL=http://localhost:8080
+      - VITE_API_URL=http://localhost:8081
       - NODE_ENV=development
     depends_on:
       - backend

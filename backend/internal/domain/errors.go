@@ -3,6 +3,10 @@ package domain
 import "errors"
 
 var (
+	// General errors
+	ErrNotFound     = errors.New("resource not found")
+	ErrUnauthorized = errors.New("unauthorized")
+
 	// Alert errors
 	ErrInvalidPriority = errors.New("invalid alert priority")
 	ErrInvalidStatus   = errors.New("invalid alert status")

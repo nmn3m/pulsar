@@ -2,7 +2,7 @@ package logger
 
 import (
 	"go.uber.org/zap"
-	"go.uber.org/zap"
+)
 
 func New(env string) (*zap.Logger, error) {
 	var config zap.Config
