@@ -58,6 +58,7 @@ func main() {
 	escalationRepo := postgres.NewEscalationPolicyRepository(db)
 	notificationRepo := postgres.NewNotificationRepository(db)
 	incidentRepo := postgres.NewIncidentRepository(db)
+	webhookRepo := postgres.NewWebhookRepository(db)
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, orgRepo, cfg)
@@ -67,12 +68,13 @@ func main() {
 	notificationService := service.NewNotificationService(notificationRepo)
 	wsService := service.NewWebSocketService(log)
 	incidentService := service.NewIncidentService(incidentRepo, wsService)
+	webhookService := service.NewWebhookService(webhookRepo, log)
 
 	// Initialize alert notifier with dependencies
 	alertNotifier := service.NewAlertNotifier(notificationService, userRepo, teamRepo, scheduleService)
 
 	// Initialize alert and escalation services with notifier
-	alertService := service.NewAlertService(alertRepo, alertNotifier, wsService)
+	alertService := service.NewAlertService(alertRepo, alertNotifier, wsService, webhookService)
 	escalationService := service.NewEscalationService(escalationRepo, alertRepo, alertNotifier)
 
 	// Initialize handlers
@@ -85,6 +87,8 @@ func main() {
 	notificationHandler := rest.NewNotificationHandler(notificationService)
 	incidentHandler := rest.NewIncidentHandler(incidentService)
 	wsHandler := rest.NewWebSocketHandler(wsService, log)
+	webhookHandler := rest.NewWebhookHandler(webhookService)
+	incomingWebhookHandler := rest.NewIncomingWebhookHandler(webhookService, alertService, log)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret)
@@ -264,7 +268,26 @@ func main() {
 			// WebSocket route
 			protected.GET("/ws", wsHandler.HandleWebSocket)
 			protected.GET("/ws/stats", wsHandler.GetStats)
+
+			// Webhook routes
+			webhooks := protected.Group("/webhooks")
+			{
+				webhooks.GET("/endpoints", webhookHandler.ListEndpoints)
+				webhooks.POST("/endpoints", webhookHandler.CreateEndpoint)
+				webhooks.GET("/endpoints/:id", webhookHandler.GetEndpoint)
+				webhooks.PATCH("/endpoints/:id", webhookHandler.UpdateEndpoint)
+				webhooks.DELETE("/endpoints/:id", webhookHandler.DeleteEndpoint)
+
+				webhooks.GET("/deliveries", webhookHandler.ListDeliveries)
+
+				webhooks.GET("/incoming", webhookHandler.ListIncomingTokens)
+				webhooks.POST("/incoming", webhookHandler.CreateIncomingToken)
+				webhooks.DELETE("/incoming/:id", webhookHandler.DeleteIncomingToken)
+			}
 		}
+
+		// Public incoming webhook route (no auth required)
+		v1.POST("/webhook/:token", incomingWebhookHandler.ReceiveWebhook)
 	}
 
 	// Create HTTP server
@@ -310,13 +333,36 @@ func main() {
 		}
 	}()
 
+	// Start background worker for processing webhook deliveries
+	webhookWorkerQuit := make(chan bool)
+	go func() {
+		ticker := time.NewTicker(30 * time.Second) // Process webhook deliveries every 30 seconds
+		defer ticker.Stop()
+
+		log.Info("Webhook delivery worker started")
+
+		for {
+			select {
+			case <-ticker.C:
+				ctx := context.Background()
+				if err := webhookService.ProcessPendingDeliveries(ctx); err != nil {
+					log.Error("Failed to process pending webhook deliveries", zap.Error(err))
+				}
+			case <-webhookWorkerQuit:
+				log.Info("Webhook delivery worker stopped")
+				return
+			}
+		}
+	}()
+
 	// Wait for interrupt signal to gracefully shutdown the server
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	// Stop escalation worker
+	// Stop background workers
 	escalationWorkerQuit <- true
+	webhookWorkerQuit <- true
 
 	log.Info("Shutting down server...")
 

@@ -11,16 +11,18 @@ import (
 )
 
 type AlertService struct {
-	alertRepo     repository.AlertRepository
-	alertNotifier *AlertNotifier
-	wsService     *WebSocketService
+	alertRepo      repository.AlertRepository
+	alertNotifier  *AlertNotifier
+	wsService      *WebSocketService
+	webhookService *WebhookService
 }
 
-func NewAlertService(alertRepo repository.AlertRepository, alertNotifier *AlertNotifier, wsService *WebSocketService) *AlertService {
+func NewAlertService(alertRepo repository.AlertRepository, alertNotifier *AlertNotifier, wsService *WebSocketService, webhookService *WebhookService) *AlertService {
 	return &AlertService{
-		alertRepo:     alertRepo,
-		alertNotifier: alertNotifier,
-		wsService:     wsService,
+		alertRepo:      alertRepo,
+		alertNotifier:  alertNotifier,
+		wsService:      wsService,
+		webhookService: webhookService,
 	}
 }
 
@@ -129,6 +131,20 @@ func (s *AlertService) CreateAlert(ctx context.Context, orgID uuid.UUID, req *Cr
 		s.wsService.BroadcastAlertEvent(domain.WSEventAlertCreated, orgID, alert)
 	}
 
+	// Trigger webhooks
+	if s.webhookService != nil {
+		s.webhookService.TriggerWebhooks(ctx, orgID, "alert.created", map[string]interface{}{
+			"alert_id":    alert.ID.String(),
+			"source":      alert.Source,
+			"priority":    string(alert.Priority),
+			"status":      string(alert.Status),
+			"message":     alert.Message,
+			"description": alert.Description,
+			"tags":        alert.Tags,
+			"created_at":  alert.CreatedAt,
+		})
+	}
+
 	return alert, nil
 }
 
@@ -179,6 +195,20 @@ func (s *AlertService) UpdateAlert(ctx context.Context, id uuid.UUID, req *Updat
 	// Broadcast WebSocket event
 	if s.wsService != nil {
 		s.wsService.BroadcastAlertEvent(domain.WSEventAlertUpdated, alert.OrganizationID, alert)
+	}
+
+	// Trigger webhooks
+	if s.webhookService != nil {
+		s.webhookService.TriggerWebhooks(ctx, alert.OrganizationID, "alert.updated", map[string]interface{}{
+			"alert_id":    alert.ID.String(),
+			"source":      alert.Source,
+			"priority":    string(alert.Priority),
+			"status":      string(alert.Status),
+			"message":     alert.Message,
+			"description": alert.Description,
+			"tags":        alert.Tags,
+			"updated_at":  alert.UpdatedAt,
+		})
 	}
 
 	return alert, nil
@@ -269,11 +299,24 @@ func (s *AlertService) AcknowledgeAlert(ctx context.Context, id, userID uuid.UUI
 		}()
 	}
 
-	// Broadcast WebSocket event
-	if s.wsService != nil {
+	// Broadcast WebSocket event and trigger webhooks
+	if s.wsService != nil || s.webhookService != nil {
 		alert, err := s.alertRepo.GetByID(ctx, id)
 		if err == nil {
-			s.wsService.BroadcastAlertEvent(domain.WSEventAlertAcknowledged, alert.OrganizationID, alert)
+			if s.wsService != nil {
+				s.wsService.BroadcastAlertEvent(domain.WSEventAlertAcknowledged, alert.OrganizationID, alert)
+			}
+			if s.webhookService != nil {
+				s.webhookService.TriggerWebhooks(ctx, alert.OrganizationID, "alert.acknowledged", map[string]interface{}{
+					"alert_id":         alert.ID.String(),
+					"source":           alert.Source,
+					"priority":         string(alert.Priority),
+					"status":           string(alert.Status),
+					"message":          alert.Message,
+					"acknowledged_at":  alert.AcknowledgedAt,
+					"acknowledged_by":  userID.String(),
+				})
+			}
 		}
 	}
 
@@ -297,11 +340,25 @@ func (s *AlertService) CloseAlert(ctx context.Context, id, userID uuid.UUID, rea
 		}()
 	}
 
-	// Broadcast WebSocket event
-	if s.wsService != nil {
+	// Broadcast WebSocket event and trigger webhooks
+	if s.wsService != nil || s.webhookService != nil {
 		alert, err := s.alertRepo.GetByID(ctx, id)
 		if err == nil {
-			s.wsService.BroadcastAlertEvent(domain.WSEventAlertClosed, alert.OrganizationID, alert)
+			if s.wsService != nil {
+				s.wsService.BroadcastAlertEvent(domain.WSEventAlertClosed, alert.OrganizationID, alert)
+			}
+			if s.webhookService != nil {
+				s.webhookService.TriggerWebhooks(ctx, alert.OrganizationID, "alert.closed", map[string]interface{}{
+					"alert_id":    alert.ID.String(),
+					"source":      alert.Source,
+					"priority":    string(alert.Priority),
+					"status":      string(alert.Status),
+					"message":     alert.Message,
+					"closed_at":   alert.ClosedAt,
+					"closed_by":   userID.String(),
+					"close_reason": reason,
+				})
+			}
 		}
 	}
 

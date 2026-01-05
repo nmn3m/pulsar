@@ -81,6 +81,15 @@ import type {
 	ListUserNotificationPreferencesResponse,
 	ListNotificationLogsResponse
 } from '$lib/types/notification';
+import type {
+	WebhookEndpoint,
+	WebhookDelivery,
+	IncomingWebhookToken,
+	CreateWebhookEndpointRequest,
+	UpdateWebhookEndpointRequest,
+	CreateIncomingWebhookTokenRequest,
+	ListWebhookDeliveriesResponse
+} from '$lib/types/webhook';
 
 const API_URL = browser ? import.meta.env.VITE_API_URL || 'http://localhost:8080' : 'http://backend:8080';
 
@@ -858,6 +867,64 @@ class APIClient {
 
 	async unlinkAlertFromIncident(incidentId: string, alertId: string): Promise<void> {
 		await this.request(`/api/v1/incidents/${incidentId}/alerts/${alertId}`, {
+			method: 'DELETE'
+		});
+	}
+
+	// Webhook Endpoints
+	async listWebhookEndpoints(): Promise<WebhookEndpoint[]> {
+		return this.request<WebhookEndpoint[]>('/api/v1/webhooks/endpoints');
+	}
+
+	async createWebhookEndpoint(data: CreateWebhookEndpointRequest): Promise<WebhookEndpoint> {
+		return this.request<WebhookEndpoint>('/api/v1/webhooks/endpoints', {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async getWebhookEndpoint(id: string): Promise<WebhookEndpoint> {
+		return this.request<WebhookEndpoint>(`/api/v1/webhooks/endpoints/${id}`);
+	}
+
+	async updateWebhookEndpoint(id: string, data: UpdateWebhookEndpointRequest): Promise<WebhookEndpoint> {
+		return this.request<WebhookEndpoint>(`/api/v1/webhooks/endpoints/${id}`, {
+			method: 'PATCH',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async deleteWebhookEndpoint(id: string): Promise<void> {
+		await this.request(`/api/v1/webhooks/endpoints/${id}`, {
+			method: 'DELETE'
+		});
+	}
+
+	// Webhook Deliveries
+	async listWebhookDeliveries(limit?: number, offset?: number): Promise<ListWebhookDeliveriesResponse> {
+		const params = new URLSearchParams();
+		if (limit) params.append('limit', limit.toString());
+		if (offset) params.append('offset', offset.toString());
+
+		return this.request<ListWebhookDeliveriesResponse>(
+			`/api/v1/webhooks/deliveries?${params.toString()}`
+		);
+	}
+
+	// Incoming Webhook Tokens
+	async listIncomingWebhookTokens(): Promise<IncomingWebhookToken[]> {
+		return this.request<IncomingWebhookToken[]>('/api/v1/webhooks/incoming');
+	}
+
+	async createIncomingWebhookToken(data: CreateIncomingWebhookTokenRequest): Promise<IncomingWebhookToken> {
+		return this.request<IncomingWebhookToken>('/api/v1/webhooks/incoming', {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async deleteIncomingWebhookToken(id: string): Promise<void> {
+		await this.request(`/api/v1/webhooks/incoming/${id}`, {
 			method: 'DELETE'
 		});
 	}
