@@ -38,10 +38,10 @@ function createAlertsStore() {
 			try {
 				const response = await api.listAlerts(params);
 				set({
-					alerts: response.alerts,
-					total: response.total,
-					page: response.page,
-					pageSize: response.page_size,
+					alerts: response.alerts || [],
+					total: response.total || 0,
+					page: response.page || 1,
+					pageSize: response.page_size || 20,
 					isLoading: false,
 					error: null
 				});

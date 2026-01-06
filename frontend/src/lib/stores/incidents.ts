@@ -36,12 +36,12 @@ function createIncidentsStore() {
 			try {
 				const response = await api.listIncidents(params);
 				set({
-					incidents: response.incidents,
+					incidents: response.incidents || [],
 					isLoading: false,
 					error: null,
-					total: response.total,
-					page: response.page,
-					pageSize: response.page_size
+					total: response.total || 0,
+					page: response.page || 1,
+					pageSize: response.page_size || 20
 				});
 			} catch (err) {
 				const error = err instanceof Error ? err.message : 'Failed to load incidents';

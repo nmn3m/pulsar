@@ -25,7 +25,7 @@ function createEscalationPoliciesStore() {
 				const response = await api.listEscalationPolicies();
 				update((state) => ({
 					...state,
-					policies: response.policies,
+					policies: response.policies || [],
 					isLoading: false
 				}));
 			} catch (err) {

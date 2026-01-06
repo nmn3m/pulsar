@@ -234,6 +234,11 @@ func (h *IncidentHandler) ListResponders(c *gin.Context) {
 		return
 	}
 
+	// Ensure we return an empty array instead of null
+	if responders == nil {
+		responders = []*domain.ResponderWithUser{}
+	}
+
 	c.JSON(http.StatusOK, responders)
 }
 
@@ -276,6 +281,11 @@ func (h *IncidentHandler) GetTimeline(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	// Ensure we return an empty array instead of null
+	if timeline == nil {
+		timeline = []*domain.TimelineEventWithUser{}
 	}
 
 	c.JSON(http.StatusOK, timeline)
@@ -346,6 +356,11 @@ func (h *IncidentHandler) ListAlerts(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	// Ensure we return an empty array instead of null
+	if alerts == nil {
+		alerts = []*domain.IncidentAlertWithDetails{}
 	}
 
 	c.JSON(http.StatusOK, alerts)

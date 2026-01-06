@@ -33,7 +33,7 @@ function createNotificationChannelsStore() {
 				const response = await api.listNotificationChannels();
 				update((state) => ({
 					...state,
-					channels: response.channels,
+					channels: response.channels || [],
 					isLoading: false
 				}));
 			} catch (err) {
@@ -109,7 +109,7 @@ function createUserNotificationPreferencesStore() {
 				const response = await api.listUserNotificationPreferences();
 				update((state) => ({
 					...state,
-					preferences: response.preferences,
+					preferences: response.preferences || [],
 					isLoading: false
 				}));
 			} catch (err) {

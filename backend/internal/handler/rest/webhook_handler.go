@@ -76,6 +76,11 @@ func (h *WebhookHandler) ListEndpoints(c *gin.Context) {
 		return
 	}
 
+	// Ensure we return an empty array instead of null
+	if endpoints == nil {
+		endpoints = []*domain.WebhookEndpoint{}
+	}
+
 	c.JSON(http.StatusOK, endpoints)
 }
 
@@ -186,6 +191,11 @@ func (h *WebhookHandler) ListIncomingTokens(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list incoming webhook tokens"})
 		return
+	}
+
+	// Ensure we return an empty array instead of null
+	if tokens == nil {
+		tokens = []*domain.IncomingWebhookToken{}
 	}
 
 	c.JSON(http.StatusOK, tokens)

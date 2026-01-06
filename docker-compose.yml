@@ -53,6 +53,7 @@ services:
       - "5173:5173"
     environment:
       - VITE_API_URL=http://localhost:8081
+      - VITE_API_PORT=8081
       - NODE_ENV=development
     depends_on:
       - backend

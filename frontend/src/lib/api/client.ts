@@ -95,19 +95,12 @@ const API_URL = browser ? import.meta.env.VITE_API_URL || 'http://localhost:8080
 
 class APIClient {
 	private baseURL: string;
-	private accessToken: string | null = null;
 
 	constructor(baseURL: string) {
 		this.baseURL = baseURL;
-
-		// Load token from localStorage if in browser
-		if (browser) {
-			this.accessToken = localStorage.getItem('access_token');
-		}
 	}
 
 	setAccessToken(token: string | null) {
-		this.accessToken = token;
 		if (browser) {
 			if (token) {
 				localStorage.setItem('access_token', token);
@@ -118,7 +111,10 @@ class APIClient {
 	}
 
 	getAccessToken(): string | null {
-		return this.accessToken;
+		if (browser) {
+			return localStorage.getItem('access_token');
+		}
+		return null;
 	}
 
 	private async request<T>(
@@ -130,8 +126,9 @@ class APIClient {
 			...options.headers
 		};
 
-		if (this.accessToken) {
-			headers['Authorization'] = `Bearer ${this.accessToken}`;
+		const token = this.getAccessToken();
+		if (token) {
+			headers['Authorization'] = `Bearer ${token}`;
 		}
 
 		const response = await fetch(`${this.baseURL}${endpoint}`, {

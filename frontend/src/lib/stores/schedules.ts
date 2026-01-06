@@ -25,7 +25,7 @@ function createSchedulesStore() {
 				const response = await api.listSchedules();
 				update((state) => ({
 					...state,
-					schedules: response.schedules,
+					schedules: response.schedules || [],
 					isLoading: false
 				}));
 			} catch (err) {
