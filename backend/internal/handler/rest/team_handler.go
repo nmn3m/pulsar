@@ -20,6 +20,18 @@ func NewTeamHandler(teamService *service.TeamService) *TeamHandler {
 	}
 }
 
+// Create godoc
+// @Summary      Create a new team
+// @Description  Create a new team in the organization
+// @Tags         Teams
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body service.CreateTeamRequest true "Create team request"
+// @Success      201 {object} domain.Team
+// @Failure      400 {object} map[string]string
+// @Failure      401 {object} map[string]string
+// @Router       /teams [post]
 func (h *TeamHandler) Create(c *gin.Context) {
 	orgID, ok := middleware.GetOrganizationID(c)
 	if !ok {
@@ -42,6 +54,18 @@ func (h *TeamHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, team)
 }
 
+// Get godoc
+// @Summary      Get a team
+// @Description  Get a team by ID with its members
+// @Tags         Teams
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path string true "Team ID" format(uuid)
+// @Success      200 {object} service.TeamWithMembers
+// @Failure      400 {object} map[string]string
+// @Failure      404 {object} map[string]string
+// @Router       /teams/{id} [get]
 func (h *TeamHandler) Get(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -59,6 +83,18 @@ func (h *TeamHandler) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, team)
 }
 
+// Update godoc
+// @Summary      Update a team
+// @Description  Update a team by ID
+// @Tags         Teams
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path string true "Team ID" format(uuid)
+// @Param        request body service.UpdateTeamRequest true "Update team request"
+// @Success      200 {object} domain.Team
+// @Failure      400 {object} map[string]string
+// @Router       /teams/{id} [patch]
 func (h *TeamHandler) Update(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -82,6 +118,17 @@ func (h *TeamHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, team)
 }
 
+// Delete godoc
+// @Summary      Delete a team
+// @Description  Delete a team by ID
+// @Tags         Teams
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path string true "Team ID" format(uuid)
+// @Success      200 {object} map[string]string
+// @Failure      400 {object} map[string]string
+// @Router       /teams/{id} [delete]
 func (h *TeamHandler) Delete(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -98,6 +145,19 @@ func (h *TeamHandler) Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "team deleted successfully"})
 }
 
+// List godoc
+// @Summary      List teams
+// @Description  List all teams in the organization
+// @Tags         Teams
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        page query int false "Page number" default(1)
+// @Param        page_size query int false "Page size" default(20)
+// @Success      200 {object} map[string][]domain.Team
+// @Failure      401 {object} map[string]string
+// @Failure      500 {object} map[string]string
+// @Router       /teams [get]
 func (h *TeamHandler) List(c *gin.Context) {
 	orgID, ok := middleware.GetOrganizationID(c)
 	if !ok {
@@ -117,6 +177,18 @@ func (h *TeamHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"teams": teams})
 }
 
+// AddMember godoc
+// @Summary      Add a member to a team
+// @Description  Add a user as a member to a team
+// @Tags         Teams
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path string true "Team ID" format(uuid)
+// @Param        request body service.AddTeamMemberRequest true "Add member request"
+// @Success      200 {object} map[string]string
+// @Failure      400 {object} map[string]string
+// @Router       /teams/{id}/members [post]
 func (h *TeamHandler) AddMember(c *gin.Context) {
 	teamIDStr := c.Param("id")
 	teamID, err := uuid.Parse(teamIDStr)
@@ -139,6 +211,18 @@ func (h *TeamHandler) AddMember(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "member added successfully"})
 }
 
+// RemoveMember godoc
+// @Summary      Remove a member from a team
+// @Description  Remove a user from a team
+// @Tags         Teams
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path string true "Team ID" format(uuid)
+// @Param        userId path string true "User ID" format(uuid)
+// @Success      200 {object} map[string]string
+// @Failure      400 {object} map[string]string
+// @Router       /teams/{id}/members/{userId} [delete]
 func (h *TeamHandler) RemoveMember(c *gin.Context) {
 	teamIDStr := c.Param("id")
 	teamID, err := uuid.Parse(teamIDStr)
@@ -162,6 +246,19 @@ func (h *TeamHandler) RemoveMember(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "member removed successfully"})
 }
 
+// UpdateMemberRole godoc
+// @Summary      Update a team member's role
+// @Description  Update the role of a team member
+// @Tags         Teams
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path string true "Team ID" format(uuid)
+// @Param        userId path string true "User ID" format(uuid)
+// @Param        request body service.UpdateTeamMemberRoleRequest true "Update role request"
+// @Success      200 {object} map[string]string
+// @Failure      400 {object} map[string]string
+// @Router       /teams/{id}/members/{userId} [patch]
 func (h *TeamHandler) UpdateMemberRole(c *gin.Context) {
 	teamIDStr := c.Param("id")
 	teamID, err := uuid.Parse(teamIDStr)
@@ -191,6 +288,18 @@ func (h *TeamHandler) UpdateMemberRole(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "member role updated successfully"})
 }
 
+// ListMembers godoc
+// @Summary      List team members
+// @Description  List all members of a team
+// @Tags         Teams
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path string true "Team ID" format(uuid)
+// @Success      200 {object} map[string][]domain.UserWithTeamRole
+// @Failure      400 {object} map[string]string
+// @Failure      500 {object} map[string]string
+// @Router       /teams/{id}/members [get]
 func (h *TeamHandler) ListMembers(c *gin.Context) {
 	teamIDStr := c.Param("id")
 	teamID, err := uuid.Parse(teamIDStr)

@@ -33,7 +33,7 @@ type NotificationChannel struct {
 	Name           string          `json:"name" db:"name"`
 	ChannelType    ChannelType     `json:"channel_type" db:"channel_type"`
 	IsEnabled      bool            `json:"is_enabled" db:"is_enabled"`
-	Config         json.RawMessage `json:"config" db:"config"`
+	Config         json.RawMessage `json:"config" db:"config" swaggertype:"object"`
 	CreatedAt      time.Time       `json:"created_at" db:"created_at"`
 	UpdatedAt      time.Time       `json:"updated_at" db:"updated_at"`
 }
@@ -82,7 +82,7 @@ type CreateNotificationChannelRequest struct {
 	Name        string          `json:"name" binding:"required"`
 	ChannelType ChannelType     `json:"channel_type" binding:"required"`
 	IsEnabled   bool            `json:"is_enabled"`
-	Config      json.RawMessage `json:"config" binding:"required"`
+	Config      json.RawMessage `json:"config" binding:"required" swaggertype:"object"`
 }
 
 // UpdateNotificationChannelRequest represents a request to update a notification channel
@@ -90,7 +90,7 @@ type UpdateNotificationChannelRequest struct {
 	Name        *string         `json:"name,omitempty"`
 	ChannelType *ChannelType    `json:"channel_type,omitempty"`
 	IsEnabled   *bool           `json:"is_enabled,omitempty"`
-	Config      json.RawMessage `json:"config,omitempty"`
+	Config      json.RawMessage `json:"config,omitempty" swaggertype:"object"`
 }
 
 // CreateUserNotificationPreferenceRequest represents a request to create user notification preferences

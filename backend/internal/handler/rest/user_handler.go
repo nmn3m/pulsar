@@ -18,6 +18,17 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 	}
 }
 
+// ListOrganizationUsers godoc
+// @Summary      List organization users
+// @Description  List all users in the organization
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {object} map[string][]domain.User
+// @Failure      401 {object} map[string]string
+// @Failure      500 {object} map[string]string
+// @Router       /users [get]
 func (h *UserHandler) ListOrganizationUsers(c *gin.Context) {
 	orgID, ok := middleware.GetOrganizationID(c)
 	if !ok {

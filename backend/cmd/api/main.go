@@ -1,3 +1,23 @@
+// @title           Pulsar API
+// @version         1.0
+// @description     Pulsar is an incident management and alerting platform. This API provides endpoints for managing alerts, incidents, teams, schedules, escalation policies, notifications, and webhooks.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    https://github.com/nmn3m/pulsar
+// @contact.email  support@pulsar.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
+
 package main
 
 import (
@@ -10,6 +30,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "github.com/nmn3m/pulsar/backend/docs"
 	"github.com/nmn3m/pulsar/backend/internal/config"
 	"github.com/nmn3m/pulsar/backend/internal/handler/rest"
 	"github.com/nmn3m/pulsar/backend/internal/middleware"
@@ -110,6 +134,9 @@ func main() {
 			"time":   time.Now().UTC(),
 		})
 	})
+
+	// Swagger documentation
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// API v1 routes
 	v1 := router.Group("/api/v1")

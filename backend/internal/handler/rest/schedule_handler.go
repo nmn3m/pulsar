@@ -23,6 +23,19 @@ func NewScheduleHandler(scheduleService *service.ScheduleService) *ScheduleHandl
 
 // Schedule handlers
 
+// List godoc
+// @Summary      List schedules
+// @Description  Retrieves a paginated list of schedules for the current organization
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        page       query     int  false  "Page number"      default(1)
+// @Param        page_size  query     int  false  "Page size"        default(20)
+// @Success      200        {object}  map[string][]domain.Schedule
+// @Failure      401        {object}  map[string]string
+// @Failure      500        {object}  map[string]string
+// @Router       /schedules [get]
 func (h *ScheduleHandler) List(c *gin.Context) {
 	orgID, ok := middleware.GetOrganizationID(c)
 	if !ok {
@@ -42,6 +55,18 @@ func (h *ScheduleHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"schedules": schedules})
 }
 
+// Create godoc
+// @Summary      Create schedule
+// @Description  Creates a new schedule for the current organization
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request  body      service.CreateScheduleRequest  true  "Schedule creation request"
+// @Success      201      {object}  domain.Schedule
+// @Failure      400      {object}  map[string]string
+// @Failure      401      {object}  map[string]string
+// @Router       /schedules [post]
 func (h *ScheduleHandler) Create(c *gin.Context) {
 	orgID, ok := middleware.GetOrganizationID(c)
 	if !ok {
@@ -64,6 +89,18 @@ func (h *ScheduleHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, schedule)
 }
 
+// Get godoc
+// @Summary      Get schedule
+// @Description  Retrieves a schedule by ID including its rotations
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string  true  "Schedule ID"  format(uuid)
+// @Success      200  {object}  domain.ScheduleWithRotations
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /schedules/{id} [get]
 func (h *ScheduleHandler) Get(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -80,6 +117,18 @@ func (h *ScheduleHandler) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, schedule)
 }
 
+// Update godoc
+// @Summary      Update schedule
+// @Description  Updates an existing schedule by ID
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id       path      string                          true  "Schedule ID"  format(uuid)
+// @Param        request  body      service.UpdateScheduleRequest   true  "Schedule update request"
+// @Success      200      {object}  domain.Schedule
+// @Failure      400      {object}  map[string]string
+// @Router       /schedules/{id} [patch]
 func (h *ScheduleHandler) Update(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -102,6 +151,18 @@ func (h *ScheduleHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, schedule)
 }
 
+// Delete godoc
+// @Summary      Delete schedule
+// @Description  Deletes a schedule by ID
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string  true  "Schedule ID"  format(uuid)
+// @Success      200  {object}  map[string]string
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /schedules/{id} [delete]
 func (h *ScheduleHandler) Delete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -119,6 +180,18 @@ func (h *ScheduleHandler) Delete(c *gin.Context) {
 
 // Rotation handlers
 
+// ListRotations godoc
+// @Summary      List rotations
+// @Description  Retrieves all rotations for a schedule
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string  true  "Schedule ID"  format(uuid)
+// @Success      200  {object}  map[string][]domain.ScheduleRotation
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /schedules/{id}/rotations [get]
 func (h *ScheduleHandler) ListRotations(c *gin.Context) {
 	scheduleID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -135,6 +208,18 @@ func (h *ScheduleHandler) ListRotations(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"rotations": rotations})
 }
 
+// CreateRotation godoc
+// @Summary      Create rotation
+// @Description  Creates a new rotation for a schedule
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id       path      string                          true  "Schedule ID"  format(uuid)
+// @Param        request  body      service.CreateRotationRequest   true  "Rotation creation request"
+// @Success      201      {object}  domain.ScheduleRotation
+// @Failure      400      {object}  map[string]string
+// @Router       /schedules/{id}/rotations [post]
 func (h *ScheduleHandler) CreateRotation(c *gin.Context) {
 	scheduleID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -157,6 +242,19 @@ func (h *ScheduleHandler) CreateRotation(c *gin.Context) {
 	c.JSON(http.StatusCreated, rotation)
 }
 
+// GetRotation godoc
+// @Summary      Get rotation
+// @Description  Retrieves a rotation by ID
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id          path      string  true  "Schedule ID"   format(uuid)
+// @Param        rotationId  path      string  true  "Rotation ID"   format(uuid)
+// @Success      200         {object}  domain.ScheduleRotation
+// @Failure      400         {object}  map[string]string
+// @Failure      404         {object}  map[string]string
+// @Router       /schedules/{id}/rotations/{rotationId} [get]
 func (h *ScheduleHandler) GetRotation(c *gin.Context) {
 	rotationID, err := uuid.Parse(c.Param("rotationId"))
 	if err != nil {
@@ -173,6 +271,19 @@ func (h *ScheduleHandler) GetRotation(c *gin.Context) {
 	c.JSON(http.StatusOK, rotation)
 }
 
+// UpdateRotation godoc
+// @Summary      Update rotation
+// @Description  Updates an existing rotation by ID
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id          path      string                          true  "Schedule ID"   format(uuid)
+// @Param        rotationId  path      string                          true  "Rotation ID"   format(uuid)
+// @Param        request     body      service.UpdateRotationRequest   true  "Rotation update request"
+// @Success      200         {object}  domain.ScheduleRotation
+// @Failure      400         {object}  map[string]string
+// @Router       /schedules/{id}/rotations/{rotationId} [patch]
 func (h *ScheduleHandler) UpdateRotation(c *gin.Context) {
 	rotationID, err := uuid.Parse(c.Param("rotationId"))
 	if err != nil {
@@ -195,6 +306,19 @@ func (h *ScheduleHandler) UpdateRotation(c *gin.Context) {
 	c.JSON(http.StatusOK, rotation)
 }
 
+// DeleteRotation godoc
+// @Summary      Delete rotation
+// @Description  Deletes a rotation by ID
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id          path      string  true  "Schedule ID"   format(uuid)
+// @Param        rotationId  path      string  true  "Rotation ID"   format(uuid)
+// @Success      200         {object}  map[string]string
+// @Failure      400         {object}  map[string]string
+// @Failure      500         {object}  map[string]string
+// @Router       /schedules/{id}/rotations/{rotationId} [delete]
 func (h *ScheduleHandler) DeleteRotation(c *gin.Context) {
 	rotationID, err := uuid.Parse(c.Param("rotationId"))
 	if err != nil {
@@ -212,6 +336,19 @@ func (h *ScheduleHandler) DeleteRotation(c *gin.Context) {
 
 // Participant handlers
 
+// ListParticipants godoc
+// @Summary      List participants
+// @Description  Retrieves all participants for a rotation
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id          path      string  true  "Schedule ID"   format(uuid)
+// @Param        rotationId  path      string  true  "Rotation ID"   format(uuid)
+// @Success      200         {object}  map[string][]domain.ParticipantWithUser
+// @Failure      400         {object}  map[string]string
+// @Failure      500         {object}  map[string]string
+// @Router       /schedules/{id}/rotations/{rotationId}/participants [get]
 func (h *ScheduleHandler) ListParticipants(c *gin.Context) {
 	rotationID, err := uuid.Parse(c.Param("rotationId"))
 	if err != nil {
@@ -228,6 +365,19 @@ func (h *ScheduleHandler) ListParticipants(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"participants": participants})
 }
 
+// AddParticipant godoc
+// @Summary      Add participant
+// @Description  Adds a participant to a rotation
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id          path      string                          true  "Schedule ID"   format(uuid)
+// @Param        rotationId  path      string                          true  "Rotation ID"   format(uuid)
+// @Param        request     body      service.AddParticipantRequest   true  "Add participant request"
+// @Success      201         {object}  domain.ScheduleRotationParticipant
+// @Failure      400         {object}  map[string]string
+// @Router       /schedules/{id}/rotations/{rotationId}/participants [post]
 func (h *ScheduleHandler) AddParticipant(c *gin.Context) {
 	rotationID, err := uuid.Parse(c.Param("rotationId"))
 	if err != nil {
@@ -250,6 +400,20 @@ func (h *ScheduleHandler) AddParticipant(c *gin.Context) {
 	c.JSON(http.StatusCreated, participant)
 }
 
+// RemoveParticipant godoc
+// @Summary      Remove participant
+// @Description  Removes a participant from a rotation
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id          path      string  true  "Schedule ID"   format(uuid)
+// @Param        rotationId  path      string  true  "Rotation ID"   format(uuid)
+// @Param        userId      path      string  true  "User ID"       format(uuid)
+// @Success      200         {object}  map[string]string
+// @Failure      400         {object}  map[string]string
+// @Failure      500         {object}  map[string]string
+// @Router       /schedules/{id}/rotations/{rotationId}/participants/{userId} [delete]
 func (h *ScheduleHandler) RemoveParticipant(c *gin.Context) {
 	rotationID, err := uuid.Parse(c.Param("rotationId"))
 	if err != nil {
@@ -271,6 +435,19 @@ func (h *ScheduleHandler) RemoveParticipant(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "participant removed"})
 }
 
+// ReorderParticipants godoc
+// @Summary      Reorder participants
+// @Description  Reorders participants in a rotation
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id          path      string                              true  "Schedule ID"   format(uuid)
+// @Param        rotationId  path      string                              true  "Rotation ID"   format(uuid)
+// @Param        request     body      service.ReorderParticipantsRequest  true  "Reorder participants request"
+// @Success      200         {object}  map[string]string
+// @Failure      400         {object}  map[string]string
+// @Router       /schedules/{id}/rotations/{rotationId}/participants/reorder [put]
 func (h *ScheduleHandler) ReorderParticipants(c *gin.Context) {
 	rotationID, err := uuid.Parse(c.Param("rotationId"))
 	if err != nil {
@@ -294,6 +471,20 @@ func (h *ScheduleHandler) ReorderParticipants(c *gin.Context) {
 
 // Override handlers
 
+// ListOverrides godoc
+// @Summary      List overrides
+// @Description  Retrieves all overrides for a schedule within a time range
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id     path      string  true   "Schedule ID"                        format(uuid)
+// @Param        start  query     string  false  "Start time (RFC3339 format)"        format(date-time)
+// @Param        end    query     string  false  "End time (RFC3339 format)"          format(date-time)
+// @Success      200    {object}  map[string][]domain.ScheduleOverride
+// @Failure      400    {object}  map[string]string
+// @Failure      500    {object}  map[string]string
+// @Router       /schedules/{id}/overrides [get]
 func (h *ScheduleHandler) ListOverrides(c *gin.Context) {
 	scheduleID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -335,6 +526,18 @@ func (h *ScheduleHandler) ListOverrides(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"overrides": overrides})
 }
 
+// CreateOverride godoc
+// @Summary      Create override
+// @Description  Creates a new schedule override
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id       path      string                          true  "Schedule ID"  format(uuid)
+// @Param        request  body      service.CreateOverrideRequest   true  "Override creation request"
+// @Success      201      {object}  domain.ScheduleOverride
+// @Failure      400      {object}  map[string]string
+// @Router       /schedules/{id}/overrides [post]
 func (h *ScheduleHandler) CreateOverride(c *gin.Context) {
 	scheduleID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -357,6 +560,19 @@ func (h *ScheduleHandler) CreateOverride(c *gin.Context) {
 	c.JSON(http.StatusCreated, override)
 }
 
+// GetOverride godoc
+// @Summary      Get override
+// @Description  Retrieves an override by ID
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id          path      string  true  "Schedule ID"   format(uuid)
+// @Param        overrideId  path      string  true  "Override ID"   format(uuid)
+// @Success      200         {object}  domain.ScheduleOverride
+// @Failure      400         {object}  map[string]string
+// @Failure      404         {object}  map[string]string
+// @Router       /schedules/{id}/overrides/{overrideId} [get]
 func (h *ScheduleHandler) GetOverride(c *gin.Context) {
 	overrideID, err := uuid.Parse(c.Param("overrideId"))
 	if err != nil {
@@ -373,6 +589,19 @@ func (h *ScheduleHandler) GetOverride(c *gin.Context) {
 	c.JSON(http.StatusOK, override)
 }
 
+// UpdateOverride godoc
+// @Summary      Update override
+// @Description  Updates an existing override by ID
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id          path      string                          true  "Schedule ID"   format(uuid)
+// @Param        overrideId  path      string                          true  "Override ID"   format(uuid)
+// @Param        request     body      service.UpdateOverrideRequest   true  "Override update request"
+// @Success      200         {object}  domain.ScheduleOverride
+// @Failure      400         {object}  map[string]string
+// @Router       /schedules/{id}/overrides/{overrideId} [patch]
 func (h *ScheduleHandler) UpdateOverride(c *gin.Context) {
 	overrideID, err := uuid.Parse(c.Param("overrideId"))
 	if err != nil {
@@ -395,6 +624,19 @@ func (h *ScheduleHandler) UpdateOverride(c *gin.Context) {
 	c.JSON(http.StatusOK, override)
 }
 
+// DeleteOverride godoc
+// @Summary      Delete override
+// @Description  Deletes an override by ID
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id          path      string  true  "Schedule ID"   format(uuid)
+// @Param        overrideId  path      string  true  "Override ID"   format(uuid)
+// @Success      200         {object}  map[string]string
+// @Failure      400         {object}  map[string]string
+// @Failure      500         {object}  map[string]string
+// @Router       /schedules/{id}/overrides/{overrideId} [delete]
 func (h *ScheduleHandler) DeleteOverride(c *gin.Context) {
 	overrideID, err := uuid.Parse(c.Param("overrideId"))
 	if err != nil {
@@ -412,6 +654,19 @@ func (h *ScheduleHandler) DeleteOverride(c *gin.Context) {
 
 // On-call handler
 
+// GetOnCall godoc
+// @Summary      Get on-call user
+// @Description  Retrieves the user currently on-call for a schedule at a specific time
+// @Tags         Schedules
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string  true   "Schedule ID"                        format(uuid)
+// @Param        at   query     string  false  "Time to check (RFC3339 format)"     format(date-time)
+// @Success      200  {object}  domain.OnCallUser
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /schedules/{id}/oncall [get]
 func (h *ScheduleHandler) GetOnCall(c *gin.Context) {
 	scheduleID, err := uuid.Parse(c.Param("id"))
 	if err != nil {

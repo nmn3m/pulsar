@@ -1,0 +1,5103 @@
+basePath: /api/v1
+definitions:
+  domain.Alert:
+    properties:
+      acknowledged_at:
+        type: string
+      acknowledged_by:
+        description: Acknowledgment
+        type: string
+      assigned_to_team_id:
+        type: string
+      assigned_to_user_id:
+        description: Assignment
+        type: string
+      close_reason:
+        type: string
+      closed_at:
+        type: string
+      closed_by:
+        description: Closure
+        type: string
+      created_at:
+        type: string
+      custom_fields:
+        additionalProperties: true
+        type: object
+      description:
+        type: string
+      escalation_level:
+        type: integer
+      escalation_policy_id:
+        description: Escalation
+        type: string
+      id:
+        type: string
+      last_escalated_at:
+        type: string
+      message:
+        type: string
+      organization_id:
+        type: string
+      priority:
+        $ref: '#/definitions/domain.AlertPriority'
+      snoozed_until:
+        description: Snooze
+        type: string
+      source:
+        type: string
+      source_id:
+        type: string
+      status:
+        $ref: '#/definitions/domain.AlertStatus'
+      tags:
+        items:
+          type: string
+        type: array
+      updated_at:
+        type: string
+    type: object
+  domain.AlertPriority:
+    enum:
+    - P1
+    - P2
+    - P3
+    - P4
+    - P5
+    type: string
+    x-enum-comments:
+      PriorityP1: Critical
+      PriorityP2: High
+      PriorityP3: Medium
+      PriorityP4: Low
+      PriorityP5: Informational
+    x-enum-descriptions:
+    - Critical
+    - High
+    - Medium
+    - Low
+    - Informational
+    x-enum-varnames:
+    - PriorityP1
+    - PriorityP2
+    - PriorityP3
+    - PriorityP4
+    - PriorityP5
+  domain.AlertStatus:
+    enum:
+    - open
+    - acknowledged
+    - closed
+    - snoozed
+    type: string
+    x-enum-varnames:
+    - AlertStatusOpen
+    - AlertStatusAcknowledged
+    - AlertStatusClosed
+    - AlertStatusSnoozed
+  domain.ChannelType:
+    enum:
+    - email
+    - slack
+    - teams
+    - webhook
+    type: string
+    x-enum-varnames:
+    - ChannelTypeEmail
+    - ChannelTypeSlack
+    - ChannelTypeTeams
+    - ChannelTypeWebhook
+  domain.CreateIncomingWebhookTokenRequest:
+    properties:
+      default_priority:
+        type: string
+      default_tags:
+        items:
+          type: string
+        type: array
+      integration_type:
+        $ref: '#/definitions/domain.IncomingWebhookIntegrationType'
+      name:
+        type: string
+    required:
+    - integration_type
+    - name
+    type: object
+  domain.CreateNotificationChannelRequest:
+    properties:
+      channel_type:
+        $ref: '#/definitions/domain.ChannelType'
+      config:
+        type: object
+      is_enabled:
+        type: boolean
+      name:
+        type: string
+    required:
+    - channel_type
+    - config
+    - name
+    type: object
+  domain.CreateUserNotificationPreferenceRequest:
+    properties:
+      channel_id:
+        type: string
+      dnd_enabled:
+        type: boolean
+      dnd_end_time:
+        type: string
+      dnd_start_time:
+        type: string
+      is_enabled:
+        type: boolean
+      min_priority:
+        type: string
+    required:
+    - channel_id
+    type: object
+  domain.CreateWebhookEndpointRequest:
+    properties:
+      alert_acknowledged:
+        type: boolean
+      alert_closed:
+        type: boolean
+      alert_created:
+        type: boolean
+      alert_escalated:
+        type: boolean
+      alert_updated:
+        type: boolean
+      enabled:
+        type: boolean
+      headers:
+        additionalProperties:
+          type: string
+        type: object
+      incident_created:
+        type: boolean
+      incident_resolved:
+        type: boolean
+      incident_updated:
+        type: boolean
+      max_retries:
+        type: integer
+      name:
+        type: string
+      retry_delay_seconds:
+        type: integer
+      timeout_seconds:
+        type: integer
+      url:
+        type: string
+    required:
+    - name
+    - url
+    type: object
+  domain.EscalationPolicy:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      organization_id:
+        type: string
+      repeat_count:
+        description: NULL = infinite
+        type: integer
+      repeat_enabled:
+        type: boolean
+      updated_at:
+        type: string
+    type: object
+  domain.EscalationPolicyWithRules:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      organization_id:
+        type: string
+      repeat_count:
+        description: NULL = infinite
+        type: integer
+      repeat_enabled:
+        type: boolean
+      rules:
+        items:
+          $ref: '#/definitions/domain.EscalationRuleWithTargets'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  domain.EscalationRule:
+    properties:
+      created_at:
+        type: string
+      escalation_delay:
+        description: minutes
+        type: integer
+      id:
+        type: string
+      policy_id:
+        type: string
+      position:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  domain.EscalationRuleWithTargets:
+    properties:
+      created_at:
+        type: string
+      escalation_delay:
+        description: minutes
+        type: integer
+      id:
+        type: string
+      policy_id:
+        type: string
+      position:
+        type: integer
+      targets:
+        items:
+          $ref: '#/definitions/domain.EscalationTarget'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  domain.EscalationTarget:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      rule_id:
+        type: string
+      target_id:
+        type: string
+      target_type:
+        $ref: '#/definitions/domain.EscalationTargetType'
+    type: object
+  domain.EscalationTargetType:
+    enum:
+    - user
+    - team
+    - schedule
+    type: string
+    x-enum-varnames:
+    - EscalationTargetTypeUser
+    - EscalationTargetTypeTeam
+    - EscalationTargetTypeSchedule
+  domain.Incident:
+    properties:
+      assigned_to_team_id:
+        type: string
+      created_at:
+        type: string
+      created_by_user_id:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      organization_id:
+        type: string
+      priority:
+        $ref: '#/definitions/domain.AlertPriority'
+      resolved_at:
+        type: string
+      severity:
+        $ref: '#/definitions/domain.IncidentSeverity'
+      started_at:
+        type: string
+      status:
+        $ref: '#/definitions/domain.IncidentStatus'
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.IncidentAlert:
+    properties:
+      alert_id:
+        type: string
+      id:
+        type: string
+      incident_id:
+        type: string
+      linked_at:
+        type: string
+      linked_by_user_id:
+        type: string
+    type: object
+  domain.IncidentAlertWithDetails:
+    properties:
+      alert:
+        $ref: '#/definitions/domain.Alert'
+      alert_id:
+        type: string
+      id:
+        type: string
+      incident_id:
+        type: string
+      linked_at:
+        type: string
+      linked_by_user_id:
+        type: string
+    type: object
+  domain.IncidentResponder:
+    properties:
+      added_at:
+        type: string
+      id:
+        type: string
+      incident_id:
+        type: string
+      role:
+        $ref: '#/definitions/domain.ResponderRole'
+      user_id:
+        type: string
+    type: object
+  domain.IncidentSeverity:
+    enum:
+    - critical
+    - high
+    - medium
+    - low
+    type: string
+    x-enum-varnames:
+    - IncidentSeverityCritical
+    - IncidentSeverityHigh
+    - IncidentSeverityMedium
+    - IncidentSeverityLow
+  domain.IncidentStatus:
+    enum:
+    - investigating
+    - identified
+    - monitoring
+    - resolved
+    type: string
+    x-enum-varnames:
+    - IncidentStatusInvestigating
+    - IncidentStatusIdentified
+    - IncidentStatusMonitoring
+    - IncidentStatusResolved
+  domain.IncidentTimelineEvent:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      event_type:
+        $ref: '#/definitions/domain.TimelineEventType'
+      id:
+        type: string
+      incident_id:
+        type: string
+      metadata:
+        additionalProperties: true
+        type: object
+      user_id:
+        type: string
+    type: object
+  domain.IncidentWithDetails:
+    properties:
+      alerts:
+        items:
+          $ref: '#/definitions/domain.IncidentAlertWithDetails'
+        type: array
+      assigned_to_team_id:
+        type: string
+      created_at:
+        type: string
+      created_by_user_id:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      organization_id:
+        type: string
+      priority:
+        $ref: '#/definitions/domain.AlertPriority'
+      resolved_at:
+        type: string
+      responders:
+        items:
+          $ref: '#/definitions/domain.ResponderWithUser'
+        type: array
+      severity:
+        $ref: '#/definitions/domain.IncidentSeverity'
+      started_at:
+        type: string
+      status:
+        $ref: '#/definitions/domain.IncidentStatus'
+      timeline:
+        items:
+          $ref: '#/definitions/domain.TimelineEventWithUser'
+        type: array
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.IncomingWebhookIntegrationType:
+    enum:
+    - generic
+    - prometheus
+    - grafana
+    - datadog
+    type: string
+    x-enum-varnames:
+    - IncomingWebhookGeneric
+    - IncomingWebhookPrometheus
+    - IncomingWebhookGrafana
+    - IncomingWebhookDatadog
+  domain.IncomingWebhookToken:
+    properties:
+      created_at:
+        type: string
+      default_priority:
+        type: string
+      default_tags:
+        items:
+          type: string
+        type: array
+      enabled:
+        type: boolean
+      id:
+        type: string
+      integration_type:
+        $ref: '#/definitions/domain.IncomingWebhookIntegrationType'
+      last_used_at:
+        type: string
+      name:
+        type: string
+      organization_id:
+        type: string
+      request_count:
+        type: integer
+      token:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.NotificationChannel:
+    properties:
+      channel_type:
+        $ref: '#/definitions/domain.ChannelType'
+      config:
+        type: object
+      created_at:
+        type: string
+      id:
+        type: string
+      is_enabled:
+        type: boolean
+      name:
+        type: string
+      organization_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.NotificationLog:
+    properties:
+      alert_id:
+        type: string
+      channel_id:
+        type: string
+      created_at:
+        type: string
+      error_message:
+        type: string
+      id:
+        type: string
+      message:
+        type: string
+      organization_id:
+        type: string
+      recipient:
+        type: string
+      sent_at:
+        type: string
+      status:
+        $ref: '#/definitions/domain.NotificationStatus'
+      subject:
+        type: string
+      user_id:
+        type: string
+    type: object
+  domain.NotificationStatus:
+    enum:
+    - pending
+    - sent
+    - failed
+    type: string
+    x-enum-varnames:
+    - NotificationStatusPending
+    - NotificationStatusSent
+    - NotificationStatusFailed
+  domain.OnCallUser:
+    properties:
+      end_time:
+        type: string
+      is_override:
+        type: boolean
+      schedule_id:
+        type: string
+      start_time:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      user_id:
+        type: string
+    type: object
+  domain.Organization:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      plan:
+        type: string
+      settings:
+        additionalProperties: true
+        type: object
+      slug:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.ParticipantWithUser:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      position:
+        type: integer
+      rotation_id:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      user_id:
+        type: string
+    type: object
+  domain.ResponderRole:
+    enum:
+    - incident_commander
+    - responder
+    type: string
+    x-enum-varnames:
+    - ResponderRoleIncidentCommander
+    - ResponderRoleResponder
+  domain.ResponderWithUser:
+    properties:
+      added_at:
+        type: string
+      id:
+        type: string
+      incident_id:
+        type: string
+      role:
+        $ref: '#/definitions/domain.ResponderRole'
+      user:
+        $ref: '#/definitions/domain.User'
+      user_id:
+        type: string
+    type: object
+  domain.RotationType:
+    enum:
+    - daily
+    - weekly
+    - custom
+    type: string
+    x-enum-varnames:
+    - RotationTypeDaily
+    - RotationTypeWeekly
+    - RotationTypeCustom
+  domain.Schedule:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      organization_id:
+        type: string
+      team_id:
+        type: string
+      timezone:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.ScheduleOverride:
+    properties:
+      created_at:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: string
+      note:
+        type: string
+      schedule_id:
+        type: string
+      start_time:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  domain.ScheduleRotation:
+    properties:
+      created_at:
+        type: string
+      end_time:
+        type: string
+      handoff_day:
+        type: integer
+      handoff_time:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      rotation_length:
+        type: integer
+      rotation_type:
+        $ref: '#/definitions/domain.RotationType'
+      schedule_id:
+        type: string
+      start_date:
+        type: string
+      start_time:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.ScheduleRotationParticipant:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      position:
+        type: integer
+      rotation_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  domain.ScheduleWithRotations:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      organization_id:
+        type: string
+      rotations:
+        items:
+          $ref: '#/definitions/domain.ScheduleRotation'
+        type: array
+      team_id:
+        type: string
+      timezone:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.SendNotificationRequest:
+    properties:
+      alert_id:
+        type: string
+      channel_id:
+        type: string
+      message:
+        type: string
+      recipient:
+        type: string
+      subject:
+        type: string
+      user_id:
+        type: string
+    required:
+    - channel_id
+    - message
+    - recipient
+    type: object
+  domain.Team:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      organization_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.TimelineEventType:
+    enum:
+    - created
+    - status_changed
+    - severity_changed
+    - responder_added
+    - responder_removed
+    - note_added
+    - alert_linked
+    - alert_unlinked
+    - resolved
+    type: string
+    x-enum-varnames:
+    - TimelineEventCreated
+    - TimelineEventStatusChanged
+    - TimelineEventSeverityChanged
+    - TimelineEventResponderAdded
+    - TimelineEventResponderRemoved
+    - TimelineEventNoteAdded
+    - TimelineEventAlertLinked
+    - TimelineEventAlertUnlinked
+    - TimelineEventResolved
+  domain.TimelineEventWithUser:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      event_type:
+        $ref: '#/definitions/domain.TimelineEventType'
+      id:
+        type: string
+      incident_id:
+        type: string
+      metadata:
+        additionalProperties: true
+        type: object
+      user:
+        $ref: '#/definitions/domain.User'
+      user_id:
+        type: string
+    type: object
+  domain.UpdateNotificationChannelRequest:
+    properties:
+      channel_type:
+        $ref: '#/definitions/domain.ChannelType'
+      config:
+        type: object
+      is_enabled:
+        type: boolean
+      name:
+        type: string
+    type: object
+  domain.UpdateUserNotificationPreferenceRequest:
+    properties:
+      dnd_enabled:
+        type: boolean
+      dnd_end_time:
+        type: string
+      dnd_start_time:
+        type: string
+      is_enabled:
+        type: boolean
+      min_priority:
+        type: string
+    type: object
+  domain.UpdateWebhookEndpointRequest:
+    properties:
+      alert_acknowledged:
+        type: boolean
+      alert_closed:
+        type: boolean
+      alert_created:
+        type: boolean
+      alert_escalated:
+        type: boolean
+      alert_updated:
+        type: boolean
+      enabled:
+        type: boolean
+      headers:
+        additionalProperties:
+          type: string
+        type: object
+      incident_created:
+        type: boolean
+      incident_resolved:
+        type: boolean
+      incident_updated:
+        type: boolean
+      max_retries:
+        type: integer
+      name:
+        type: string
+      retry_delay_seconds:
+        type: integer
+      timeout_seconds:
+        type: integer
+      url:
+        type: string
+    type: object
+  domain.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      notification_preferences:
+        additionalProperties: true
+        type: object
+      phone:
+        type: string
+      timezone:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  domain.UserNotificationPreference:
+    properties:
+      channel_id:
+        type: string
+      created_at:
+        type: string
+      dnd_enabled:
+        type: boolean
+      dnd_end_time:
+        type: string
+      dnd_start_time:
+        type: string
+      id:
+        type: string
+      is_enabled:
+        type: boolean
+      min_priority:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  domain.UserWithTeamRole:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      joined_at:
+        type: string
+      notification_preferences:
+        additionalProperties: true
+        type: object
+      phone:
+        type: string
+      role:
+        type: string
+      timezone:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  domain.WebhookEndpoint:
+    properties:
+      alert_acknowledged:
+        type: boolean
+      alert_closed:
+        type: boolean
+      alert_created:
+        description: Event filters
+        type: boolean
+      alert_escalated:
+        type: boolean
+      alert_updated:
+        type: boolean
+      created_at:
+        type: string
+      enabled:
+        type: boolean
+      headers:
+        additionalProperties:
+          type: string
+        description: HTTP configuration
+        type: object
+      id:
+        type: string
+      incident_created:
+        type: boolean
+      incident_resolved:
+        type: boolean
+      incident_updated:
+        type: boolean
+      max_retries:
+        description: Retry configuration
+        type: integer
+      name:
+        type: string
+      organization_id:
+        type: string
+      retry_delay_seconds:
+        type: integer
+      timeout_seconds:
+        type: integer
+      updated_at:
+        type: string
+      url:
+        type: string
+    type: object
+  service.AddEscalationTargetRequest:
+    properties:
+      target_id:
+        type: string
+      target_type:
+        type: string
+    required:
+    - target_id
+    - target_type
+    type: object
+  service.AddNoteRequest:
+    properties:
+      note:
+        type: string
+    required:
+    - note
+    type: object
+  service.AddParticipantRequest:
+    properties:
+      position:
+        type: integer
+      user_id:
+        type: string
+    required:
+    - position
+    - user_id
+    type: object
+  service.AddResponderRequest:
+    properties:
+      role:
+        type: string
+      user_id:
+        type: string
+    required:
+    - role
+    - user_id
+    type: object
+  service.AddTeamMemberRequest:
+    properties:
+      role:
+        type: string
+      user_id:
+        type: string
+    required:
+    - user_id
+    type: object
+  service.AssignAlertRequest:
+    properties:
+      team_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  service.AuthResponse:
+    properties:
+      access_token:
+        type: string
+      organization:
+        $ref: '#/definitions/domain.Organization'
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+    type: object
+  service.CloseAlertRequest:
+    properties:
+      reason:
+        type: string
+      userID:
+        type: string
+    type: object
+  service.CreateAlertRequest:
+    properties:
+      custom_fields:
+        additionalProperties: true
+        type: object
+      description:
+        type: string
+      message:
+        type: string
+      priority:
+        type: string
+      source:
+        type: string
+      source_id:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+    required:
+    - message
+    - priority
+    - source
+    type: object
+  service.CreateEscalationPolicyRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      repeat_count:
+        type: integer
+      repeat_enabled:
+        type: boolean
+    required:
+    - name
+    type: object
+  service.CreateEscalationRuleRequest:
+    properties:
+      escalation_delay:
+        type: integer
+      position:
+        type: integer
+    required:
+    - escalation_delay
+    - position
+    type: object
+  service.CreateIncidentRequest:
+    properties:
+      assigned_to_team_id:
+        type: string
+      description:
+        type: string
+      priority:
+        type: string
+      severity:
+        type: string
+      title:
+        type: string
+    required:
+    - priority
+    - severity
+    - title
+    type: object
+  service.CreateOverrideRequest:
+    properties:
+      end_time:
+        type: string
+      note:
+        type: string
+      start_time:
+        type: string
+      user_id:
+        type: string
+    required:
+    - end_time
+    - start_time
+    - user_id
+    type: object
+  service.CreateRotationRequest:
+    properties:
+      end_time:
+        type: string
+      handoff_day:
+        type: integer
+      handoff_time:
+        type: string
+      name:
+        type: string
+      rotation_length:
+        type: integer
+      rotation_type:
+        type: string
+      start_date:
+        type: string
+      start_time:
+        type: string
+    required:
+    - name
+    - rotation_length
+    - rotation_type
+    - start_date
+    type: object
+  service.CreateScheduleRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      team_id:
+        type: string
+      timezone:
+        type: string
+    required:
+    - name
+    type: object
+  service.CreateTeamRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  service.LinkAlertRequest:
+    properties:
+      alert_id:
+        type: string
+    required:
+    - alert_id
+    type: object
+  service.ListAlertsResponse:
+    properties:
+      alerts:
+        items:
+          $ref: '#/definitions/domain.Alert'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+    type: object
+  service.ListIncidentsResponse:
+    properties:
+      incidents:
+        items:
+          $ref: '#/definitions/domain.Incident'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+    type: object
+  service.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  service.RegisterRequest:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      organization_name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      username:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - email
+    - organization_name
+    - password
+    - username
+    type: object
+  service.ReorderParticipantsRequest:
+    properties:
+      user_ids:
+        items:
+          type: string
+        type: array
+    required:
+    - user_ids
+    type: object
+  service.SnoozeAlertRequest:
+    properties:
+      until:
+        type: string
+    required:
+    - until
+    type: object
+  service.TeamWithMembers:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      members:
+        items:
+          $ref: '#/definitions/domain.UserWithTeamRole'
+        type: array
+      name:
+        type: string
+      organization_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  service.UpdateAlertRequest:
+    properties:
+      custom_fields:
+        additionalProperties: true
+        type: object
+      description:
+        type: string
+      message:
+        type: string
+      priority:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
+  service.UpdateEscalationPolicyRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      repeat_count:
+        type: integer
+      repeat_enabled:
+        type: boolean
+    type: object
+  service.UpdateEscalationRuleRequest:
+    properties:
+      escalation_delay:
+        type: integer
+      position:
+        type: integer
+    type: object
+  service.UpdateIncidentRequest:
+    properties:
+      assigned_to_team_id:
+        type: string
+      description:
+        type: string
+      priority:
+        type: string
+      severity:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  service.UpdateOverrideRequest:
+    properties:
+      end_time:
+        type: string
+      note:
+        type: string
+      start_time:
+        type: string
+      user_id:
+        type: string
+    type: object
+  service.UpdateResponderRoleRequest:
+    properties:
+      role:
+        type: string
+    required:
+    - role
+    type: object
+  service.UpdateRotationRequest:
+    properties:
+      end_time:
+        type: string
+      handoff_day:
+        type: integer
+      handoff_time:
+        type: string
+      name:
+        type: string
+      rotation_length:
+        type: integer
+      rotation_type:
+        type: string
+      start_date:
+        type: string
+      start_time:
+        type: string
+    type: object
+  service.UpdateScheduleRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      team_id:
+        type: string
+      timezone:
+        type: string
+    type: object
+  service.UpdateTeamMemberRoleRequest:
+    properties:
+      role:
+        type: string
+    required:
+    - role
+    type: object
+  service.UpdateTeamRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@pulsar.io
+    name: API Support
+    url: https://github.com/nmn3m/pulsar
+  description: Pulsar is an incident management and alerting platform. This API provides
+    endpoints for managing alerts, incidents, teams, schedules, escalation policies,
+    notifications, and webhooks.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Pulsar API
+  version: "1.0"
+paths:
+  /alerts:
+    get:
+      consumes:
+      - application/json
+      description: List alerts with optional filters
+      parameters:
+      - collectionFormat: multi
+        description: Filter by status
+        in: query
+        items:
+          type: string
+        name: status
+        type: array
+      - collectionFormat: multi
+        description: Filter by priority
+        in: query
+        items:
+          type: string
+        name: priority
+        type: array
+      - description: Filter by assigned user ID
+        format: uuid
+        in: query
+        name: assigned_to_user
+        type: string
+      - description: Filter by assigned team ID
+        format: uuid
+        in: query
+        name: assigned_to_team
+        type: string
+      - description: Filter by source
+        in: query
+        name: source
+        type: string
+      - description: Search in message and description
+        in: query
+        name: search
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.ListAlertsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List alerts
+      tags:
+      - Alerts
+    post:
+      consumes:
+      - application/json
+      description: Create a new alert in the organization
+      parameters:
+      - description: Create alert request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateAlertRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Alert'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new alert
+      tags:
+      - Alerts
+  /alerts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an alert by ID
+      parameters:
+      - description: Alert ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete an alert
+      tags:
+      - Alerts
+    get:
+      consumes:
+      - application/json
+      description: Get an alert by ID
+      parameters:
+      - description: Alert ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Alert'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get an alert
+      tags:
+      - Alerts
+    patch:
+      consumes:
+      - application/json
+      description: Update an alert by ID
+      parameters:
+      - description: Alert ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update alert request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateAlertRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Alert'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update an alert
+      tags:
+      - Alerts
+  /alerts/{id}/acknowledge:
+    post:
+      consumes:
+      - application/json
+      description: Acknowledge an alert by ID
+      parameters:
+      - description: Alert ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Acknowledge an alert
+      tags:
+      - Alerts
+  /alerts/{id}/assign:
+    post:
+      consumes:
+      - application/json
+      description: Assign an alert to a user or team
+      parameters:
+      - description: Alert ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Assign alert request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.AssignAlertRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Assign an alert
+      tags:
+      - Alerts
+  /alerts/{id}/close:
+    post:
+      consumes:
+      - application/json
+      description: Close an alert by ID with a reason
+      parameters:
+      - description: Alert ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Close alert request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CloseAlertRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Close an alert
+      tags:
+      - Alerts
+  /alerts/{id}/snooze:
+    post:
+      consumes:
+      - application/json
+      description: Snooze an alert until a specified time
+      parameters:
+      - description: Alert ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Snooze alert request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.SnoozeAlertRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Snooze an alert
+      tags:
+      - Alerts
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user and return tokens
+      parameters:
+      - description: Login request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User login
+      tags:
+      - Auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout the current user (client should discard tokens)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Logout user
+      tags:
+      - Auth
+  /auth/me:
+    get:
+      consumes:
+      - application/json
+      description: Get the currently authenticated user's information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Get a new access token using a refresh token
+      parameters:
+      - description: Refresh token request
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            refresh_token:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Refresh access token
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with an organization
+      parameters:
+      - description: Registration request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/service.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - Auth
+  /escalation-policies:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a paginated list of escalation policies for the authenticated
+        user's organization
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of escalation policies
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/domain.EscalationPolicy'
+              type: array
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List escalation policies
+      tags:
+      - Escalation Policies
+    post:
+      consumes:
+      - application/json
+      description: Creates a new escalation policy for the authenticated user's organization
+      parameters:
+      - description: Escalation policy creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateEscalationPolicyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created escalation policy
+          schema:
+            $ref: '#/definitions/domain.EscalationPolicy'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create escalation policy
+      tags:
+      - Escalation Policies
+  /escalation-policies/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an escalation policy by ID
+      parameters:
+      - description: Escalation policy ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Policy deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid policy ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete escalation policy
+      tags:
+      - Escalation Policies
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a specific escalation policy by ID with its rules and
+        targets
+      parameters:
+      - description: Escalation policy ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Escalation policy with rules
+          schema:
+            $ref: '#/definitions/domain.EscalationPolicyWithRules'
+        "400":
+          description: Invalid policy ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Policy not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get escalation policy
+      tags:
+      - Escalation Policies
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing escalation policy by ID
+      parameters:
+      - description: Escalation policy ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Escalation policy update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateEscalationPolicyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated escalation policy
+          schema:
+            $ref: '#/definitions/domain.EscalationPolicy'
+        "400":
+          description: Invalid request or policy ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update escalation policy
+      tags:
+      - Escalation Policies
+  /escalation-policies/{id}/rules:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all escalation rules for a specific policy
+      parameters:
+      - description: Escalation policy ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of escalation rules
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/domain.EscalationRule'
+              type: array
+            type: object
+        "400":
+          description: Invalid policy ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List escalation rules
+      tags:
+      - Escalation Policies
+    post:
+      consumes:
+      - application/json
+      description: Creates a new escalation rule for a specific policy
+      parameters:
+      - description: Escalation policy ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Escalation rule creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateEscalationRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created escalation rule
+          schema:
+            $ref: '#/definitions/domain.EscalationRule'
+        "400":
+          description: Invalid request or policy ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create escalation rule
+      tags:
+      - Escalation Policies
+  /escalation-policies/{id}/rules/{ruleId}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an escalation rule by ID
+      parameters:
+      - description: Escalation policy ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Escalation rule ID
+        format: uuid
+        in: path
+        name: ruleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Rule deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid rule ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete escalation rule
+      tags:
+      - Escalation Policies
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a specific escalation rule by ID
+      parameters:
+      - description: Escalation policy ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Escalation rule ID
+        format: uuid
+        in: path
+        name: ruleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Escalation rule
+          schema:
+            $ref: '#/definitions/domain.EscalationRule'
+        "400":
+          description: Invalid rule ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Rule not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get escalation rule
+      tags:
+      - Escalation Policies
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing escalation rule by ID
+      parameters:
+      - description: Escalation policy ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Escalation rule ID
+        format: uuid
+        in: path
+        name: ruleId
+        required: true
+        type: string
+      - description: Escalation rule update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateEscalationRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated escalation rule
+          schema:
+            $ref: '#/definitions/domain.EscalationRule'
+        "400":
+          description: Invalid request or rule ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update escalation rule
+      tags:
+      - Escalation Policies
+  /escalation-policies/{id}/rules/{ruleId}/targets:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all escalation targets for a specific rule
+      parameters:
+      - description: Escalation policy ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Escalation rule ID
+        format: uuid
+        in: path
+        name: ruleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of escalation targets
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/domain.EscalationTarget'
+              type: array
+            type: object
+        "400":
+          description: Invalid rule ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List escalation targets
+      tags:
+      - Escalation Policies
+    post:
+      consumes:
+      - application/json
+      description: Adds a new target (user, team, or schedule) to an escalation rule
+      parameters:
+      - description: Escalation policy ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Escalation rule ID
+        format: uuid
+        in: path
+        name: ruleId
+        required: true
+        type: string
+      - description: Escalation target request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.AddEscalationTargetRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created escalation target
+          schema:
+            $ref: '#/definitions/domain.EscalationTarget'
+        "400":
+          description: Invalid request or rule ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add escalation target
+      tags:
+      - Escalation Policies
+  /escalation-policies/{id}/rules/{ruleId}/targets/{targetId}:
+    delete:
+      consumes:
+      - application/json
+      description: Removes a target from an escalation rule
+      parameters:
+      - description: Escalation policy ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Escalation rule ID
+        format: uuid
+        in: path
+        name: ruleId
+        required: true
+        type: string
+      - description: Escalation target ID
+        format: uuid
+        in: path
+        name: targetId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Target removed successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid target ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove escalation target
+      tags:
+      - Escalation Policies
+  /incidents:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a paginated list of incidents with optional filtering
+        by status, severity, team, and search term
+      parameters:
+      - collectionFormat: csv
+        description: Filter by status (investigating, identified, monitoring, resolved)
+        in: query
+        items:
+          type: string
+        name: status
+        type: array
+      - collectionFormat: csv
+        description: Filter by severity (critical, high, medium, low)
+        in: query
+        items:
+          type: string
+        name: severity
+        type: array
+      - description: Filter by assigned team ID
+        format: uuid
+        in: query
+        name: assigned_to_team_id
+        type: string
+      - description: Search term for title and description
+        in: query
+        name: search
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 20, max: 100)'
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.ListIncidentsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List incidents
+      tags:
+      - Incidents
+    post:
+      consumes:
+      - application/json
+      description: Creates a new incident with the provided details. The incident
+        is created in the investigating status.
+      parameters:
+      - description: Incident creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateIncidentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Incident'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new incident
+      tags:
+      - Incidents
+  /incidents/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Permanently deletes an incident and all associated data
+      parameters:
+      - description: Incident ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete an incident
+      tags:
+      - Incidents
+    get:
+      consumes:
+      - application/json
+      description: Retrieves an incident with all related data including responders,
+        alerts, and timeline events
+      parameters:
+      - description: Incident ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.IncidentWithDetails'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get an incident with full details
+      tags:
+      - Incidents
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing incident with the provided fields. Only fields
+        included in the request body will be updated.
+      parameters:
+      - description: Incident ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Incident update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateIncidentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Incident'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update an incident
+      tags:
+      - Incidents
+  /incidents/{id}/alerts:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all alerts that are associated with an incident
+      parameters:
+      - description: Incident ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.IncidentAlertWithDetails'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List alerts linked to an incident
+      tags:
+      - Incidents
+    post:
+      consumes:
+      - application/json
+      description: Associates an existing alert with an incident for tracking and
+        correlation
+      parameters:
+      - description: Incident ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Link alert request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.LinkAlertRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.IncidentAlert'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Link an alert to an incident
+      tags:
+      - Incidents
+  /incidents/{id}/alerts/{alertId}:
+    delete:
+      consumes:
+      - application/json
+      description: Removes the association between an alert and an incident
+      parameters:
+      - description: Incident ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Alert ID
+        format: uuid
+        in: path
+        name: alertId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Unlink an alert from an incident
+      tags:
+      - Incidents
+  /incidents/{id}/notes:
+    post:
+      consumes:
+      - application/json
+      description: Adds a note to the incident timeline as a timeline event
+      parameters:
+      - description: Incident ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Add note request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.AddNoteRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.IncidentTimelineEvent'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add a note to an incident
+      tags:
+      - Incidents
+  /incidents/{id}/responders:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all responders assigned to an incident with their user
+        details
+      parameters:
+      - description: Incident ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.ResponderWithUser'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List responders for an incident
+      tags:
+      - Incidents
+    post:
+      consumes:
+      - application/json
+      description: Assigns a user as a responder to an incident with a specific role
+      parameters:
+      - description: Incident ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Add responder request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.AddResponderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.IncidentResponder'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add a responder to an incident
+      tags:
+      - Incidents
+  /incidents/{id}/responders/{responderId}:
+    delete:
+      consumes:
+      - application/json
+      description: Removes a user from the list of responders for an incident
+      parameters:
+      - description: Incident ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Responder ID
+        format: uuid
+        in: path
+        name: responderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove a responder from an incident
+      tags:
+      - Incidents
+    patch:
+      consumes:
+      - application/json
+      description: Updates the role of a responder assigned to an incident
+      parameters:
+      - description: Incident ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Responder ID
+        format: uuid
+        in: path
+        name: responderId
+        required: true
+        type: string
+      - description: Update responder role request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateResponderRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a responder's role
+      tags:
+      - Incidents
+  /incidents/{id}/timeline:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all timeline events for an incident including status
+        changes, notes, and responder actions
+      parameters:
+      - description: Incident ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.TimelineEventWithUser'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get incident timeline
+      tags:
+      - Incidents
+  /notifications/channels:
+    get:
+      consumes:
+      - application/json
+      description: Lists all notification channels for the organization
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List notification channels
+      tags:
+      - Notifications
+    post:
+      consumes:
+      - application/json
+      description: Creates a new notification channel for the organization
+      parameters:
+      - description: Channel creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateNotificationChannelRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.NotificationChannel'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a notification channel
+      tags:
+      - Notifications
+  /notifications/channels/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a notification channel by its ID
+      parameters:
+      - description: Channel ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a notification channel
+      tags:
+      - Notifications
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a notification channel by its ID
+      parameters:
+      - description: Channel ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.NotificationChannel'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a notification channel
+      tags:
+      - Notifications
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing notification channel by its ID
+      parameters:
+      - description: Channel ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Channel update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateNotificationChannelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.NotificationChannel'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a notification channel
+      tags:
+      - Notifications
+  /notifications/logs:
+    get:
+      consumes:
+      - application/json
+      description: Lists all notification logs for the organization with pagination
+      parameters:
+      - default: 50
+        description: Number of logs to return
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of logs to skip
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List notification logs
+      tags:
+      - Notifications
+  /notifications/logs/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a notification log entry by its ID
+      parameters:
+      - description: Log ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.NotificationLog'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a notification log
+      tags:
+      - Notifications
+  /notifications/logs/alert/{alertId}:
+    get:
+      consumes:
+      - application/json
+      description: Lists all notification logs associated with a specific alert
+      parameters:
+      - description: Alert ID
+        format: uuid
+        in: path
+        name: alertId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List notification logs by alert
+      tags:
+      - Notifications
+  /notifications/logs/user/me:
+    get:
+      consumes:
+      - application/json
+      description: Lists all notification logs for the authenticated user with pagination
+      parameters:
+      - default: 50
+        description: Number of logs to return
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of logs to skip
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List notification logs for the current user
+      tags:
+      - Notifications
+  /notifications/preferences:
+    get:
+      consumes:
+      - application/json
+      description: Lists all notification preferences for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List user notification preferences
+      tags:
+      - Notifications
+    post:
+      consumes:
+      - application/json
+      description: Creates a new notification preference for the authenticated user
+      parameters:
+      - description: Preference creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateUserNotificationPreferenceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.UserNotificationPreference'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a user notification preference
+      tags:
+      - Notifications
+  /notifications/preferences/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a notification preference by its ID
+      parameters:
+      - description: Preference ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a user notification preference
+      tags:
+      - Notifications
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a notification preference by its ID
+      parameters:
+      - description: Preference ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserNotificationPreference'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a user notification preference
+      tags:
+      - Notifications
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing notification preference by its ID
+      parameters:
+      - description: Preference ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Preference update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateUserNotificationPreferenceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserNotificationPreference'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a user notification preference
+      tags:
+      - Notifications
+  /notifications/send:
+    post:
+      consumes:
+      - application/json
+      description: Sends a notification through the specified channel
+      parameters:
+      - description: Notification send request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.SendNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.NotificationLog'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Send a notification
+      tags:
+      - Notifications
+  /schedules:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a paginated list of schedules for the current organization
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/domain.Schedule'
+              type: array
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List schedules
+      tags:
+      - Schedules
+    post:
+      consumes:
+      - application/json
+      description: Creates a new schedule for the current organization
+      parameters:
+      - description: Schedule creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Schedule'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create schedule
+      tags:
+      - Schedules
+  /schedules/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a schedule by ID
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete schedule
+      tags:
+      - Schedules
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a schedule by ID including its rotations
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ScheduleWithRotations'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get schedule
+      tags:
+      - Schedules
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing schedule by ID
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Schedule update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Schedule'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update schedule
+      tags:
+      - Schedules
+  /schedules/{id}/oncall:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the user currently on-call for a schedule at a specific
+        time
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Time to check (RFC3339 format)
+        format: date-time
+        in: query
+        name: at
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.OnCallUser'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get on-call user
+      tags:
+      - Schedules
+  /schedules/{id}/overrides:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all overrides for a schedule within a time range
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Start time (RFC3339 format)
+        format: date-time
+        in: query
+        name: start
+        type: string
+      - description: End time (RFC3339 format)
+        format: date-time
+        in: query
+        name: end
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/domain.ScheduleOverride'
+              type: array
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List overrides
+      tags:
+      - Schedules
+    post:
+      consumes:
+      - application/json
+      description: Creates a new schedule override
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Override creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateOverrideRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.ScheduleOverride'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create override
+      tags:
+      - Schedules
+  /schedules/{id}/overrides/{overrideId}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an override by ID
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Override ID
+        format: uuid
+        in: path
+        name: overrideId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete override
+      tags:
+      - Schedules
+    get:
+      consumes:
+      - application/json
+      description: Retrieves an override by ID
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Override ID
+        format: uuid
+        in: path
+        name: overrideId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ScheduleOverride'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get override
+      tags:
+      - Schedules
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing override by ID
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Override ID
+        format: uuid
+        in: path
+        name: overrideId
+        required: true
+        type: string
+      - description: Override update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateOverrideRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ScheduleOverride'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update override
+      tags:
+      - Schedules
+  /schedules/{id}/rotations:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all rotations for a schedule
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/domain.ScheduleRotation'
+              type: array
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List rotations
+      tags:
+      - Schedules
+    post:
+      consumes:
+      - application/json
+      description: Creates a new rotation for a schedule
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Rotation creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateRotationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.ScheduleRotation'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create rotation
+      tags:
+      - Schedules
+  /schedules/{id}/rotations/{rotationId}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a rotation by ID
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Rotation ID
+        format: uuid
+        in: path
+        name: rotationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete rotation
+      tags:
+      - Schedules
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a rotation by ID
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Rotation ID
+        format: uuid
+        in: path
+        name: rotationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ScheduleRotation'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get rotation
+      tags:
+      - Schedules
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing rotation by ID
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Rotation ID
+        format: uuid
+        in: path
+        name: rotationId
+        required: true
+        type: string
+      - description: Rotation update request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateRotationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ScheduleRotation'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update rotation
+      tags:
+      - Schedules
+  /schedules/{id}/rotations/{rotationId}/participants:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all participants for a rotation
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Rotation ID
+        format: uuid
+        in: path
+        name: rotationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/domain.ParticipantWithUser'
+              type: array
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List participants
+      tags:
+      - Schedules
+    post:
+      consumes:
+      - application/json
+      description: Adds a participant to a rotation
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Rotation ID
+        format: uuid
+        in: path
+        name: rotationId
+        required: true
+        type: string
+      - description: Add participant request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.AddParticipantRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.ScheduleRotationParticipant'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add participant
+      tags:
+      - Schedules
+  /schedules/{id}/rotations/{rotationId}/participants/{userId}:
+    delete:
+      consumes:
+      - application/json
+      description: Removes a participant from a rotation
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Rotation ID
+        format: uuid
+        in: path
+        name: rotationId
+        required: true
+        type: string
+      - description: User ID
+        format: uuid
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove participant
+      tags:
+      - Schedules
+  /schedules/{id}/rotations/{rotationId}/participants/reorder:
+    put:
+      consumes:
+      - application/json
+      description: Reorders participants in a rotation
+      parameters:
+      - description: Schedule ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Rotation ID
+        format: uuid
+        in: path
+        name: rotationId
+        required: true
+        type: string
+      - description: Reorder participants request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.ReorderParticipantsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Reorder participants
+      tags:
+      - Schedules
+  /teams:
+    get:
+      consumes:
+      - application/json
+      description: List all teams in the organization
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/domain.Team'
+              type: array
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List teams
+      tags:
+      - Teams
+    post:
+      consumes:
+      - application/json
+      description: Create a new team in the organization
+      parameters:
+      - description: Create team request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateTeamRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Team'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new team
+      tags:
+      - Teams
+  /teams/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a team by ID
+      parameters:
+      - description: Team ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a team
+      tags:
+      - Teams
+    get:
+      consumes:
+      - application/json
+      description: Get a team by ID with its members
+      parameters:
+      - description: Team ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.TeamWithMembers'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a team
+      tags:
+      - Teams
+    patch:
+      consumes:
+      - application/json
+      description: Update a team by ID
+      parameters:
+      - description: Team ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update team request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateTeamRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Team'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a team
+      tags:
+      - Teams
+  /teams/{id}/members:
+    get:
+      consumes:
+      - application/json
+      description: List all members of a team
+      parameters:
+      - description: Team ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/domain.UserWithTeamRole'
+              type: array
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List team members
+      tags:
+      - Teams
+    post:
+      consumes:
+      - application/json
+      description: Add a user as a member to a team
+      parameters:
+      - description: Team ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Add member request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.AddTeamMemberRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add a member to a team
+      tags:
+      - Teams
+  /teams/{id}/members/{userId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a user from a team
+      parameters:
+      - description: Team ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User ID
+        format: uuid
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove a member from a team
+      tags:
+      - Teams
+    patch:
+      consumes:
+      - application/json
+      description: Update the role of a team member
+      parameters:
+      - description: Team ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User ID
+        format: uuid
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: Update role request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateTeamMemberRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a team member's role
+      tags:
+      - Teams
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: List all users in the organization
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/domain.User'
+              type: array
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List organization users
+      tags:
+      - Users
+  /webhooks/deliveries:
+    get:
+      consumes:
+      - application/json
+      description: List all webhook delivery attempts for the organization
+      parameters:
+      - default: 20
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List webhook deliveries
+      tags:
+      - Webhooks
+  /webhooks/endpoints:
+    get:
+      consumes:
+      - application/json
+      description: List all outgoing webhook endpoints for the organization
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.WebhookEndpoint'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List webhook endpoints
+      tags:
+      - Webhooks
+    post:
+      consumes:
+      - application/json
+      description: Create a new outgoing webhook endpoint
+      parameters:
+      - description: Create endpoint request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateWebhookEndpointRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.WebhookEndpoint'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a webhook endpoint
+      tags:
+      - Webhooks
+  /webhooks/endpoints/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a webhook endpoint by ID
+      parameters:
+      - description: Endpoint ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a webhook endpoint
+      tags:
+      - Webhooks
+    get:
+      consumes:
+      - application/json
+      description: Get a webhook endpoint by ID
+      parameters:
+      - description: Endpoint ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.WebhookEndpoint'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a webhook endpoint
+      tags:
+      - Webhooks
+    patch:
+      consumes:
+      - application/json
+      description: Update a webhook endpoint by ID
+      parameters:
+      - description: Endpoint ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update endpoint request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateWebhookEndpointRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.WebhookEndpoint'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a webhook endpoint
+      tags:
+      - Webhooks
+  /webhooks/incoming:
+    get:
+      consumes:
+      - application/json
+      description: List all incoming webhook tokens for the organization
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.IncomingWebhookToken'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List incoming webhook tokens
+      tags:
+      - Webhooks
+    post:
+      consumes:
+      - application/json
+      description: Create a new incoming webhook token for receiving webhooks from
+        external sources
+      parameters:
+      - description: Create token request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateIncomingWebhookTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.IncomingWebhookToken'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create an incoming webhook token
+      tags:
+      - Webhooks
+  /webhooks/incoming/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an incoming webhook token by ID
+      parameters:
+      - description: Token ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete an incoming webhook token
+      tags:
+      - Webhooks
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
