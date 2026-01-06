@@ -138,8 +138,8 @@
 <div class="space-y-6">
 	<div class="flex justify-between items-center">
 		<div>
-			<h2 class="text-3xl font-bold text-gray-100">Alerts</h2>
-			<p class="mt-2 text-gray-400">Manage and respond to alerts</p>
+			<h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Alerts</h2>
+			<p class="mt-2 text-gray-500 dark:text-gray-400">Manage and respond to alerts</p>
 		</div>
 		<Button variant="primary" on:click={() => (showCreateForm = !showCreateForm)}>
 			{showCreateForm ? 'Cancel' : 'Create Alert'}
@@ -147,11 +147,11 @@
 	</div>
 
 	{#if showCreateForm}
-		<div class="bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-primary-500/30">
-			<h3 class="text-lg font-semibold mb-4 text-gray-100">Create New Alert</h3>
+		<div class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-primary-200 dark:border-primary-500/30 shadow-sm">
+			<h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Create New Alert</h3>
 			<form on:submit|preventDefault={handleCreateAlert} class="space-y-4">
 				<div>
-					<label for="message" class="block text-sm font-medium text-gray-300 mb-1">
+					<label for="message" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
 						Message *
 					</label>
 					<input
@@ -159,32 +159,32 @@
 						type="text"
 						bind:value={message}
 						required
-						class="w-full px-3 py-2 bg-space-700 border border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-100 placeholder-gray-500"
+						class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
 						placeholder="Brief description of the alert"
 					/>
 				</div>
 
 				<div>
-					<label for="description" class="block text-sm font-medium text-gray-300 mb-1">
+					<label for="description" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
 						Description
 					</label>
 					<textarea
 						id="description"
 						bind:value={description}
 						rows="3"
-						class="w-full px-3 py-2 bg-space-700 border border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-100 placeholder-gray-500"
+						class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
 						placeholder="Additional details..."
 					></textarea>
 				</div>
 
 				<div>
-					<label for="priority" class="block text-sm font-medium text-gray-300 mb-1">
+					<label for="priority" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
 						Priority *
 					</label>
 					<select
 						id="priority"
 						bind:value={priority}
-						class="w-full px-3 py-2 bg-space-700 border border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-100"
+						class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white"
 					>
 						<option value="P1">P1 - Critical</option>
 						<option value="P2">P2 - High</option>
@@ -195,20 +195,20 @@
 				</div>
 
 				<div>
-					<label for="tags" class="block text-sm font-medium text-gray-300 mb-1">
+					<label for="tags" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
 						Tags (comma-separated)
 					</label>
 					<input
 						id="tags"
 						type="text"
 						bind:value={tags}
-						class="w-full px-3 py-2 bg-space-700 border border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-100 placeholder-gray-500"
+						class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
 						placeholder="production, database, critical"
 					/>
 				</div>
 
 				{#if createError}
-					<div class="bg-accent-900/30 border border-accent-500/50 text-accent-300 px-4 py-3 rounded-lg">
+					<div class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg">
 						{createError}
 					</div>
 				{/if}
@@ -226,17 +226,17 @@
 	{/if}
 
 	<!-- Filters -->
-	<div class="bg-space-800/50 backdrop-blur-sm p-4 rounded-xl border border-space-600">
+	<div class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-4 rounded-xl border border-gray-200 dark:border-space-600 shadow-sm">
 		<div class="space-y-4">
 			<div>
-				<label class="block text-sm font-medium text-gray-300 mb-2">Status</label>
+				<label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Status</label>
 				<div class="flex gap-2 flex-wrap">
 					{#each ['open', 'acknowledged', 'closed', 'snoozed'] as status}
 						<button
 							type="button"
 							class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 {selectedStatus.includes(status)
-								? 'bg-primary-500 text-space-900 shadow-neon-cyan'
-								: 'bg-space-700 text-gray-300 hover:bg-space-600 border border-space-500 hover:border-primary-500/50'}"
+								? 'bg-primary-600 dark:bg-primary-500 text-white dark:text-space-900 dark:shadow-neon-cyan'
+								: 'bg-gray-100 dark:bg-space-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-space-600 border border-gray-300 dark:border-space-500 hover:border-primary-500/50'}"
 							on:click={() => handleStatusFilter(status)}
 						>
 							{status}
@@ -246,14 +246,14 @@
 			</div>
 
 			<div>
-				<label class="block text-sm font-medium text-gray-300 mb-2">Priority</label>
+				<label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Priority</label>
 				<div class="flex gap-2 flex-wrap">
 					{#each ['P1', 'P2', 'P3', 'P4', 'P5'] as prio}
 						<button
 							type="button"
 							class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 {selectedPriority.includes(prio)
-								? 'bg-accent-500 text-white shadow-neon-pink'
-								: 'bg-space-700 text-gray-300 hover:bg-space-600 border border-space-500 hover:border-accent-500/50'}"
+								? 'bg-accent-600 dark:bg-accent-500 text-white dark:shadow-neon-pink'
+								: 'bg-gray-100 dark:bg-space-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-space-600 border border-gray-300 dark:border-space-500 hover:border-accent-500/50'}"
 							on:click={() => handlePriorityFilter(prio)}
 						>
 							{prio}
@@ -263,13 +263,13 @@
 			</div>
 
 			<div>
-				<label for="search" class="block text-sm font-medium text-gray-300 mb-2">Search</label>
+				<label for="search" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Search</label>
 				<div class="flex gap-2">
 					<input
 						id="search"
 						type="text"
 						bind:value={searchQuery}
-						class="flex-1 px-3 py-2 bg-space-700 border border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-100 placeholder-gray-500"
+						class="flex-1 px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
 						placeholder="Search alerts..."
 					/>
 					<Button variant="primary" on:click={loadAlerts}>Search</Button>
@@ -283,16 +283,16 @@
 		{#if $alertsStore.isLoading}
 			<div class="text-center py-12">
 				<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-				<p class="mt-2 text-gray-400">Loading alerts...</p>
+				<p class="mt-2 text-gray-500 dark:text-gray-400">Loading alerts...</p>
 			</div>
 		{:else if $alertsStore.error}
-			<div class="bg-accent-900/30 border border-accent-500/50 text-accent-300 px-4 py-3 rounded-lg">
+			<div class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg">
 				{$alertsStore.error}
 			</div>
 		{:else if $alertsStore.alerts.length === 0}
-			<div class="text-center py-12 bg-space-800/50 backdrop-blur-sm rounded-xl border border-space-600">
-				<p class="text-gray-300">No alerts found</p>
-				<p class="text-sm text-gray-500 mt-2">Create your first alert to get started</p>
+			<div class="text-center py-12 bg-white dark:bg-space-800/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-space-600 shadow-sm">
+				<p class="text-gray-600 dark:text-gray-300">No alerts found</p>
+				<p class="text-sm text-gray-400 dark:text-gray-500 mt-2">Create your first alert to get started</p>
 			</div>
 		{:else}
 			{#each $alertsStore.alerts as alert (alert.id)}
@@ -304,7 +304,7 @@
 				/>
 			{/each}
 
-			<div class="text-sm text-gray-500 text-center py-4">
+			<div class="text-sm text-gray-400 dark:text-gray-500 text-center py-4">
 				Showing {$alertsStore.alerts.length} of {$alertsStore.total} alerts
 			</div>
 		{/if}

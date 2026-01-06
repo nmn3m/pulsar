@@ -1,9 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script>
+			// Prevent flash of wrong theme
+			(function() {
+				const stored = localStorage.getItem('pulsar-theme');
+				const theme = stored === 'light' ? 'light' : 'dark';
+				if (theme === 'light') {
+					document.documentElement.classList.remove('dark');
+				}
+			})();
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

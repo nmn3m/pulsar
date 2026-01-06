@@ -2,45 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Light mode (default) */
 :root {
+	--bg-primary: #f0f4f8;
+	--bg-secondary: #ffffff;
+	--bg-tertiary: #e2e8f0;
+	--text-primary: #1a1a2e;
+	--text-secondary: #4a5568;
+	--text-muted: #718096;
+	--border-color: #e2e8f0;
+	--glow-color: rgba(0, 180, 230, 0.3);
+	--primary-500: #0891b2;
+	--primary-600: #0e7490;
+	--accent-500: #db2777;
+}
+
+/* Dark mode */
+.dark {
+	--bg-primary: #0a0a1a;
+	--bg-secondary: #0d1025;
+	--bg-tertiary: #1a2040;
+	--text-primary: #f3f4f6;
+	--text-secondary: #d1d5db;
+	--text-muted: #9ca3af;
+	--border-color: #1a2040;
 	--glow-color: rgba(0, 212, 255, 0.5);
-	--space-900: #0a0a1a;
-	--space-800: #0d1025;
-	--space-700: #121830;
-	--space-600: #1a2040;
 	--primary-500: #00d4ff;
-	--primary-700: #0891b2;
+	--primary-600: #00b8e6;
 	--accent-500: #ff0080;
 }
 
+/* Base body styles */
 body {
-	background-color: var(--space-900);
-	color: #f3f4f6;
+	background-color: var(--bg-primary);
+	color: var(--text-primary);
+	transition: background-color 0.3s ease, color 0.3s ease;
+	min-height: 100vh;
+}
+
+/* Light mode gradient background */
+:root body {
+	background-image:
+		radial-gradient(ellipse at 20% 30%, rgba(0, 180, 230, 0.05) 0%, transparent 50%),
+		radial-gradient(ellipse at 80% 70%, rgba(219, 39, 119, 0.03) 0%, transparent 50%),
+		linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+	background-attachment: fixed;
+}
+
+/* Dark mode gradient background */
+.dark body {
 	background-image:
 		radial-gradient(ellipse at 20% 30%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
 		radial-gradient(ellipse at 80% 70%, rgba(255, 0, 128, 0.06) 0%, transparent 50%),
 		radial-gradient(ellipse at center, #1a2040 0%, #0a0a1a 50%, #050510 100%);
 	background-attachment: fixed;
-	min-height: 100vh;
 }
 
-/* Scrollbar styling for dark theme */
+/* Scrollbar styling */
 ::-webkit-scrollbar {
 	width: 8px;
 	height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-	background-color: var(--space-800);
+	background-color: var(--bg-tertiary);
 }
 
 ::-webkit-scrollbar-thumb {
-	background-color: var(--space-600);
+	background-color: var(--border-color);
 	border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-	background-color: var(--primary-700);
+	background-color: var(--primary-500);
 }
 
 /* Custom utility classes */
@@ -60,4 +94,16 @@ body {
 	.border-glow-pink {
 		box-shadow: 0 0 10px rgba(255, 0, 128, 0.3), inset 0 0 10px rgba(255, 0, 128, 0.1);
 	}
+}
+
+/* Smooth theme transition for all elements */
+*, *::before, *::after {
+	transition-property: background-color, border-color, color, fill, stroke;
+	transition-duration: 0.15s;
+	transition-timing-function: ease-out;
+}
+
+/* Disable transitions on page load to prevent flash */
+.no-transitions *, .no-transitions *::before, .no-transitions *::after {
+	transition: none !important;
 }

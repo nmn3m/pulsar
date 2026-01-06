@@ -152,8 +152,8 @@
 <div class="space-y-6">
 	<div class="flex justify-between items-center">
 		<div>
-			<h2 class="text-3xl font-bold text-gray-100">Webhook Endpoints</h2>
-			<p class="mt-2 text-gray-400">Send events to external services via HTTP webhooks</p>
+			<h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Webhook Endpoints</h2>
+			<p class="mt-2 text-gray-500 dark:text-gray-400">Send events to external services via HTTP webhooks</p>
 		</div>
 		<Button variant="primary" on:click={() => (showCreateForm = !showCreateForm)}>
 			{showCreateForm ? 'Cancel' : 'Create Endpoint'}
@@ -161,18 +161,18 @@
 	</div>
 
 	{#if error}
-		<div class="bg-accent-900/30 border border-accent-500/50 text-accent-300 px-4 py-3 rounded-lg">
+		<div class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg">
 			{error}
 		</div>
 	{/if}
 
 	{#if showCreateForm}
-		<div class="bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-primary-500/30">
-			<h3 class="text-lg font-semibold mb-4 text-gray-100">Create Webhook Endpoint</h3>
+		<div class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-primary-200 dark:border-primary-500/30 shadow-sm">
+			<h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Create Webhook Endpoint</h3>
 			<form on:submit|preventDefault={handleCreate} class="space-y-4">
 				<div class="grid grid-cols-2 gap-4">
 					<div>
-						<label for="name" class="block text-sm font-medium text-gray-300 mb-1">
+						<label for="name" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
 							Name *
 						</label>
 						<input
@@ -180,13 +180,13 @@
 							type="text"
 							bind:value={name}
 							required
-							class="w-full px-3 py-2 bg-space-700 border border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-100 placeholder-gray-500"
+							class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
 							placeholder="My Webhook"
 						/>
 					</div>
 
 					<div>
-						<label for="url" class="block text-sm font-medium text-gray-300 mb-1">
+						<label for="url" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
 							URL *
 						</label>
 						<input
@@ -194,7 +194,7 @@
 							type="url"
 							bind:value={url}
 							required
-							class="w-full px-3 py-2 bg-space-700 border border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-100 placeholder-gray-500"
+							class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
 							placeholder="https://example.com/webhook"
 						/>
 					</div>
@@ -202,53 +202,53 @@
 
 				<div>
 					<label class="flex items-center space-x-2">
-						<input type="checkbox" bind:checked={enabled} class="rounded bg-space-700 border-space-500 text-primary-500 focus:ring-primary-500" />
-						<span class="text-sm font-medium text-gray-300">Enabled</span>
+						<input type="checkbox" bind:checked={enabled} class="rounded bg-white dark:bg-space-800 border-gray-300 dark:border-space-500 text-primary-500 focus:ring-primary-500" />
+						<span class="text-sm font-medium text-gray-600 dark:text-gray-300">Enabled</span>
 					</label>
 				</div>
 
 				<div>
-					<label class="block text-sm font-medium text-gray-300 mb-2">
+					<label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
 						Event Triggers
 					</label>
 					<div class="grid grid-cols-2 gap-2">
 						<label class="flex items-center space-x-2">
-							<input type="checkbox" bind:checked={alertCreated} class="rounded bg-space-700 border-space-500 text-primary-500 focus:ring-primary-500" />
-							<span class="text-sm text-gray-300">Alert Created</span>
+							<input type="checkbox" bind:checked={alertCreated} class="rounded bg-white dark:bg-space-800 border-gray-300 dark:border-space-500 text-primary-500 focus:ring-primary-500" />
+							<span class="text-sm text-gray-600 dark:text-gray-300">Alert Created</span>
 						</label>
 						<label class="flex items-center space-x-2">
-							<input type="checkbox" bind:checked={alertUpdated} class="rounded bg-space-700 border-space-500 text-primary-500 focus:ring-primary-500" />
-							<span class="text-sm text-gray-300">Alert Updated</span>
+							<input type="checkbox" bind:checked={alertUpdated} class="rounded bg-white dark:bg-space-800 border-gray-300 dark:border-space-500 text-primary-500 focus:ring-primary-500" />
+							<span class="text-sm text-gray-600 dark:text-gray-300">Alert Updated</span>
 						</label>
 						<label class="flex items-center space-x-2">
-							<input type="checkbox" bind:checked={alertAcknowledged} class="rounded bg-space-700 border-space-500 text-primary-500 focus:ring-primary-500" />
-							<span class="text-sm text-gray-300">Alert Acknowledged</span>
+							<input type="checkbox" bind:checked={alertAcknowledged} class="rounded bg-white dark:bg-space-800 border-gray-300 dark:border-space-500 text-primary-500 focus:ring-primary-500" />
+							<span class="text-sm text-gray-600 dark:text-gray-300">Alert Acknowledged</span>
 						</label>
 						<label class="flex items-center space-x-2">
-							<input type="checkbox" bind:checked={alertClosed} class="rounded bg-space-700 border-space-500 text-primary-500 focus:ring-primary-500" />
-							<span class="text-sm text-gray-300">Alert Closed</span>
+							<input type="checkbox" bind:checked={alertClosed} class="rounded bg-white dark:bg-space-800 border-gray-300 dark:border-space-500 text-primary-500 focus:ring-primary-500" />
+							<span class="text-sm text-gray-600 dark:text-gray-300">Alert Closed</span>
 						</label>
 						<label class="flex items-center space-x-2">
-							<input type="checkbox" bind:checked={alertEscalated} class="rounded bg-space-700 border-space-500 text-primary-500 focus:ring-primary-500" />
-							<span class="text-sm text-gray-300">Alert Escalated</span>
+							<input type="checkbox" bind:checked={alertEscalated} class="rounded bg-white dark:bg-space-800 border-gray-300 dark:border-space-500 text-primary-500 focus:ring-primary-500" />
+							<span class="text-sm text-gray-600 dark:text-gray-300">Alert Escalated</span>
 						</label>
 						<label class="flex items-center space-x-2">
-							<input type="checkbox" bind:checked={incidentCreated} class="rounded bg-space-700 border-space-500 text-primary-500 focus:ring-primary-500" />
-							<span class="text-sm text-gray-300">Incident Created</span>
+							<input type="checkbox" bind:checked={incidentCreated} class="rounded bg-white dark:bg-space-800 border-gray-300 dark:border-space-500 text-primary-500 focus:ring-primary-500" />
+							<span class="text-sm text-gray-600 dark:text-gray-300">Incident Created</span>
 						</label>
 						<label class="flex items-center space-x-2">
-							<input type="checkbox" bind:checked={incidentUpdated} class="rounded bg-space-700 border-space-500 text-primary-500 focus:ring-primary-500" />
-							<span class="text-sm text-gray-300">Incident Updated</span>
+							<input type="checkbox" bind:checked={incidentUpdated} class="rounded bg-white dark:bg-space-800 border-gray-300 dark:border-space-500 text-primary-500 focus:ring-primary-500" />
+							<span class="text-sm text-gray-600 dark:text-gray-300">Incident Updated</span>
 						</label>
 						<label class="flex items-center space-x-2">
-							<input type="checkbox" bind:checked={incidentResolved} class="rounded bg-space-700 border-space-500 text-primary-500 focus:ring-primary-500" />
-							<span class="text-sm text-gray-300">Incident Resolved</span>
+							<input type="checkbox" bind:checked={incidentResolved} class="rounded bg-white dark:bg-space-800 border-gray-300 dark:border-space-500 text-primary-500 focus:ring-primary-500" />
+							<span class="text-sm text-gray-600 dark:text-gray-300">Incident Resolved</span>
 						</label>
 					</div>
 				</div>
 
 				<div>
-					<label class="block text-sm font-medium text-gray-300 mb-2">
+					<label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
 						Custom Headers
 					</label>
 					<div class="flex gap-2 mb-2">
@@ -256,25 +256,25 @@
 							type="text"
 							bind:value={headerKey}
 							placeholder="Header name"
-							class="flex-1 px-3 py-2 bg-space-700 border border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-100 placeholder-gray-500"
+							class="flex-1 px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
 						/>
 						<input
 							type="text"
 							bind:value={headerValue}
 							placeholder="Header value"
-							class="flex-1 px-3 py-2 bg-space-700 border border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-100 placeholder-gray-500"
+							class="flex-1 px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
 						/>
 						<Button type="button" variant="secondary" on:click={addHeader}>Add</Button>
 					</div>
 					{#if Object.keys(customHeaders).length > 0}
 						<div class="space-y-1">
 							{#each Object.entries(customHeaders) as [key, value]}
-								<div class="flex items-center justify-between bg-space-700 px-3 py-2 rounded-lg border border-space-500">
-									<span class="text-sm text-gray-300"><strong class="text-primary-300">{key}:</strong> {value}</span>
+								<div class="flex items-center justify-between bg-gray-100 dark:bg-space-700 px-3 py-2 rounded-lg border border-gray-200 dark:border-space-500">
+									<span class="text-sm text-gray-700 dark:text-gray-300"><strong class="text-primary-600 dark:text-primary-300">{key}:</strong> {value}</span>
 									<button
 										type="button"
 										on:click={() => removeHeader(key)}
-										class="text-accent-400 hover:text-accent-300 text-sm"
+										class="text-accent-600 dark:text-accent-400 hover:text-accent-500 dark:hover:text-accent-300 text-sm"
 									>
 										Remove
 									</button>
@@ -286,7 +286,7 @@
 
 				<div class="grid grid-cols-3 gap-4">
 					<div>
-						<label for="timeout" class="block text-sm font-medium text-gray-300 mb-1">
+						<label for="timeout" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
 							Timeout (seconds)
 						</label>
 						<input
@@ -295,12 +295,12 @@
 							bind:value={timeoutSeconds}
 							min="1"
 							max="300"
-							class="w-full px-3 py-2 bg-space-700 border border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-100"
+							class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white"
 						/>
 					</div>
 
 					<div>
-						<label for="retries" class="block text-sm font-medium text-gray-300 mb-1">
+						<label for="retries" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
 							Max Retries
 						</label>
 						<input
@@ -309,12 +309,12 @@
 							bind:value={maxRetries}
 							min="0"
 							max="10"
-							class="w-full px-3 py-2 bg-space-700 border border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-100"
+							class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white"
 						/>
 					</div>
 
 					<div>
-						<label for="delay" class="block text-sm font-medium text-gray-300 mb-1">
+						<label for="delay" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
 							Retry Delay (seconds)
 						</label>
 						<input
@@ -323,13 +323,13 @@
 							bind:value={retryDelaySeconds}
 							min="1"
 							max="3600"
-							class="w-full px-3 py-2 bg-space-700 border border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-100"
+							class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white"
 						/>
 					</div>
 				</div>
 
 				{#if createError}
-					<div class="bg-accent-900/30 border border-accent-500/50 text-accent-300 px-4 py-3 rounded-lg">
+					<div class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg">
 						{createError}
 					</div>
 				{/if}
@@ -349,49 +349,49 @@
 	{#if isLoading}
 		<div class="text-center py-12">
 			<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-			<p class="mt-2 text-gray-400">Loading webhook endpoints...</p>
+			<p class="mt-2 text-gray-500 dark:text-gray-400">Loading webhook endpoints...</p>
 		</div>
 	{:else if endpoints.length === 0}
-		<div class="text-center py-12 bg-space-800/50 backdrop-blur-sm rounded-xl border border-space-600">
-			<p class="text-gray-300">No webhook endpoints configured</p>
-			<p class="text-sm text-gray-500 mt-2">Create your first webhook to send events to external services</p>
+		<div class="text-center py-12 bg-white dark:bg-space-800/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-space-600 shadow-sm">
+			<p class="text-gray-600 dark:text-gray-300">No webhook endpoints configured</p>
+			<p class="text-sm text-gray-400 dark:text-gray-500 mt-2">Create your first webhook to send events to external services</p>
 		</div>
 	{:else}
 		<div class="grid grid-cols-1 gap-4">
 			{#each endpoints as endpoint (endpoint.id)}
-				<div class="bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-space-600 hover:border-primary-500/30 transition-all duration-300">
+				<div class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-200 dark:border-space-600 hover:border-primary-400 dark:hover:border-primary-500/30 transition-all duration-300 shadow-sm hover:shadow-lg dark:hover:shadow-primary-500/10">
 					<div class="flex items-start justify-between">
 						<div class="flex-1">
 							<div class="flex items-center gap-3 mb-2">
-								<h3 class="text-lg font-semibold text-gray-100">{endpoint.name}</h3>
+								<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{endpoint.name}</h3>
 								<button
 									type="button"
 									on:click={() => toggleEnabled(endpoint)}
 									class="px-2 py-1 text-xs rounded border {endpoint.enabled
-										? 'bg-green-900/50 text-green-300 border-green-500/30'
-										: 'bg-space-700 text-gray-400 border-space-500'}"
+										? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border-green-300 dark:border-green-500/30'
+										: 'bg-gray-100 dark:bg-space-700 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-space-500'}"
 								>
 									{endpoint.enabled ? 'Enabled' : 'Disabled'}
 								</button>
 							</div>
-							<p class="text-sm text-primary-300 mb-3 font-mono break-all">{endpoint.url}</p>
+							<p class="text-sm text-primary-600 dark:text-primary-300 mb-3 font-mono break-all">{endpoint.url}</p>
 
 							<div class="space-y-2">
 								<div class="flex flex-wrap gap-1">
-									<span class="text-xs font-medium text-gray-400">Events:</span>
+									<span class="text-xs font-medium text-gray-500 dark:text-gray-400">Events:</span>
 									{#each getEventFilters(endpoint) as filter}
-										<span class="px-2 py-1 bg-primary-900/50 text-primary-300 text-xs rounded border border-primary-500/30">{filter}</span>
+										<span class="px-2 py-1 bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 text-xs rounded border border-primary-200 dark:border-primary-500/30">{filter}</span>
 									{/each}
 								</div>
 
-								<div class="text-xs text-gray-500">
+								<div class="text-xs text-gray-400 dark:text-gray-500">
 									Timeout: {endpoint.timeout_seconds}s |
 									Max Retries: {endpoint.max_retries} |
 									Retry Delay: {endpoint.retry_delay_seconds}s
 								</div>
 
 								{#if Object.keys(endpoint.headers).length > 0}
-									<div class="text-xs text-gray-500">
+									<div class="text-xs text-gray-400 dark:text-gray-500">
 										Custom Headers: {Object.keys(endpoint.headers).length}
 									</div>
 								{/if}

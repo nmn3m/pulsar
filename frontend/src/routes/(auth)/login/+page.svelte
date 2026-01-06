@@ -31,11 +31,11 @@
 <div class="min-h-screen flex items-center justify-center px-4 py-12">
 	<div class="max-w-md w-full space-y-8">
 		<div class="text-center">
-			<h1 class="text-4xl font-bold text-primary-400 text-glow-cyan">Pulsar</h1>
-			<p class="mt-2 text-gray-400">Sign in to your account</p>
+			<h1 class="text-4xl font-bold text-primary-600 dark:text-primary-400 dark:text-glow-cyan">Pulsar</h1>
+			<p class="mt-2 text-gray-500 dark:text-gray-400">Sign in to your account</p>
 		</div>
 
-		<div class="bg-space-800/50 backdrop-blur-sm p-8 rounded-xl border border-space-600 shadow-lg">
+		<div class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-8 rounded-xl border border-gray-200 dark:border-space-600 shadow-lg">
 			<form on:submit|preventDefault={handleLogin} class="space-y-6">
 				<Input
 					id="email"
@@ -56,7 +56,7 @@
 				/>
 
 				{#if error}
-					<div class="bg-accent-900/30 border border-accent-500/50 text-accent-300 px-4 py-3 rounded-lg">
+					<div class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg">
 						{error}
 					</div>
 				{/if}
@@ -67,9 +67,9 @@
 			</form>
 
 			<div class="mt-6 text-center">
-				<p class="text-sm text-gray-400">
+				<p class="text-sm text-gray-500 dark:text-gray-400">
 					Don't have an account?
-					<a href="/register" class="text-primary-400 hover:text-primary-300 font-medium">
+					<a href="/register" class="text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 font-medium">
 						Sign up
 					</a>
 				</p>
