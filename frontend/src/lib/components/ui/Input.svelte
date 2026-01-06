@@ -14,9 +14,9 @@
 
 <div class="w-full">
 	{#if label}
-		<label for={id} class="block text-sm font-medium text-gray-700 mb-1">
+		<label for={id} class="block text-sm font-medium text-gray-300 mb-1">
 			{label}
-			{#if required}<span class="text-red-500">*</span>{/if}
+			{#if required}<span class="text-accent-400">*</span>{/if}
 		</label>
 	{/if}
 	<input
@@ -26,11 +26,11 @@
 		{required}
 		{value}
 		on:input={handleInput}
-		class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent {error ? 'border-red-500' : ''}"
+		class="w-full px-3 py-2 bg-space-700 border border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-100 placeholder-gray-500 transition-all duration-200 {error ? 'border-accent-500 focus:ring-accent-500' : ''}"
 		on:input
 		on:blur
 	/>
 	{#if error}
-		<p class="mt-1 text-sm text-red-600">{error}</p>
+		<p class="mt-1 text-sm text-accent-400">{error}</p>
 	{/if}
 </div>

@@ -29,15 +29,15 @@
 	function getStatusColor(status: string): string {
 		switch (status) {
 			case 'connected':
-				return 'bg-green-500';
+				return 'bg-neon-green shadow-neon-green';
 			case 'connecting':
-				return 'bg-yellow-500';
+				return 'bg-neon-yellow animate-pulse';
 			case 'disconnected':
-				return 'bg-gray-400';
+				return 'bg-gray-500';
 			case 'error':
-				return 'bg-red-500';
+				return 'bg-neon-red shadow-neon-pink';
 			default:
-				return 'bg-gray-400';
+				return 'bg-gray-500';
 		}
 	}
 
@@ -60,32 +60,32 @@
 {#if $authStore.isLoading}
 	<div class="min-h-screen flex items-center justify-center">
 		<div class="text-center">
-			<div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-			<p class="mt-4 text-gray-600">Loading...</p>
+			<div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+			<p class="mt-4 text-gray-400">Loading...</p>
 		</div>
 	</div>
 {:else if $authStore.isAuthenticated}
-	<div class="min-h-screen bg-gray-50">
+	<div class="min-h-screen">
 		<!-- Header -->
-		<header class="bg-white shadow">
+		<header class="bg-space-800/80 backdrop-blur-md border-b border-primary-500/20 shadow-lg shadow-primary-500/5">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div class="flex justify-between items-center h-16">
 					<div class="flex items-center">
-						<h1 class="text-2xl font-bold text-primary-600">Pulsar</h1>
-						<nav class="ml-10 flex space-x-8">
-							<a href="/dashboard" class="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">
+						<h1 class="text-2xl font-bold text-primary-400 text-glow-cyan">Pulsar</h1>
+						<nav class="ml-10 flex space-x-2">
+							<a href="/dashboard" class="text-gray-300 hover:text-primary-400 hover:bg-space-700/50 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">
 								Dashboard
 							</a>
-							<a href="/alerts" class="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">
+							<a href="/alerts" class="text-gray-300 hover:text-accent-400 hover:bg-space-700/50 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">
 								Alerts
 							</a>
-							<a href="/incidents" class="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">
+							<a href="/incidents" class="text-gray-300 hover:text-accent-400 hover:bg-space-700/50 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">
 								Incidents
 							</a>
-							<a href="/schedules" class="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">
+							<a href="/schedules" class="text-gray-300 hover:text-primary-400 hover:bg-space-700/50 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">
 								Schedules
 							</a>
-							<a href="/webhooks/endpoints" class="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">
+							<a href="/webhooks/endpoints" class="text-gray-300 hover:text-primary-400 hover:bg-space-700/50 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">
 								Webhooks
 							</a>
 						</nav>
@@ -108,12 +108,12 @@
 									)}"
 								/>
 							</span>
-							<span class="text-xs text-gray-600 hidden sm:inline">
+							<span class="text-xs text-gray-400 hidden sm:inline">
 								{getStatusText($wsStore.status)}
 							</span>
 						</div>
 
-						<span class="text-sm text-gray-700">
+						<span class="text-sm text-primary-300">
 							{$authStore.user?.email}
 						</span>
 						<Button variant="secondary" on:click={handleLogout}>
