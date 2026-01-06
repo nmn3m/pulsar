@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: pulsar-postgres-test
+    environment:
+      POSTGRES_DB: pulsar_test
+      POSTGRES_USER: pulsar_test
+      POSTGRES_PASSWORD: pulsar_test_password
+    ports:
+      - "5434:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pulsar_test -d pulsar_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - pulsar-test-network
+
+networks:
+  pulsar-test-network:
+    driver: bridge

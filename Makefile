@@ -1,4 +1,4 @@
-.PHONY: help up down build logs migrate-up migrate-down migrate-create db-reset test clean
+.PHONY: help up down build logs migrate-up migrate-down migrate-create db-reset test test-db-up test-db-down test-integration test-integration-verbose test-coverage clean
 
 help:
 	@echo "Pulsar - Development Commands"
@@ -11,7 +11,11 @@ help:
 	@echo "  make migrate-down  - Rollback last migration"
 	@echo "  make migrate-create NAME=<name> - Create new migration"
 	@echo "  make db-reset      - Reset database (WARNING: destructive)"
-	@echo "  make test          - Run tests"
+	@echo "  make test          - Run unit tests"
+	@echo "  make test-db-up    - Start test database"
+	@echo "  make test-db-down  - Stop test database"
+	@echo "  make test-integration - Run integration tests"
+	@echo "  make test-coverage - Run tests with coverage report"
 	@echo "  make clean         - Clean up containers and volumes"
 
 up:
@@ -59,7 +63,33 @@ db-reset:
 test:
 	cd backend && go test -v ./...
 
+# Integration test targets
+test-db-up:
+	docker-compose -f docker-compose.test.yml up -d
+	@echo "Waiting for test database to be ready..."
+	@sleep 3
+	@echo "Test database ready at localhost:5434"
+
+test-db-down:
+	docker-compose -f docker-compose.test.yml down -v
+
+test-integration: test-db-up
+	cd backend && go test -v ./tests/integration/... -count=1 || ($(MAKE) test-db-down && exit 1)
+	$(MAKE) test-db-down
+
+test-integration-verbose: test-db-up
+	cd backend && go test -v -race ./tests/integration/... -count=1 || ($(MAKE) test-db-down && exit 1)
+	$(MAKE) test-db-down
+
+test-coverage: test-db-up
+	cd backend && go test -v -coverprofile=coverage.out -covermode=atomic ./tests/integration/... || ($(MAKE) test-db-down && exit 1)
+	cd backend && go tool cover -html=coverage.out -o coverage.html
+	$(MAKE) test-db-down
+	@echo "Coverage report generated at backend/coverage.html"
+
 clean:
 	docker-compose down -v
+	docker-compose -f docker-compose.test.yml down -v 2>/dev/null || true
 	rm -rf backend/tmp
 	rm -f backend/build-errors.log
+	rm -f backend/coverage.out backend/coverage.html
