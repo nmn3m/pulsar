@@ -1,156 +1,136 @@
-# Pulsar - Incident Management Platform
+<p align="center">
+  <img src="pulsar.svg" alt="Pulsar Logo" width="180" height="180">
+</p>
 
-An open-source Opsgenie replacement built with Go and Svelte.
+<h1 align="center">Pulsar</h1>
+
+<p align="center">
+  <b>A modern, open-source incident management platform.</b><br>
+  Alerting, on-call scheduling, escalations, and real-time notifications — an Opsgenie alternative built with Go and Svelte.
+</p>
+
+---
+
+<p align="center">
+  <a href="https://github.com/nmn3m/pulsar/releases"><img src="https://img.shields.io/badge/release-v0.1.0-blue?style=flat-square" alt="Release"></a>
+  <a href="#license"><img src="https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square" alt="License"></a>
+  <a href="#"><img src="https://img.shields.io/badge/build-passing-brightgreen?style=flat-square" alt="Build"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Go-1.25-00ADD8?style=flat-square&logo=go&logoColor=white" alt="Go"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Svelte-4-FF3E00?style=flat-square&logo=svelte&logoColor=white" alt="Svelte"></a>
+  <a href="#"><img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL"></a>
+</p>
+
+<p align="center">
+  <a href="#features">Features</a> &bull;
+  <a href="#quick-start">Quick Start</a> &bull;
+  <a href="#installation">Installation</a> &bull;
+  <a href="#api-reference">API Reference</a> &bull;
+  <a href="#development">Development</a> &bull;
+  <a href="#architecture">Architecture</a>
+</p>
+
+---
 
 ## Features
 
-### Phase 1 (Completed)
-- ✅ User authentication (JWT-based)
-- ✅ User registration and login
-- ✅ Organization management
-- ✅ Multi-tenancy support
-- ✅ Role-based access control (RBAC)
+### Core Capabilities
 
-### Upcoming Features
-- Alert Management
-- On-Call Schedules
-- Incident Management
-- Escalation Policies
-- Multi-channel Notifications (Email, Slack, Teams)
-- Webhooks & Integrations
-- Real-time Updates (WebSocket)
-- API Keys
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Alert Management** | Create, acknowledge, snooze, assign, and resolve alerts with full lifecycle tracking | Done |
+| **Incident Management** | Track incidents with responders, timeline, notes, and linked alerts | Done |
+| **On-Call Schedules** | Flexible scheduling with rotations, participants, and schedule overrides | Done |
+| **Escalation Policies** | Multi-level escalation rules with configurable targets and delays | Done |
+| **Team Management** | Organize users into teams with role-based member management | Done |
+| **Notifications** | Channel configuration, user preferences, and delivery tracking | Done |
+| **Webhooks** | Outgoing webhook endpoints and incoming webhook tokens for integrations | Done |
+| **Real-time Updates** | WebSocket support for live dashboard updates | Done |
 
-## Tech Stack
+### Platform Features
 
-### Backend
-- **Language**: Go 1.21
-- **Framework**: Gin
-- **Database**: PostgreSQL 16
-- **Authentication**: JWT
-- **Logging**: Uber Zap
+- **JWT Authentication** — Secure access and refresh token authentication
+- **Multi-Tenancy** — Full organization isolation with scoped data access
+- **Role-Based Access Control** — Admin, member, and viewer permission levels
+- **Dark/Light Theme** — Beautiful UI with theme switching support
+- **Swagger Documentation** — Interactive API documentation
+- **Background Workers** — Automated escalation and webhook delivery processing
 
-### Frontend
-- **Framework**: SvelteKit
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Build Tool**: Vite
-
-### Infrastructure
-- **Containerization**: Docker & Docker Compose
-- **Development**: Live reload with Air (backend) and Vite (frontend)
+---
 
 ## Quick Start
 
+```bash
+# Clone and enter the repository
+git clone https://github.com/nmn3m/pulsar.git && cd pulsar
+
+# Copy environment configuration
+cp .env.example .env
+
+# Start all services
+make up
+
+# Run database migrations
+make migrate-up
+```
+
+**Access the application:**
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:5173 |
+| Backend API | http://localhost:8081 |
+| Swagger Docs | http://localhost:8081/swagger/index.html |
+| PostgreSQL | localhost:5433 |
+
+---
+
+## Installation
+
 ### Prerequisites
+
 - Docker and Docker Compose
-- (Optional) Go 1.21+ and Node.js 20+ for local development
+- (Optional) Go 1.25+ and Node.js 20+ for local development
 
-### Getting Started
-
-1. **Clone the repository**
-   ```bash
-   cd /home/nour/workspace/github/pulsar
-   ```
-
-2. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env if needed (defaults work for development)
-   ```
-
-3. **Start all services**
-   ```bash
-   make up
-   ```
-
-   This will start:
-   - PostgreSQL database on `localhost:5432`
-   - Backend API on `http://localhost:8080`
-   - Frontend on `http://localhost:3000`
-
-4. **Run database migrations**
-   ```bash
-   make migrate-up
-   ```
-
-5. **Access the application**
-   - Open your browser to `http://localhost:3000`
-   - Create a new account via the registration page
-   - Log in and explore the dashboard
-
-### Common Commands
+### Docker Compose (Recommended)
 
 ```bash
-make up            # Start all services
-make down          # Stop all services
-make logs          # View logs
-make migrate-up    # Run database migrations
-make migrate-down  # Rollback last migration
-make clean         # Clean up containers and volumes
+# Start all services in detached mode
+make up
+
+# View logs
+make logs
+
+# Stop services
+make down
 ```
 
-## Project Structure
+### Manual Setup
 
-```
-pulsar/
-├── backend/              # Go backend
-│   ├── cmd/
-│   │   └── api/         # API server entry point
-│   ├── internal/
-│   │   ├── config/      # Configuration
-│   │   ├── domain/      # Domain models
-│   │   ├── repository/  # Data access
-│   │   ├── service/     # Business logic
-│   │   ├── handler/     # HTTP handlers
-│   │   ├── middleware/  # HTTP middleware
-│   │   └── pkg/         # Internal packages
-│   └── migrations/      # Database migrations
-│
-├── frontend/            # Svelte frontend
-│   ├── src/
-│   │   ├── lib/
-│   │   │   ├── api/     # API client
-│   │   │   ├── stores/  # State management
-│   │   │   ├── components/ # UI components
-│   │   │   └── types/   # TypeScript types
-│   │   └── routes/      # SvelteKit routes
-│   │       ├── (auth)/  # Login, register
-│   │       └── (app)/   # Dashboard, alerts, etc.
-│
-└── docker-compose.yml   # Development environment
-```
-
-## API Endpoints
-
-### Authentication
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login
-- `POST /api/v1/auth/refresh` - Refresh access token
-- `POST /api/v1/auth/logout` - Logout
-- `GET /api/v1/auth/me` - Get current user (protected)
-
-### Health
-- `GET /health` - Health check
-
-## Development
-
-### Backend Development
+<details>
+<summary><b>Backend Setup</b></summary>
 
 ```bash
 cd backend
 
-# Install dependencies
+# Install Go dependencies
 go mod download
+
+# Set environment variables
+export DATABASE_URL="postgres://pulsar:pulsar_dev_password@localhost:5433/pulsar?sslmode=disable"
+export JWT_SECRET="your-secret-key-min-32-characters"
+export JWT_REFRESH_SECRET="your-refresh-secret-min-32-characters"
+export SERVER_PORT="8080"
 
 # Run with live reload
 air
 
-# Run tests
-go test -v ./...
+# Or run directly
+go run cmd/api/main.go
 ```
 
-### Frontend Development
+</details>
+
+<details>
+<summary><b>Frontend Setup</b></summary>
 
 ```bash
 cd frontend
@@ -158,78 +138,249 @@ cd frontend
 # Install dependencies
 npm install
 
+# Set environment variables
+export VITE_API_URL="http://localhost:8081"
+
 # Run development server
 npm run dev
-
-# Build for production
-npm run build
 ```
 
-## Database Migrations
-
-Create a new migration:
-```bash
-make migrate-create NAME=add_something
-```
-
-Apply migrations:
-```bash
-make migrate-up
-```
-
-Rollback last migration:
-```bash
-make migrate-down
-```
-
-## Architecture
-
-Pulsar follows clean architecture principles:
-
-### Backend Layers
-1. **Domain Layer**: Core business entities (User, Organization, Alert, etc.)
-2. **Repository Layer**: Data access abstraction
-3. **Service Layer**: Business logic
-4. **Handler Layer**: HTTP request/response handling
-5. **Middleware**: Cross-cutting concerns (auth, logging, CORS)
-
-### Frontend Structure
-1. **API Client**: Centralized API communication
-2. **Stores**: Svelte stores for state management
-3. **Components**: Reusable UI components
-4. **Routes**: SvelteKit file-based routing
-
-## Security
-
-- JWT-based authentication with access and refresh tokens
-- Password hashing with bcrypt
-- CORS configuration
-- Role-based access control (RBAC)
-- SQL injection prevention via parameterized queries
-- XSS protection
-
-## Next Steps (Phase 2+)
-
-See [plan.md](./plan.md) for the complete implementation roadmap.
-
-Phase 2 will focus on Alert Management:
-- Create, view, and manage alerts
-- Alert filtering and search
-- Alert assignment to users/teams
-- Alert acknowledgment and closure
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-MIT License - feel free to use this project for any purpose.
-
-## Support
-
-For questions and support, please open an issue on GitHub.
+</details>
 
 ---
 
-Built with ❤️ using Go and Svelte
+## Tech Stack
+
+| Layer | Technologies |
+|-------|--------------|
+| **Backend** | Go 1.25, Gin, PostgreSQL 16, JWT, Zap Logger |
+| **Frontend** | SvelteKit, TypeScript, Tailwind CSS, Vite |
+| **Infrastructure** | Docker, Docker Compose |
+| **Documentation** | Swagger / OpenAPI 3.0 |
+
+---
+
+## API Reference
+
+Base URL: `http://localhost:8081/api/v1`
+
+### Authentication
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/auth/register` | Register a new user and organization |
+| `POST` | `/auth/login` | Authenticate and receive tokens |
+| `POST` | `/auth/refresh` | Refresh access token |
+| `POST` | `/auth/logout` | Invalidate refresh token |
+| `GET` | `/auth/me` | Get current user info |
+
+### Alerts
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/alerts` | List alerts with filters |
+| `POST` | `/alerts` | Create a new alert |
+| `GET` | `/alerts/:id` | Get alert details |
+| `PATCH` | `/alerts/:id` | Update alert |
+| `DELETE` | `/alerts/:id` | Delete alert |
+| `POST` | `/alerts/:id/acknowledge` | Acknowledge alert |
+| `POST` | `/alerts/:id/close` | Close alert with reason |
+| `POST` | `/alerts/:id/snooze` | Snooze alert until time |
+| `POST` | `/alerts/:id/assign` | Assign to user or team |
+
+### Incidents
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/incidents` | List incidents |
+| `POST` | `/incidents` | Create incident |
+| `GET` | `/incidents/:id` | Get incident with details |
+| `PATCH` | `/incidents/:id` | Update incident |
+| `POST` | `/incidents/:id/responders` | Add responder |
+| `GET` | `/incidents/:id/timeline` | Get incident timeline |
+| `POST` | `/incidents/:id/notes` | Add note to timeline |
+| `POST` | `/incidents/:id/alerts` | Link alert to incident |
+
+### Teams, Schedules, Escalations
+
+<details>
+<summary>View all endpoints</summary>
+
+**Teams**
+- `GET/POST` `/teams` — List/create teams
+- `GET/PATCH/DELETE` `/teams/:id` — Manage team
+- `GET/POST` `/teams/:id/members` — Manage members
+
+**Schedules**
+- `GET/POST` `/schedules` — List/create schedules
+- `GET/PATCH/DELETE` `/schedules/:id` — Manage schedule
+- `GET` `/schedules/:id/oncall` — Get current on-call
+- `*/schedules/:id/rotations/*` — Manage rotations
+- `*/schedules/:id/overrides/*` — Manage overrides
+
+**Escalation Policies**
+- `GET/POST` `/escalation-policies` — List/create policies
+- `GET/PATCH/DELETE` `/escalation-policies/:id` — Manage policy
+- `*/escalation-policies/:id/rules/*` — Manage rules and targets
+
+**Notifications**
+- `*/notifications/channels/*` — Notification channels
+- `*/notifications/preferences/*` — User preferences
+- `POST` `/notifications/send` — Send notification
+- `GET` `/notifications/logs/*` — Delivery logs
+
+**Webhooks**
+- `*/webhooks/endpoints/*` — Outgoing webhooks
+- `*/webhooks/incoming/*` — Incoming webhook tokens
+- `GET` `/webhooks/deliveries` — Delivery history
+- `POST` `/webhook/:token` — Receive incoming webhook (public)
+
+</details>
+
+---
+
+## Development
+
+### Available Commands
+
+```bash
+make up                 # Start all services
+make down               # Stop all services
+make logs               # View container logs
+make build              # Rebuild Docker images
+
+make migrate-up         # Apply database migrations
+make migrate-down       # Rollback last migration
+make migrate-create NAME=xyz  # Create new migration
+
+make test               # Run unit tests
+make test-integration   # Run integration tests
+make test-coverage      # Generate coverage report
+
+make clean              # Remove containers and volumes
+```
+
+### Backend Development
+
+```bash
+cd backend
+
+# Run with hot reload
+air
+
+# Run tests
+go test -v ./...
+
+# Generate Swagger docs
+swag init -g cmd/api/main.go
+```
+
+### Frontend Development
+
+```bash
+cd frontend
+
+# Development server with HMR
+npm run dev
+
+# Type checking
+npm run check
+
+# Production build
+npm run build
+```
+
+---
+
+## Architecture
+
+```
+pulsar/
+├── backend/
+│   ├── cmd/api/              # Application entrypoint
+│   ├── internal/
+│   │   ├── config/           # Configuration loading
+│   │   ├── domain/           # Business entities
+│   │   ├── handler/rest/     # HTTP handlers
+│   │   ├── middleware/       # Auth, CORS, logging
+│   │   ├── repository/       # Data access layer
+│   │   └── service/          # Business logic
+│   ├── migrations/           # SQL migrations
+│   └── docs/                 # Swagger specs
+│
+├── frontend/
+│   └── src/
+│       ├── lib/
+│       │   ├── api/          # API client
+│       │   ├── components/   # UI components
+│       │   └── stores/       # State management
+│       └── routes/           # SvelteKit pages
+│           ├── (auth)/       # Login, register
+│           └── (app)/        # Dashboard, alerts, etc.
+│
+├── docker-compose.yml        # Development environment
+└── Makefile                  # Build automation
+```
+
+### Design Principles
+
+- **Clean Architecture** — Separation of concerns with domain, service, and handler layers
+- **Repository Pattern** — Abstracted data access for testability
+- **Multi-Tenancy** — Organization-scoped data isolation
+- **Event-Driven** — WebSocket notifications and background workers
+
+---
+
+## Security
+
+- JWT authentication with short-lived access tokens (15 min) and refresh tokens (7 days)
+- Password hashing with bcrypt (cost factor 10)
+- Role-based access control at organization level
+- SQL injection prevention via parameterized queries
+- XSS protection through proper encoding
+- CORS configuration for allowed origins
+
+---
+
+## Roadmap
+
+- [x] User authentication and multi-tenancy
+- [x] Alert management with full lifecycle
+- [x] Team management and RBAC
+- [x] On-call schedules with rotations
+- [x] Escalation policies with background processing
+- [x] Incident management with timeline
+- [x] Notification system with preferences
+- [x] Webhooks (outgoing and incoming)
+- [x] Real-time WebSocket updates
+- [x] Dark/Light theme support
+- [ ] Email notification delivery
+- [ ] Slack integration
+- [ ] Microsoft Teams integration
+- [ ] Mobile push notifications
+- [ ] Metrics and reporting dashboard
+- [ ] API key authentication
+
+---
+
+## Contributing
+
+Contributions are welcome!
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## License
+
+This project is licensed under the **Apache License 2.0** — see the [LICENSE](LICENSE) file for details.
+
+---
+
+<p align="center">
+  <sub>Built with Go and Svelte</sub>
+</p>
