@@ -16,6 +16,7 @@ type User struct {
 	Timezone                string                 `json:"timezone" db:"timezone"`
 	NotificationPreferences map[string]interface{} `json:"notification_preferences" db:"notification_preferences"`
 	IsActive                bool                   `json:"is_active" db:"is_active"`
+	EmailVerified           bool                   `json:"email_verified" db:"email_verified"`
 	CreatedAt               time.Time              `json:"created_at" db:"created_at"`
 	UpdatedAt               time.Time              `json:"updated_at" db:"updated_at"`
 }

@@ -1,6 +1,22 @@
-version: '3.8'
-
 services:
+  traefik:
+    image: traefik:v3.0
+    container_name: pulsar-traefik
+    command:
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--log.level=DEBUG"
+    ports:
+      - "80:80"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - pulsar-network
+
   postgres:
     image: postgres:16-alpine
     container_name: pulsar-postgres
@@ -20,40 +36,72 @@ services:
     networks:
       - pulsar-network
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: pulsar-mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"   # Web UI
+      - "1025:1025"   # SMTP
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    volumes:
+      - mailpit_data:/data
+    networks:
+      - pulsar-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mailpit.rule=Host(`mail.localhost`)"
+      - "traefik.http.routers.mailpit.entrypoints=web"
+      - "traefik.http.services.mailpit.loadbalancer.server.port=8025"
+
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
     container_name: pulsar-backend
-    ports:
-      - "8081:8080"
     environment:
       - DATABASE_URL=postgres://pulsar:pulsar_dev_password@postgres:5432/pulsar?sslmode=disable
       - JWT_SECRET=dev_jwt_secret_change_in_production_min_32_chars
       - JWT_REFRESH_SECRET=dev_refresh_secret_change_in_production_min_32_chars
       - SERVER_PORT=8080
       - ENV=development
-      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+      - CORS_ALLOWED_ORIGINS=http://localhost,http://localhost:3000,http://localhost:5173,http://pulsar.localhost
+      # Email configuration for Mailpit
+      - SMTP_ENABLED=true
+      - SMTP_HOST=mailpit
+      - SMTP_PORT=1025
+      - SMTP_USERNAME=
+      - SMTP_PASSWORD=
+      - SMTP_FROM=noreply@pulsar.localhost
+      - SMTP_FROM_NAME=Pulsar
+      - SMTP_USE_TLS=false
     depends_on:
       postgres:
         condition: service_healthy
+      mailpit:
+        condition: service_started
     volumes:
       - ./backend:/app
       - go_modules:/go/pkg/mod
     networks:
       - pulsar-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`pulsar.localhost`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.services.backend.loadbalancer.server.port=8080"
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
     container_name: pulsar-frontend
-    ports:
-      - "3000:3000"
-      - "5173:5173"
     environment:
-      - VITE_API_URL=http://localhost:8081
-      - VITE_API_PORT=8081
+      - VITE_API_URL=http://pulsar.localhost/api
       - NODE_ENV=development
     depends_on:
       - backend
@@ -62,10 +110,16 @@ services:
       - /app/node_modules
     networks:
       - pulsar-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`pulsar.localhost`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=5173"
 
 volumes:
   postgres_data:
   go_modules:
+  mailpit_data:
 
 networks:
   pulsar-network:

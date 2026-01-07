@@ -11,10 +11,12 @@ import (
 type ChannelType string
 
 const (
-	ChannelTypeEmail   ChannelType = "email"
-	ChannelTypeSlack   ChannelType = "slack"
-	ChannelTypeTeams   ChannelType = "teams"
-	ChannelTypeWebhook ChannelType = "webhook"
+	ChannelTypeEmail    ChannelType = "email"
+	ChannelTypeSlack    ChannelType = "slack"
+	ChannelTypeTeams    ChannelType = "teams"
+	ChannelTypeWebhook  ChannelType = "webhook"
+	ChannelTypePush     ChannelType = "push"      // Firebase Cloud Messaging
+	ChannelTypePushAPNS ChannelType = "push_apns" // Apple Push Notification Service (future)
 )
 
 // NotificationStatus represents the status of a notification

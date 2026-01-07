@@ -4,17 +4,20 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nmn3m/pulsar/backend/internal/domain"
 	"github.com/nmn3m/pulsar/backend/internal/middleware"
 	"github.com/nmn3m/pulsar/backend/internal/service"
 )
 
 type AuthHandler struct {
-	authService *service.AuthService
+	authService              *service.AuthService
+	emailVerificationService *service.EmailVerificationService
 }
 
-func NewAuthHandler(authService *service.AuthService) *AuthHandler {
+func NewAuthHandler(authService *service.AuthService, emailVerificationService *service.EmailVerificationService) *AuthHandler {
 	return &AuthHandler{
-		authService: authService,
+		authService:              authService,
+		emailVerificationService: emailVerificationService,
 	}
 }
 
@@ -141,4 +144,64 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	// by removing the token. For enhanced security, you could implement
 	// token blacklisting here.
 	c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
+}
+
+// VerifyEmail godoc
+// @Summary      Verify email with OTP
+// @Description  Verify user email address using OTP code sent via email
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request body domain.VerifyEmailRequest true "Verify email request"
+// @Success      200 {object} map[string]string
+// @Failure      400 {object} map[string]string
+// @Router       /auth/verify-email [post]
+func (h *AuthHandler) VerifyEmail(c *gin.Context) {
+	if h.emailVerificationService == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "email verification not configured"})
+		return
+	}
+
+	var req domain.VerifyEmailRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.emailVerificationService.VerifyOTP(c.Request.Context(), req.Email, req.OTP); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "email verified successfully"})
+}
+
+// ResendOTP godoc
+// @Summary      Resend OTP verification code
+// @Description  Resend OTP verification code to user's email
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request body domain.ResendOTPRequest true "Resend OTP request"
+// @Success      200 {object} map[string]string
+// @Failure      400 {object} map[string]string
+// @Router       /auth/resend-otp [post]
+func (h *AuthHandler) ResendOTP(c *gin.Context) {
+	if h.emailVerificationService == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "email verification not configured"})
+		return
+	}
+
+	var req domain.ResendOTPRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.emailVerificationService.ResendOTP(c.Request.Context(), req.Email); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "verification code sent"})
 }

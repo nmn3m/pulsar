@@ -1,13 +1,14 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { api } from '$lib/api/client';
-import type { User, Organization, LoginRequest, RegisterRequest } from '$lib/types/user';
+import type { User, Organization, LoginRequest, RegisterRequest, VerifyEmailRequest, ResendOTPRequest } from '$lib/types/user';
 
 interface AuthState {
 	user: User | null;
 	organization: Organization | null;
 	isAuthenticated: boolean;
 	isLoading: boolean;
+	pendingVerificationEmail: string | null;
 }
 
 function createAuthStore() {
@@ -15,7 +16,8 @@ function createAuthStore() {
 		user: null,
 		organization: null,
 		isAuthenticated: false,
-		isLoading: true
+		isLoading: true,
+		pendingVerificationEmail: null
 	});
 
 	return {
@@ -67,12 +69,21 @@ function createAuthStore() {
 		async register(data: RegisterRequest) {
 			try {
 				const response = await api.register(data);
-				set({
-					user: response.user,
-					organization: response.organization,
-					isAuthenticated: true,
-					isLoading: false
-				});
+				if (response.requires_email_verification) {
+					update(state => ({
+						...state,
+						pendingVerificationEmail: data.email,
+						isLoading: false
+					}));
+				} else {
+					set({
+						user: response.user,
+						organization: response.organization,
+						isAuthenticated: true,
+						isLoading: false,
+						pendingVerificationEmail: null
+					});
+				}
 				return response;
 			} catch (error) {
 				throw error;
@@ -82,16 +93,52 @@ function createAuthStore() {
 		async login(data: LoginRequest) {
 			try {
 				const response = await api.login(data);
-				set({
-					user: response.user,
-					organization: response.organization,
-					isAuthenticated: true,
-					isLoading: false
-				});
+				if (response.requires_email_verification) {
+					update(state => ({
+						...state,
+						pendingVerificationEmail: data.email,
+						isLoading: false
+					}));
+				} else {
+					set({
+						user: response.user,
+						organization: response.organization,
+						isAuthenticated: true,
+						isLoading: false,
+						pendingVerificationEmail: null
+					});
+				}
 				return response;
 			} catch (error) {
 				throw error;
 			}
+		},
+
+		async verifyEmail(data: VerifyEmailRequest) {
+			try {
+				await api.verifyEmail(data);
+				update(state => ({
+					...state,
+					pendingVerificationEmail: null
+				}));
+			} catch (error) {
+				throw error;
+			}
+		},
+
+		async resendOTP(data: ResendOTPRequest) {
+			try {
+				await api.resendOTP(data);
+			} catch (error) {
+				throw error;
+			}
+		},
+
+		setPendingVerificationEmail(email: string | null) {
+			update(state => ({
+				...state,
+				pendingVerificationEmail: email
+			}));
 		},
 
 		async logout() {
@@ -102,7 +149,8 @@ function createAuthStore() {
 					user: null,
 					organization: null,
 					isAuthenticated: false,
-					isLoading: false
+					isLoading: false,
+					pendingVerificationEmail: null
 				});
 			}
 		}

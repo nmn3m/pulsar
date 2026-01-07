@@ -14,8 +14,12 @@
 		loading = true;
 
 		try {
-			await authStore.login({ email, password });
-			goto('/dashboard');
+			const response = await authStore.login({ email, password });
+			if (response.requires_email_verification) {
+				goto('/verify-email');
+			} else {
+				goto('/dashboard');
+			}
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Login failed';
 		} finally {

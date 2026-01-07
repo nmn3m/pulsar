@@ -30,6 +30,7 @@ type TestServer struct {
 	IncidentService     *service.IncidentService
 	WebhookService      *service.WebhookService
 	UserService         *service.UserService
+	MetricsService      *service.MetricsService
 }
 
 // NewTestServer creates a new test server with all dependencies wired up
@@ -72,9 +73,12 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 	notificationRepo := postgres.NewNotificationRepository(testDB.DB)
 	incidentRepo := postgres.NewIncidentRepository(testDB.DB)
 	webhookRepo := postgres.NewWebhookRepository(testDB.DB)
+	metricsRepo := postgres.NewMetricsRepository(testDB.DB)
 
 	// Initialize services
-	authService := service.NewAuthService(userRepo, orgRepo, cfg)
+	// Email verification is nil for tests (SMTP not configured)
+	var emailVerificationService *service.EmailVerificationService
+	authService := service.NewAuthService(userRepo, orgRepo, cfg, emailVerificationService)
 	teamService := service.NewTeamService(teamRepo, userRepo)
 	userService := service.NewUserService(orgRepo)
 	scheduleService := service.NewScheduleService(scheduleRepo, userRepo)
@@ -82,6 +86,7 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 	wsService := service.NewWebSocketService(logger)
 	incidentService := service.NewIncidentService(incidentRepo, wsService)
 	webhookService := service.NewWebhookService(webhookRepo, logger)
+	metricsService := service.NewMetricsService(metricsRepo)
 
 	// Initialize alert notifier with dependencies
 	alertNotifier := service.NewAlertNotifier(notificationService, userRepo, teamRepo, scheduleService)
@@ -91,7 +96,7 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 	escalationService := service.NewEscalationService(escalationRepo, alertRepo, alertNotifier)
 
 	// Initialize handlers
-	authHandler := rest.NewAuthHandler(authService)
+	authHandler := rest.NewAuthHandler(authService, emailVerificationService)
 	alertHandler := rest.NewAlertHandler(alertService)
 	teamHandler := rest.NewTeamHandler(teamService)
 	userHandler := rest.NewUserHandler(userService)
@@ -101,6 +106,7 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 	incidentHandler := rest.NewIncidentHandler(incidentService)
 	webhookHandler := rest.NewWebhookHandler(webhookService)
 	incomingWebhookHandler := rest.NewIncomingWebhookHandler(webhookService, alertService, logger)
+	metricsHandler := rest.NewMetricsHandler(metricsService)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret)
@@ -112,7 +118,7 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 	// Setup routes (mirrors main.go)
 	setupRoutes(router, authMiddleware, authHandler, alertHandler, teamHandler,
 		userHandler, scheduleHandler, escalationHandler, notificationHandler,
-		incidentHandler, webhookHandler, incomingWebhookHandler)
+		incidentHandler, webhookHandler, incomingWebhookHandler, metricsHandler)
 
 	// Create test server
 	server := httptest.NewServer(router)
@@ -132,6 +138,7 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 		IncidentService:     incidentService,
 		WebhookService:      webhookService,
 		UserService:         userService,
+		MetricsService:      metricsService,
 	}, nil
 }
 
@@ -149,6 +156,7 @@ func setupRoutes(
 	incidentHandler *rest.IncidentHandler,
 	webhookHandler *rest.WebhookHandler,
 	incomingWebhookHandler *rest.IncomingWebhookHandler,
+	metricsHandler *rest.MetricsHandler,
 ) {
 	// API v1 routes
 	v1 := router.Group("/api/v1")
@@ -318,6 +326,17 @@ func setupRoutes(
 				webhooks.GET("/incoming", webhookHandler.ListIncomingTokens)
 				webhooks.POST("/incoming", webhookHandler.CreateIncomingToken)
 				webhooks.DELETE("/incoming/:id", webhookHandler.DeleteIncomingToken)
+			}
+
+			// Metrics routes
+			metrics := protected.Group("/metrics")
+			{
+				metrics.GET("/dashboard", metricsHandler.GetDashboard)
+				metrics.GET("/alerts", metricsHandler.GetAlertMetrics)
+				metrics.GET("/alerts/trend", metricsHandler.GetAlertTrend)
+				metrics.GET("/incidents", metricsHandler.GetIncidentMetrics)
+				metrics.GET("/notifications", metricsHandler.GetNotificationMetrics)
+				metrics.GET("/teams", metricsHandler.GetTeamMetrics)
 			}
 		}
 

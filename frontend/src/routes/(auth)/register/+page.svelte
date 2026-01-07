@@ -17,14 +17,18 @@
 		loading = true;
 
 		try {
-			await authStore.register({
+			const response = await authStore.register({
 				email,
 				username,
 				password,
 				full_name: fullName,
 				organization_name: organizationName
 			});
-			goto('/dashboard');
+			if (response.requires_email_verification) {
+				goto('/verify-email');
+			} else {
+				goto('/dashboard');
+			}
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Registration failed';
 		} finally {

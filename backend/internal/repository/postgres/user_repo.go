@@ -20,8 +20,8 @@ func NewUserRepository(db *DB) *UserRepository {
 
 func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 	query := `
-		INSERT INTO users (id, email, username, password_hash, full_name, phone, timezone, notification_preferences, is_active)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		INSERT INTO users (id, email, username, password_hash, full_name, phone, timezone, notification_preferences, is_active, email_verified)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		RETURNING created_at, updated_at
 	`
 
@@ -42,6 +42,7 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 		user.Timezone,
 		prefs,
 		user.IsActive,
+		user.EmailVerified,
 	).Scan(&user.CreatedAt, &user.UpdatedAt)
 
 	if err != nil {
@@ -54,7 +55,7 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	query := `
 		SELECT id, email, username, password_hash, full_name, phone, timezone,
-		       notification_preferences, is_active, created_at, updated_at
+		       notification_preferences, is_active, email_verified, created_at, updated_at
 		FROM users
 		WHERE id = $1
 	`
@@ -72,6 +73,7 @@ func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Use
 		&user.Timezone,
 		&prefsJSON,
 		&user.IsActive,
+		&user.EmailVerified,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -93,7 +95,7 @@ func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Use
 func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	query := `
 		SELECT id, email, username, password_hash, full_name, phone, timezone,
-		       notification_preferences, is_active, created_at, updated_at
+		       notification_preferences, is_active, email_verified, created_at, updated_at
 		FROM users
 		WHERE email = $1
 	`
@@ -111,6 +113,7 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.
 		&user.Timezone,
 		&prefsJSON,
 		&user.IsActive,
+		&user.EmailVerified,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -132,7 +135,7 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.
 func (r *UserRepository) GetByUsername(ctx context.Context, username string) (*domain.User, error) {
 	query := `
 		SELECT id, email, username, password_hash, full_name, phone, timezone,
-		       notification_preferences, is_active, created_at, updated_at
+		       notification_preferences, is_active, email_verified, created_at, updated_at
 		FROM users
 		WHERE username = $1
 	`
@@ -150,6 +153,7 @@ func (r *UserRepository) GetByUsername(ctx context.Context, username string) (*d
 		&user.Timezone,
 		&prefsJSON,
 		&user.IsActive,
+		&user.EmailVerified,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -172,7 +176,7 @@ func (r *UserRepository) Update(ctx context.Context, user *domain.User) error {
 	query := `
 		UPDATE users
 		SET email = $2, username = $3, full_name = $4, phone = $5, timezone = $6,
-		    notification_preferences = $7, is_active = $8
+		    notification_preferences = $7, is_active = $8, email_verified = $9
 		WHERE id = $1
 		RETURNING updated_at
 	`
@@ -193,6 +197,7 @@ func (r *UserRepository) Update(ctx context.Context, user *domain.User) error {
 		user.Timezone,
 		prefs,
 		user.IsActive,
+		user.EmailVerified,
 	).Scan(&user.UpdatedAt)
 
 	if err != nil {
@@ -225,7 +230,7 @@ func (r *UserRepository) Delete(ctx context.Context, id uuid.UUID) error {
 func (r *UserRepository) List(ctx context.Context, limit, offset int) ([]*domain.User, error) {
 	query := `
 		SELECT id, email, username, password_hash, full_name, phone, timezone,
-		       notification_preferences, is_active, created_at, updated_at
+		       notification_preferences, is_active, email_verified, created_at, updated_at
 		FROM users
 		ORDER BY created_at DESC
 		LIMIT $1 OFFSET $2
@@ -252,6 +257,7 @@ func (r *UserRepository) List(ctx context.Context, limit, offset int) ([]*domain
 			&user.Timezone,
 			&prefsJSON,
 			&user.IsActive,
+			&user.EmailVerified,
 			&user.CreatedAt,
 			&user.UpdatedAt,
 		)
@@ -272,7 +278,7 @@ func (r *UserRepository) List(ctx context.Context, limit, offset int) ([]*domain
 func (r *UserRepository) ListByTeam(ctx context.Context, teamID uuid.UUID) ([]*domain.User, error) {
 	query := `
 		SELECT u.id, u.email, u.username, u.password_hash, u.full_name, u.phone, u.timezone,
-		       u.notification_preferences, u.is_active, u.created_at, u.updated_at
+		       u.notification_preferences, u.is_active, u.email_verified, u.created_at, u.updated_at
 		FROM users u
 		JOIN team_members tm ON u.id = tm.user_id
 		WHERE tm.team_id = $1
@@ -300,6 +306,7 @@ func (r *UserRepository) ListByTeam(ctx context.Context, teamID uuid.UUID) ([]*d
 			&user.Timezone,
 			&prefsJSON,
 			&user.IsActive,
+			&user.EmailVerified,
 			&user.CreatedAt,
 			&user.UpdatedAt,
 		)

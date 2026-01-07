@@ -7,6 +7,7 @@ export interface User {
 	timezone: string;
 	notification_preferences: Record<string, unknown>;
 	is_active: boolean;
+	email_verified: boolean;
 	created_at: string;
 	updated_at: string;
 }
@@ -26,6 +27,16 @@ export interface AuthResponse {
 	organization: Organization;
 	access_token: string;
 	refresh_token: string;
+	requires_email_verification?: boolean;
+}
+
+export interface VerifyEmailRequest {
+	email: string;
+	otp: string;
+}
+
+export interface ResendOTPRequest {
+	email: string;
 }
 
 export interface RegisterRequest {

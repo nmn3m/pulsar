@@ -16,20 +16,23 @@ import (
 )
 
 type AuthService struct {
-	userRepo repository.UserRepository
-	orgRepo  repository.OrganizationRepository
-	config   *config.Config
+	userRepo                 repository.UserRepository
+	orgRepo                  repository.OrganizationRepository
+	config                   *config.Config
+	emailVerificationService *EmailVerificationService
 }
 
 func NewAuthService(
 	userRepo repository.UserRepository,
 	orgRepo repository.OrganizationRepository,
 	cfg *config.Config,
+	emailVerificationService *EmailVerificationService,
 ) *AuthService {
 	return &AuthService{
-		userRepo: userRepo,
-		orgRepo:  orgRepo,
-		config:   cfg,
+		userRepo:                 userRepo,
+		orgRepo:                  orgRepo,
+		config:                   cfg,
+		emailVerificationService: emailVerificationService,
 	}
 }
 
@@ -47,10 +50,11 @@ type LoginRequest struct {
 }
 
 type AuthResponse struct {
-	User         *domain.User         `json:"user"`
-	Organization *domain.Organization `json:"organization"`
-	AccessToken  string               `json:"access_token"`
-	RefreshToken string               `json:"refresh_token"`
+	User                      *domain.User         `json:"user"`
+	Organization              *domain.Organization `json:"organization"`
+	AccessToken               string               `json:"access_token"`
+	RefreshToken              string               `json:"refresh_token"`
+	RequiresEmailVerification bool                 `json:"requires_email_verification,omitempty"`
 }
 
 func (s *AuthService) Register(ctx context.Context, req *RegisterRequest) (*AuthResponse, error) {
@@ -71,6 +75,9 @@ func (s *AuthService) Register(ctx context.Context, req *RegisterRequest) (*Auth
 		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
+	// Check if email verification is enabled
+	emailVerificationEnabled := s.emailVerificationService != nil && s.emailVerificationService.IsEmailServiceConfigured()
+
 	// Create user
 	user := &domain.User{
 		ID:                      uuid.New(),
@@ -81,6 +88,7 @@ func (s *AuthService) Register(ctx context.Context, req *RegisterRequest) (*Auth
 		Timezone:                "UTC",
 		NotificationPreferences: make(map[string]interface{}),
 		IsActive:                true,
+		EmailVerified:           !emailVerificationEnabled, // Skip verification if email service not configured
 	}
 
 	if err := s.userRepo.Create(ctx, user); err != nil {
@@ -126,11 +134,21 @@ func (s *AuthService) Register(ctx context.Context, req *RegisterRequest) (*Auth
 	// Clear password hash before returning
 	user.PasswordHash = ""
 
+	// Send verification email if email verification is enabled
+	if emailVerificationEnabled {
+		if err := s.emailVerificationService.CreateAndSendOTP(ctx, user.ID, user.Email, user.Username); err != nil {
+			// Log error but don't fail registration
+			// In production, you might want to handle this differently
+			fmt.Printf("Warning: failed to send verification email: %v\n", err)
+		}
+	}
+
 	return &AuthResponse{
-		User:         user,
-		Organization: org,
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		User:                      user,
+		Organization:              org,
+		AccessToken:               accessToken,
+		RefreshToken:              refreshToken,
+		RequiresEmailVerification: emailVerificationEnabled,
 	}, nil
 }
 
@@ -180,11 +198,15 @@ func (s *AuthService) Login(ctx context.Context, req *LoginRequest) (*AuthRespon
 	// Clear password hash before returning
 	user.PasswordHash = ""
 
+	// Check if email verification is required
+	requiresVerification := !user.EmailVerified && s.emailVerificationService != nil && s.emailVerificationService.IsEmailServiceConfigured()
+
 	return &AuthResponse{
-		User:         user,
-		Organization: org,
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		User:                      user,
+		Organization:              org,
+		AccessToken:               accessToken,
+		RefreshToken:              refreshToken,
+		RequiresEmailVerification: requiresVerification,
 	}, nil
 }
 

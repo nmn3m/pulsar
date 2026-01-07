@@ -49,6 +49,7 @@
 ### Platform Features
 
 - **JWT Authentication** — Secure access and refresh token authentication
+- **API Key Authentication** — Scoped API keys for programmatic access with fine-grained permissions
 - **Multi-Tenancy** — Full organization isolation with scoped data access
 - **Role-Based Access Control** — Admin, member, and viewer permission levels
 - **Dark/Light Theme** — Beautiful UI with theme switching support
@@ -174,6 +175,31 @@ Base URL: `http://localhost:8081/api/v1`
 | `POST` | `/auth/logout` | Invalidate refresh token |
 | `GET` | `/auth/me` | Get current user info |
 
+### API Keys
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api-keys` | List your API keys |
+| `POST` | `/api-keys` | Create a new API key |
+| `GET` | `/api-keys/scopes` | List available scopes |
+| `GET` | `/api-keys/all` | List all org API keys (admin) |
+| `GET` | `/api-keys/:id` | Get API key details |
+| `PATCH` | `/api-keys/:id` | Update an API key |
+| `DELETE` | `/api-keys/:id` | Delete an API key |
+| `POST` | `/api-keys/:id/revoke` | Revoke an API key |
+
+**Available Scopes:**
+- `alerts:read`, `alerts:write` — Alert management
+- `incidents:read`, `incidents:write` — Incident management
+- `teams:read`, `teams:write` — Team management
+- `schedules:read`, `schedules:write` — Schedule management
+- `webhooks:read`, `webhooks:write` — Webhook management
+- `notifications:read`, `notifications:write` — Notification management
+- `users:read` — User listing
+- `*` — Full access
+
+**Usage:** Include the API key in the `X-API-Key` header or as `Authorization: ApiKey <key>`.
+
 ### Alerts
 
 | Method | Endpoint | Description |
@@ -235,6 +261,14 @@ Base URL: `http://localhost:8081/api/v1`
 - `GET` `/webhooks/deliveries` — Delivery history
 - `POST` `/webhook/:token` — Receive incoming webhook (public)
 
+**Metrics**
+- `GET` `/metrics/dashboard` — Dashboard metrics (alerts, incidents, notifications, trends)
+- `GET` `/metrics/alerts` — Alert metrics (by status, priority, source)
+- `GET` `/metrics/alerts/trend` — Alert time-series data (hourly/daily/weekly)
+- `GET` `/metrics/incidents` — Incident metrics (by status, severity)
+- `GET` `/metrics/notifications` — Notification metrics (by status, channel)
+- `GET` `/metrics/teams` — Team performance metrics
+
 </details>
 
 ---
@@ -254,11 +288,40 @@ make migrate-down       # Rollback last migration
 make migrate-create NAME=xyz  # Create new migration
 
 make test               # Run unit tests
-make test-integration   # Run integration tests
+make test-integration   # Run integration tests (150+ tests)
 make test-coverage      # Generate coverage report
 
 make clean              # Remove containers and volumes
 ```
+
+### Integration Testing
+
+The project includes a comprehensive integration test suite covering all API endpoints:
+
+```bash
+# Run all integration tests
+make test-integration
+
+# Run specific test file
+cd backend && go test -v ./tests/integration/... -run TestAlerts
+```
+
+**Test Coverage:**
+
+| Domain | Tests | Endpoints Covered |
+|--------|-------|-------------------|
+| Auth | 14 | Register, Login, Refresh, Me, Logout |
+| Alerts | 23 | CRUD, Acknowledge, Close, Snooze, Assign |
+| Teams | 16 | CRUD, Members management |
+| Schedules | 19 | CRUD, Rotations, Overrides, On-call |
+| Escalations | 17 | CRUD, Rules, Targets |
+| Incidents | 22 | CRUD, Responders, Timeline, Notes, Alerts |
+| Notifications | 19 | Channels, Preferences, Send, Logs |
+| Webhooks | 18 | Endpoints, Incoming tokens, Deliveries |
+| Metrics | 17 | Dashboard, Alerts, Incidents, Notifications, Teams |
+| Users | 2 | List users |
+
+The tests use an isolated PostgreSQL database (`docker-compose.test.yml`) and clean the database between test runs for isolation.
 
 ### Backend Development
 
@@ -344,6 +407,7 @@ pulsar/
 
 ## Roadmap
 
+### ✅ Completed
 - [x] User authentication and multi-tenancy
 - [x] Alert management with full lifecycle
 - [x] Team management and RBAC
@@ -354,12 +418,23 @@ pulsar/
 - [x] Webhooks (outgoing and incoming)
 - [x] Real-time WebSocket updates
 - [x] Dark/Light theme support
-- [ ] Email notification delivery
-- [ ] Slack integration
-- [ ] Microsoft Teams integration
-- [ ] Mobile push notifications
-- [ ] Metrics and reporting dashboard
-- [ ] API key authentication
+- [x] Email notification delivery
+- [x] Slack integration (webhook-based)
+- [x] Microsoft Teams integration (webhook-based)
+- [x] Integration test suite (150+ tests)
+
+### 🚧 In Progress
+- [x] API key authentication for programmatic access
+- [x] Metrics and reporting dashboard (API complete)
+- [ ] Mobile push notifications (Firebase/APNS)
+
+### 📋 Planned
+- [ ] Slack App (OAuth, interactive messages)
+- [ ] Microsoft Teams App (Bot framework)
+- [ ] PagerDuty/Opsgenie import tools
+- [ ] Terraform provider
+- [ ] Prometheus/Grafana integration
+- [ ] Audit logging
 
 ---
 

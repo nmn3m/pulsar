@@ -18,6 +18,11 @@
 // @name Authorization
 // @description Type "Bearer" followed by a space and JWT token.
 
+// @securityDefinitions.apikey APIKeyAuth
+// @in header
+// @name X-API-Key
+// @description API key for programmatic access. Generate keys at /api/v1/api-keys.
+
 package main
 
 import (
@@ -83,9 +88,26 @@ func main() {
 	notificationRepo := postgres.NewNotificationRepository(db.DB)
 	incidentRepo := postgres.NewIncidentRepository(db.DB)
 	webhookRepo := postgres.NewWebhookRepository(db.DB)
+	apiKeyRepo := postgres.NewAPIKeyRepository(db.DB)
+	metricsRepo := postgres.NewMetricsRepository(db.DB)
+	emailVerificationRepo := postgres.NewEmailVerificationRepository(db)
+
+	// Initialize email service (for OTP verification)
+	var emailService *service.EmailService
+	var emailVerificationService *service.EmailVerificationService
+	if cfg.SMTP.Enabled {
+		emailService = service.NewEmailService(&cfg.SMTP)
+		emailVerificationService = service.NewEmailVerificationService(emailVerificationRepo, userRepo, emailService)
+		log.Info("Email verification service enabled",
+			zap.String("smtp_host", cfg.SMTP.Host),
+			zap.Int("smtp_port", cfg.SMTP.Port),
+		)
+	} else {
+		log.Info("Email verification service disabled (SMTP not configured)")
+	}
 
 	// Initialize services
-	authService := service.NewAuthService(userRepo, orgRepo, cfg)
+	authService := service.NewAuthService(userRepo, orgRepo, cfg, emailVerificationService)
 	teamService := service.NewTeamService(teamRepo, userRepo)
 	userService := service.NewUserService(orgRepo)
 	scheduleService := service.NewScheduleService(scheduleRepo, userRepo)
@@ -93,6 +115,8 @@ func main() {
 	wsService := service.NewWebSocketService(log)
 	incidentService := service.NewIncidentService(incidentRepo, wsService)
 	webhookService := service.NewWebhookService(webhookRepo, log)
+	apiKeyService := service.NewAPIKeyService(apiKeyRepo)
+	metricsService := service.NewMetricsService(metricsRepo)
 
 	// Initialize alert notifier with dependencies
 	alertNotifier := service.NewAlertNotifier(notificationService, userRepo, teamRepo, scheduleService)
@@ -102,7 +126,7 @@ func main() {
 	escalationService := service.NewEscalationService(escalationRepo, alertRepo, alertNotifier)
 
 	// Initialize handlers
-	authHandler := rest.NewAuthHandler(authService)
+	authHandler := rest.NewAuthHandler(authService, emailVerificationService)
 	alertHandler := rest.NewAlertHandler(alertService)
 	teamHandler := rest.NewTeamHandler(teamService)
 	userHandler := rest.NewUserHandler(userService)
@@ -113,9 +137,13 @@ func main() {
 	wsHandler := rest.NewWebSocketHandler(wsService, log)
 	webhookHandler := rest.NewWebhookHandler(webhookService)
 	incomingWebhookHandler := rest.NewIncomingWebhookHandler(webhookService, alertService, log)
+	apiKeyHandler := rest.NewAPIKeyHandler(apiKeyService)
+	metricsHandler := rest.NewMetricsHandler(metricsService)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret)
+	apiKeyMiddleware := middleware.NewAPIKeyMiddleware(apiKeyService)
+	combinedAuth := middleware.NewCombinedAuthMiddleware(authMiddleware, apiKeyMiddleware)
 
 	// Setup router
 	if cfg.Server.Env == "production" {
@@ -148,6 +176,8 @@ func main() {
 			auth.POST("/login", authHandler.Login)
 			auth.POST("/refresh", authHandler.RefreshToken)
 			auth.POST("/logout", authHandler.Logout)
+			auth.POST("/verify-email", authHandler.VerifyEmail)
+			auth.POST("/resend-otp", authHandler.ResendOTP)
 		}
 
 		// Protected routes
@@ -155,6 +185,19 @@ func main() {
 		protected.Use(authMiddleware.RequireAuth())
 		{
 			protected.GET("/auth/me", authHandler.GetMe)
+
+			// API Key routes
+			apiKeys := protected.Group("/api-keys")
+			{
+				apiKeys.GET("/scopes", apiKeyHandler.GetScopes)
+				apiKeys.GET("", apiKeyHandler.List)
+				apiKeys.POST("", apiKeyHandler.Create)
+				apiKeys.GET("/all", apiKeyHandler.ListAll)
+				apiKeys.GET("/:id", apiKeyHandler.Get)
+				apiKeys.PATCH("/:id", apiKeyHandler.Update)
+				apiKeys.DELETE("/:id", apiKeyHandler.Delete)
+				apiKeys.POST("/:id/revoke", apiKeyHandler.Revoke)
+			}
 
 			// User routes
 			protected.GET("/users", userHandler.ListOrganizationUsers)
@@ -292,6 +335,17 @@ func main() {
 				incidents.DELETE("/:id/alerts/:alertId", incidentHandler.UnlinkAlert)
 			}
 
+			// Metrics routes
+			metrics := protected.Group("/metrics")
+			{
+				metrics.GET("/dashboard", metricsHandler.GetDashboard)
+				metrics.GET("/alerts", metricsHandler.GetAlertMetrics)
+				metrics.GET("/alerts/trend", metricsHandler.GetAlertTrend)
+				metrics.GET("/incidents", metricsHandler.GetIncidentMetrics)
+				metrics.GET("/notifications", metricsHandler.GetNotificationMetrics)
+				metrics.GET("/teams", metricsHandler.GetTeamMetrics)
+			}
+
 			// WebSocket route
 			protected.GET("/ws", wsHandler.HandleWebSocket)
 			protected.GET("/ws/stats", wsHandler.GetStats)
@@ -315,6 +369,32 @@ func main() {
 
 		// Public incoming webhook route (no auth required)
 		v1.POST("/webhook/:token", incomingWebhookHandler.ReceiveWebhook)
+
+		// API-key or JWT authenticated routes (for programmatic access)
+		// These routes accept either Bearer token or X-API-Key header
+		apiAuth := v1.Group("")
+		apiAuth.Use(combinedAuth.RequireAuth())
+		{
+			// Alert management via API key
+			apiAlerts := apiAuth.Group("/v2/alerts")
+			{
+				apiAlerts.GET("", alertHandler.List)
+				apiAlerts.POST("", alertHandler.Create)
+				apiAlerts.GET("/:id", alertHandler.Get)
+				apiAlerts.PATCH("/:id", alertHandler.Update)
+				apiAlerts.POST("/:id/acknowledge", alertHandler.Acknowledge)
+				apiAlerts.POST("/:id/close", alertHandler.Close)
+			}
+
+			// Incident management via API key
+			apiIncidents := apiAuth.Group("/v2/incidents")
+			{
+				apiIncidents.GET("", incidentHandler.List)
+				apiIncidents.POST("", incidentHandler.Create)
+				apiIncidents.GET("/:id", incidentHandler.GetWithDetails)
+				apiIncidents.PATCH("/:id", incidentHandler.Update)
+			}
+		}
 	}
 
 	// Create HTTP server

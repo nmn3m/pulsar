@@ -1,5 +1,76 @@
 basePath: /api/v1
 definitions:
+  domain.APIKey:
+    properties:
+      created_at:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      key_prefix:
+        description: First 8 chars for identification
+        type: string
+      last_used_at:
+        type: string
+      name:
+        type: string
+      organization:
+        allOf:
+        - $ref: '#/definitions/domain.Organization'
+        description: Relations
+      organization_id:
+        type: string
+      scopes:
+        items:
+          type: string
+        type: array
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      user_id:
+        type: string
+    type: object
+  domain.APIKeyResponse:
+    properties:
+      created_at:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      key:
+        description: Only populated on creation
+        type: string
+      key_prefix:
+        description: First 8 chars for identification
+        type: string
+      last_used_at:
+        type: string
+      name:
+        type: string
+      organization:
+        allOf:
+        - $ref: '#/definitions/domain.Organization'
+        description: Relations
+      organization_id:
+        type: string
+      scopes:
+        items:
+          type: string
+        type: array
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+      user_id:
+        type: string
+    type: object
   domain.Alert:
     properties:
       acknowledged_at:
@@ -57,6 +128,35 @@ definitions:
       updated_at:
         type: string
     type: object
+  domain.AlertMetrics:
+    properties:
+      acknowledged:
+        type: integer
+      avg_resolution_time_seconds:
+        description: Time to close
+        type: number
+      avg_response_time_seconds:
+        description: Time to acknowledge
+        type: number
+      by_priority:
+        additionalProperties:
+          format: int64
+          type: integer
+        type: object
+      by_source:
+        additionalProperties:
+          format: int64
+          type: integer
+        type: object
+      closed:
+        type: integer
+      open:
+        type: integer
+      snoozed:
+        type: integer
+      total:
+        type: integer
+    type: object
   domain.AlertPriority:
     enum:
     - P1
@@ -95,18 +195,64 @@ definitions:
     - AlertStatusAcknowledged
     - AlertStatusClosed
     - AlertStatusSnoozed
+  domain.AlertTrend:
+    properties:
+      closed:
+        items:
+          $ref: '#/definitions/domain.TimeSeriesPoint'
+        type: array
+      created:
+        items:
+          $ref: '#/definitions/domain.TimeSeriesPoint'
+        type: array
+      period:
+        description: hourly, daily, weekly
+        type: string
+    type: object
   domain.ChannelType:
     enum:
     - email
     - slack
     - teams
     - webhook
+    - push
+    - push_apns
     type: string
+    x-enum-comments:
+      ChannelTypePush: Firebase Cloud Messaging
+      ChannelTypePushAPNS: Apple Push Notification Service (future)
+    x-enum-descriptions:
+    - ""
+    - ""
+    - ""
+    - ""
+    - Firebase Cloud Messaging
+    - Apple Push Notification Service (future)
     x-enum-varnames:
     - ChannelTypeEmail
     - ChannelTypeSlack
     - ChannelTypeTeams
     - ChannelTypeWebhook
+    - ChannelTypePush
+    - ChannelTypePushAPNS
+  domain.CreateAPIKeyRequest:
+    properties:
+      expires_at:
+        description: RFC3339 format
+        type: string
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+      scopes:
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - name
+    - scopes
+    type: object
   domain.CreateIncomingWebhookTokenRequest:
     properties:
       default_priority:
@@ -192,6 +338,19 @@ definitions:
     required:
     - name
     - url
+    type: object
+  domain.DashboardMetrics:
+    properties:
+      alert_trend:
+        $ref: '#/definitions/domain.AlertTrend'
+      alerts:
+        $ref: '#/definitions/domain.AlertMetrics'
+      incidents:
+        $ref: '#/definitions/domain.IncidentMetrics'
+      notifications:
+        $ref: '#/definitions/domain.NotificationMetrics'
+      updated_at:
+        type: string
     type: object
   domain.EscalationPolicy:
     properties:
@@ -352,6 +511,30 @@ definitions:
         type: string
       linked_by_user_id:
         type: string
+    type: object
+  domain.IncidentMetrics:
+    properties:
+      avg_resolution_time_seconds:
+        type: number
+      by_severity:
+        additionalProperties:
+          format: int64
+          type: integer
+        type: object
+      closed:
+        type: integer
+      identified:
+        type: integer
+      investigating:
+        type: integer
+      monitoring:
+        type: integer
+      open:
+        type: integer
+      resolved:
+        type: integer
+      total:
+        type: integer
     type: object
   domain.IncidentResponder:
     properties:
@@ -536,6 +719,22 @@ definitions:
       user_id:
         type: string
     type: object
+  domain.NotificationMetrics:
+    properties:
+      by_channel:
+        additionalProperties:
+          format: int64
+          type: integer
+        type: object
+      failed:
+        type: integer
+      pending:
+        type: integer
+      sent:
+        type: integer
+      total:
+        type: integer
+    type: object
   domain.NotificationStatus:
     enum:
     - pending
@@ -593,6 +792,13 @@ definitions:
         $ref: '#/definitions/domain.User'
       user_id:
         type: string
+    type: object
+  domain.ResendOTPRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
     type: object
   domain.ResponderRole:
     enum:
@@ -762,6 +968,28 @@ definitions:
       updated_at:
         type: string
     type: object
+  domain.TeamMetrics:
+    properties:
+      acknowledged_alerts:
+        type: integer
+      avg_response_time_seconds:
+        type: number
+      closed_alerts:
+        type: integer
+      team_id:
+        type: string
+      team_name:
+        type: string
+      total_alerts:
+        type: integer
+    type: object
+  domain.TimeSeriesPoint:
+    properties:
+      timestamp:
+        type: string
+      value:
+        type: integer
+    type: object
   domain.TimelineEventType:
     enum:
     - created
@@ -803,6 +1031,17 @@ definitions:
         $ref: '#/definitions/domain.User'
       user_id:
         type: string
+    type: object
+  domain.UpdateAPIKeyRequest:
+    properties:
+      is_active:
+        type: boolean
+      name:
+        type: string
+      scopes:
+        items:
+          type: string
+        type: array
     type: object
   domain.UpdateNotificationChannelRequest:
     properties:
@@ -869,6 +1108,8 @@ definitions:
         type: string
       email:
         type: string
+      email_verified:
+        type: boolean
       full_name:
         type: string
       id:
@@ -916,6 +1157,8 @@ definitions:
         type: string
       email:
         type: string
+      email_verified:
+        type: boolean
       full_name:
         type: string
       id:
@@ -937,6 +1180,16 @@ definitions:
         type: string
       username:
         type: string
+    type: object
+  domain.VerifyEmailRequest:
+    properties:
+      email:
+        type: string
+      otp:
+        type: string
+    required:
+    - email
+    - otp
     type: object
   domain.WebhookEndpoint:
     properties:
@@ -1045,6 +1298,8 @@ definitions:
         $ref: '#/definitions/domain.Organization'
       refresh_token:
         type: string
+      requires_email_verification:
+        type: boolean
       user:
         $ref: '#/definitions/domain.User'
     type: object
@@ -1779,6 +2034,267 @@ paths:
       summary: Snooze an alert
       tags:
       - Alerts
+  /api-keys:
+    get:
+      consumes:
+      - application/json
+      description: List all API keys for the current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/domain.APIKey'
+              type: array
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List API keys
+      tags:
+      - API Keys
+    post:
+      consumes:
+      - application/json
+      description: Create a new API key for programmatic access. The raw key is only
+        shown once.
+      parameters:
+      - description: Create API key request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateAPIKeyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.APIKeyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new API key
+      tags:
+      - API Keys
+  /api-keys/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Permanently delete an API key by ID
+      parameters:
+      - description: API Key ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete an API key
+      tags:
+      - API Keys
+    get:
+      consumes:
+      - application/json
+      description: Get an API key by ID
+      parameters:
+      - description: API Key ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.APIKey'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get an API key
+      tags:
+      - API Keys
+    patch:
+      consumes:
+      - application/json
+      description: Update an API key by ID
+      parameters:
+      - description: API Key ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update API key request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateAPIKeyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.APIKey'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update an API key
+      tags:
+      - API Keys
+  /api-keys/{id}/revoke:
+    post:
+      consumes:
+      - application/json
+      description: Revoke (deactivate) an API key by ID
+      parameters:
+      - description: API Key ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Revoke an API key
+      tags:
+      - API Keys
+  /api-keys/all:
+    get:
+      consumes:
+      - application/json
+      description: List all API keys for the organization (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/domain.APIKey'
+              type: array
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all API keys in organization
+      tags:
+      - API Keys
+  /api-keys/scopes:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all available API key scopes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+      summary: Get available scopes
+      tags:
+      - API Keys
   /auth/login:
     post:
       consumes:
@@ -1922,6 +2438,66 @@ paths:
               type: string
             type: object
       summary: Register a new user
+      tags:
+      - Auth
+  /auth/resend-otp:
+    post:
+      consumes:
+      - application/json
+      description: Resend OTP verification code to user's email
+      parameters:
+      - description: Resend OTP request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ResendOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Resend OTP verification code
+      tags:
+      - Auth
+  /auth/verify-email:
+    post:
+      consumes:
+      - application/json
+      description: Verify user email address using OTP code sent via email
+      parameters:
+      - description: Verify email request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.VerifyEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Verify email with OTP
       tags:
       - Auth
   /escalation-policies:
@@ -3043,6 +3619,251 @@ paths:
       summary: Get incident timeline
       tags:
       - Incidents
+  /metrics/alerts:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed alert metrics including counts by status, priority,
+        source, and response times
+      parameters:
+      - description: Start time (RFC3339 format)
+        in: query
+        name: start_time
+        type: string
+      - description: End time (RFC3339 format)
+        in: query
+        name: end_time
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AlertMetrics'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get alert metrics
+      tags:
+      - Metrics
+  /metrics/alerts/trend:
+    get:
+      consumes:
+      - application/json
+      description: Get time-series data for alert creation and closure
+      parameters:
+      - description: Start time (RFC3339 format)
+        in: query
+        name: start_time
+        type: string
+      - description: End time (RFC3339 format)
+        in: query
+        name: end_time
+        type: string
+      - default: daily
+        description: 'Trend period: hourly, daily, weekly'
+        in: query
+        name: period
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AlertTrend'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get alert trend data
+      tags:
+      - Metrics
+  /metrics/dashboard:
+    get:
+      consumes:
+      - application/json
+      description: Get aggregated metrics for the dashboard including alerts, incidents,
+        notifications, and trends
+      parameters:
+      - description: Start time (RFC3339 format)
+        in: query
+        name: start_time
+        type: string
+      - description: End time (RFC3339 format)
+        in: query
+        name: end_time
+        type: string
+      - default: daily
+        description: 'Trend period: hourly, daily, weekly'
+        in: query
+        name: period
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.DashboardMetrics'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get dashboard metrics
+      tags:
+      - Metrics
+  /metrics/incidents:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed incident metrics including counts by status, severity,
+        and resolution times
+      parameters:
+      - description: Start time (RFC3339 format)
+        in: query
+        name: start_time
+        type: string
+      - description: End time (RFC3339 format)
+        in: query
+        name: end_time
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.IncidentMetrics'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get incident metrics
+      tags:
+      - Metrics
+  /metrics/notifications:
+    get:
+      consumes:
+      - application/json
+      description: Get notification delivery metrics including counts by status and
+        channel
+      parameters:
+      - description: Start time (RFC3339 format)
+        in: query
+        name: start_time
+        type: string
+      - description: End time (RFC3339 format)
+        in: query
+        name: end_time
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.NotificationMetrics'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get notification metrics
+      tags:
+      - Metrics
+  /metrics/teams:
+    get:
+      consumes:
+      - application/json
+      description: Get performance metrics for all teams including alert counts and
+        response times
+      parameters:
+      - description: Start time (RFC3339 format)
+        in: query
+        name: start_time
+        type: string
+      - description: End time (RFC3339 format)
+        in: query
+        name: end_time
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.TeamMetrics'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get team performance metrics
+      tags:
+      - Metrics
   /notifications/channels:
     get:
       consumes:
@@ -5095,6 +5916,11 @@ paths:
       tags:
       - Webhooks
 securityDefinitions:
+  APIKeyAuth:
+    description: API key for programmatic access. Generate keys at /api/v1/api-keys.
+    in: header
+    name: X-API-Key
+    type: apiKey
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token.
     in: header

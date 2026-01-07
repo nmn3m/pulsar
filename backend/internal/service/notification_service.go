@@ -324,7 +324,7 @@ func (s *NotificationService) SendNotification(ctx context.Context, orgID uuid.U
 	if err != nil {
 		errMsg := fmt.Sprintf("failed to create provider: %v", err)
 		s.repo.UpdateLogStatus(ctx, log.ID, domain.NotificationStatusFailed, &errMsg)
-		return log, fmt.Errorf(errMsg)
+		return log, fmt.Errorf("%s", errMsg)
 	}
 
 	// Send the notification

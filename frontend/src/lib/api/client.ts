@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import type { AuthResponse, LoginRequest, RegisterRequest, User } from '$lib/types/user';
+import type { AuthResponse, LoginRequest, RegisterRequest, User, VerifyEmailRequest, ResendOTPRequest } from '$lib/types/user';
 import type {
 	Alert,
 	AssignAlertRequest,
@@ -90,6 +90,15 @@ import type {
 	CreateIncomingWebhookTokenRequest,
 	ListWebhookDeliveriesResponse
 } from '$lib/types/webhook';
+import type {
+	DashboardMetrics,
+	AlertMetrics,
+	IncidentMetrics,
+	NotificationMetrics,
+	AlertTrend,
+	TeamMetrics,
+	MetricsFilter
+} from '$lib/types/metrics';
 
 const API_URL = browser ? import.meta.env.VITE_API_URL || 'http://localhost:8080' : 'http://backend:8080';
 
@@ -208,6 +217,20 @@ class APIClient {
 
 	async getMe(): Promise<User> {
 		return this.request<User>('/api/v1/auth/me');
+	}
+
+	async verifyEmail(data: VerifyEmailRequest): Promise<{ message: string }> {
+		return this.request<{ message: string }>('/api/v1/auth/verify-email', {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
+	}
+
+	async resendOTP(data: ResendOTPRequest): Promise<{ message: string }> {
+		return this.request<{ message: string }>('/api/v1/auth/resend-otp', {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
 	}
 
 	// User endpoints
@@ -924,6 +947,76 @@ class APIClient {
 		await this.request(`/api/v1/webhooks/incoming/${id}`, {
 			method: 'DELETE'
 		});
+	}
+
+	// ==================== Metrics ====================
+
+	async getDashboardMetrics(filter?: MetricsFilter): Promise<DashboardMetrics> {
+		const params = new URLSearchParams();
+		if (filter?.start_time) params.append('start_time', filter.start_time);
+		if (filter?.end_time) params.append('end_time', filter.end_time);
+		if (filter?.period) params.append('period', filter.period);
+
+		const queryString = params.toString();
+		const endpoint = queryString ? `/api/v1/metrics/dashboard?${queryString}` : '/api/v1/metrics/dashboard';
+
+		return this.request<DashboardMetrics>(endpoint);
+	}
+
+	async getAlertMetrics(filter?: MetricsFilter): Promise<AlertMetrics> {
+		const params = new URLSearchParams();
+		if (filter?.start_time) params.append('start_time', filter.start_time);
+		if (filter?.end_time) params.append('end_time', filter.end_time);
+
+		const queryString = params.toString();
+		const endpoint = queryString ? `/api/v1/metrics/alerts?${queryString}` : '/api/v1/metrics/alerts';
+
+		return this.request<AlertMetrics>(endpoint);
+	}
+
+	async getIncidentMetrics(filter?: MetricsFilter): Promise<IncidentMetrics> {
+		const params = new URLSearchParams();
+		if (filter?.start_time) params.append('start_time', filter.start_time);
+		if (filter?.end_time) params.append('end_time', filter.end_time);
+
+		const queryString = params.toString();
+		const endpoint = queryString ? `/api/v1/metrics/incidents?${queryString}` : '/api/v1/metrics/incidents';
+
+		return this.request<IncidentMetrics>(endpoint);
+	}
+
+	async getNotificationMetrics(filter?: MetricsFilter): Promise<NotificationMetrics> {
+		const params = new URLSearchParams();
+		if (filter?.start_time) params.append('start_time', filter.start_time);
+		if (filter?.end_time) params.append('end_time', filter.end_time);
+
+		const queryString = params.toString();
+		const endpoint = queryString ? `/api/v1/metrics/notifications?${queryString}` : '/api/v1/metrics/notifications';
+
+		return this.request<NotificationMetrics>(endpoint);
+	}
+
+	async getAlertTrend(filter?: MetricsFilter): Promise<AlertTrend> {
+		const params = new URLSearchParams();
+		if (filter?.start_time) params.append('start_time', filter.start_time);
+		if (filter?.end_time) params.append('end_time', filter.end_time);
+		if (filter?.period) params.append('period', filter.period);
+
+		const queryString = params.toString();
+		const endpoint = queryString ? `/api/v1/metrics/alerts/trend?${queryString}` : '/api/v1/metrics/alerts/trend';
+
+		return this.request<AlertTrend>(endpoint);
+	}
+
+	async getTeamMetrics(filter?: MetricsFilter): Promise<{ teams: TeamMetrics[] }> {
+		const params = new URLSearchParams();
+		if (filter?.start_time) params.append('start_time', filter.start_time);
+		if (filter?.end_time) params.append('end_time', filter.end_time);
+
+		const queryString = params.toString();
+		const endpoint = queryString ? `/api/v1/metrics/teams?${queryString}` : '/api/v1/metrics/teams';
+
+		return this.request<{ teams: TeamMetrics[] }>(endpoint);
 	}
 }
 
