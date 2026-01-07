@@ -1,4 +1,5 @@
-.PHONY: help up down build logs migrate-up migrate-down migrate-create db-reset test test-db-up test-db-down test-integration test-integration-verbose test-coverage clean
+.PHONY: help up down build logs migrate-up migrate-down migrate-create db-reset test test-db-up test-db-down test-integration test-integration-verbose test-coverage clean \
+	lint lint-backend lint-frontend fmt fmt-backend fmt-frontend fmt-check fmt-check-backend fmt-check-frontend vet
 
 help:
 	@echo "Pulsar - Development Commands"
@@ -17,6 +18,16 @@ help:
 	@echo "  make test-integration - Run integration tests"
 	@echo "  make test-coverage - Run tests with coverage report"
 	@echo "  make clean         - Clean up containers and volumes"
+	@echo ""
+	@echo "Linting & Formatting:"
+	@echo "  make lint          - Run linters (backend + frontend)"
+	@echo "  make lint-backend  - Run Go linters (golangci-lint)"
+	@echo "  make lint-frontend - Run ESLint"
+	@echo "  make fmt           - Format code (backend + frontend)"
+	@echo "  make fmt-backend   - Format Go code (gofmt + goimports)"
+	@echo "  make fmt-frontend  - Format frontend code (Prettier)"
+	@echo "  make fmt-check     - Check formatting (backend + frontend)"
+	@echo "  make vet           - Run go vet"
 
 up:
 	docker-compose up -d
@@ -93,3 +104,41 @@ clean:
 	rm -rf backend/tmp
 	rm -f backend/build-errors.log
 	rm -f backend/coverage.out backend/coverage.html
+
+# Linting targets
+lint: lint-backend lint-frontend
+
+lint-backend:
+	cd backend && golangci-lint run ./...
+
+lint-frontend:
+	cd frontend && npm run lint
+
+# Formatting targets
+fmt: fmt-backend fmt-frontend
+
+fmt-backend:
+	cd backend && gofmt -w .
+	cd backend && goimports -w .
+
+fmt-frontend:
+	cd frontend && npm run format
+
+# Format check targets
+fmt-check: fmt-check-backend fmt-check-frontend
+
+fmt-check-backend:
+	@cd backend && if [ -n "$$(gofmt -l .)" ]; then \
+		echo "Backend: The following files are not formatted:"; \
+		gofmt -l .; \
+		exit 1; \
+	else \
+		echo "Backend: All files are properly formatted"; \
+	fi
+
+fmt-check-frontend:
+	cd frontend && npm run format:check
+
+# Go vet
+vet:
+	cd backend && go vet ./...
