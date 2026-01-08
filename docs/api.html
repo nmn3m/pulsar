@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pulsar API Reference - REST API documentation for the incident management platform.">
+  <title>API Reference - Pulsar Documentation</title>
+  <link rel="icon" type="image/svg+xml" href="assets/pulsar.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-brand">
+        <img src="assets/pulsar.svg" alt="Pulsar Logo">
+        <span>Pulsar</span>
+      </a>
+
+      <ul class="navbar-nav">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+        <li><a href="api.html">API Reference</a></li>
+      </ul>
+
+      <div class="navbar-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </button>
+        <a href="https://github.com/nmn3m/pulsar" class="btn btn-outline" target="_blank" rel="noopener">GitHub</a>
+        <button class="mobile-menu-btn" aria-label="Toggle menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12h18M3 6h18M3 18h18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="docs-layout">
+    <!-- Sidebar -->
+    <aside class="docs-sidebar">
+      <ul class="docs-sidebar-nav">
+        <li class="nav-section">Getting Started</li>
+        <li><a href="docs.html">Overview</a></li>
+        <li><a href="installation.html">Installation</a></li>
+        <li><a href="api.html" class="active">API Reference</a></li>
+
+        <li class="nav-section">Features</li>
+        <li><a href="features/alerts.html">Alerts</a></li>
+        <li><a href="features/incidents.html">Incidents</a></li>
+        <li><a href="features/schedules.html">On-Call Schedules</a></li>
+        <li><a href="features/escalations.html">Escalation Policies</a></li>
+        <li><a href="features/webhooks.html">Webhooks</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="docs-content">
+      <h1>API Reference</h1>
+
+      <p>Pulsar provides a comprehensive REST API for managing alerts, incidents, schedules, and more. The API follows RESTful conventions and returns JSON responses.</p>
+
+      <div class="callout callout-info">
+        <div class="callout-title">Interactive Documentation</div>
+        <p>For full interactive API documentation, visit the <a href="http://localhost:8081/swagger/index.html" target="_blank">Swagger UI</a> when running Pulsar locally.</p>
+      </div>
+
+      <h2>Base URL</h2>
+
+      <div class="code-block">
+        <pre><code>http://localhost:8081/api/v1</code></pre>
+      </div>
+
+      <h2>Authentication</h2>
+
+      <p>Pulsar supports two authentication methods:</p>
+
+      <h3>1. JWT Authentication (User Sessions)</h3>
+
+      <p>Login to receive access and refresh tokens:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code><span class="token-comment"># Login</span>
+curl -X POST http://localhost:8081/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "your-password"
+  }'
+
+<span class="token-comment"># Response</span>
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
+  "expires_in": 900
+}</code></pre>
+      </div>
+
+      <p>Use the access token in subsequent requests:</p>
+
+      <div class="code-block">
+        <pre><code>Authorization: Bearer &lt;access_token&gt;</code></pre>
+      </div>
+
+      <h3>2. API Key Authentication (Programmatic Access)</h3>
+
+      <p>Create API keys for service-to-service communication:</p>
+
+      <div class="code-block">
+        <pre><code>Authorization: ApiKey &lt;api_key&gt;
+<span class="token-comment"># or</span>
+X-API-Key: &lt;api_key&gt;</code></pre>
+      </div>
+
+      <h2>API Endpoints</h2>
+
+      <h3>Authentication</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/auth/register</code></td>
+            <td>Register new user and organization</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/auth/login</code></td>
+            <td>Login and get tokens</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/auth/refresh</code></td>
+            <td>Refresh access token</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/auth/logout</code></td>
+            <td>Logout user</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-get">GET</span></td>
+            <td><code>/auth/me</code></td>
+            <td>Get current user info</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Alerts</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-get">GET</span></td>
+            <td><code>/alerts</code></td>
+            <td>List alerts (with filters)</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/alerts</code></td>
+            <td>Create new alert</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-get">GET</span></td>
+            <td><code>/alerts/:id</code></td>
+            <td>Get alert by ID</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-put">PATCH</span></td>
+            <td><code>/alerts/:id</code></td>
+            <td>Update alert</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-delete">DELETE</span></td>
+            <td><code>/alerts/:id</code></td>
+            <td>Delete alert</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/alerts/:id/acknowledge</code></td>
+            <td>Acknowledge alert</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/alerts/:id/close</code></td>
+            <td>Close alert</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/alerts/:id/snooze</code></td>
+            <td>Snooze alert</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/alerts/:id/assign</code></td>
+            <td>Assign alert to user/team</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Incidents</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-get">GET</span></td>
+            <td><code>/incidents</code></td>
+            <td>List incidents</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/incidents</code></td>
+            <td>Create incident</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-get">GET</span></td>
+            <td><code>/incidents/:id</code></td>
+            <td>Get incident by ID</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-put">PATCH</span></td>
+            <td><code>/incidents/:id</code></td>
+            <td>Update incident</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/incidents/:id/responders</code></td>
+            <td>Add responder</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-get">GET</span></td>
+            <td><code>/incidents/:id/timeline</code></td>
+            <td>Get timeline</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/incidents/:id/notes</code></td>
+            <td>Add note</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/incidents/:id/alerts</code></td>
+            <td>Link alert to incident</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Schedules</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-get">GET</span></td>
+            <td><code>/schedules</code></td>
+            <td>List schedules</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/schedules</code></td>
+            <td>Create schedule</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-get">GET</span></td>
+            <td><code>/schedules/:id</code></td>
+            <td>Get schedule by ID</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-get">GET</span></td>
+            <td><code>/schedules/:id/on-call</code></td>
+            <td>Get current on-call user</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/schedules/:id/rotations</code></td>
+            <td>Add rotation</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/schedules/:id/overrides</code></td>
+            <td>Add override</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Teams</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-get">GET</span></td>
+            <td><code>/teams</code></td>
+            <td>List teams</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/teams</code></td>
+            <td>Create team</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-get">GET</span></td>
+            <td><code>/teams/:id</code></td>
+            <td>Get team by ID</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/teams/:id/members</code></td>
+            <td>Add member to team</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Webhooks</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-get">GET</span></td>
+            <td><code>/webhooks</code></td>
+            <td>List outgoing webhooks</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/webhooks</code></td>
+            <td>Create outgoing webhook</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-get">GET</span></td>
+            <td><code>/webhooks/tokens</code></td>
+            <td>List incoming webhook tokens</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/webhooks/tokens</code></td>
+            <td>Create incoming webhook token</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-post">POST</span></td>
+            <td><code>/webhook/:token</code></td>
+            <td>Public endpoint to receive alerts</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Example: Create an Alert</h2>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/alerts \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "High CPU Usage",
+    "description": "Server cpu-1 is at 95% CPU",
+    "priority": "high",
+    "source": "prometheus",
+    "tags": ["production", "server"]
+  }'</code></pre>
+      </div>
+
+      <h2>Example: Send Alert via Webhook</h2>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/webhook/&lt;your-token&gt; \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Database Connection Error",
+    "description": "Unable to connect to primary database",
+    "priority": "critical",
+    "source": "healthcheck"
+  }'</code></pre>
+      </div>
+
+      <h2>Error Responses</h2>
+
+      <p>API errors return JSON with the following structure:</p>
+
+      <div class="code-block">
+        <pre><code>{
+  "error": "error_code",
+  "message": "Human readable error message"
+}</code></pre>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Status Code</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>400</td>
+            <td>Bad Request - Invalid parameters</td>
+          </tr>
+          <tr>
+            <td>401</td>
+            <td>Unauthorized - Missing or invalid token</td>
+          </tr>
+          <tr>
+            <td>403</td>
+            <td>Forbidden - Insufficient permissions</td>
+          </tr>
+          <tr>
+            <td>404</td>
+            <td>Not Found - Resource doesn't exist</td>
+          </tr>
+          <tr>
+            <td>500</td>
+            <td>Internal Server Error</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Rate Limiting</h2>
+
+      <p>API requests are rate limited to prevent abuse. Current limits:</p>
+
+      <ul>
+        <li>Authenticated requests: 1000 requests/minute</li>
+        <li>Webhook endpoints: 100 requests/minute per token</li>
+      </ul>
+    </main>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

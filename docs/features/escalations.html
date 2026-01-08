@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pulsar Escalation Policies - Configure multi-level escalation rules for alerts.">
+  <title>Escalation Policies - Pulsar Documentation</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/pulsar.svg">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="../index.html" class="navbar-brand">
+        <img src="../assets/pulsar.svg" alt="Pulsar Logo">
+        <span>Pulsar</span>
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+        <li><a href="../api.html">API Reference</a></li>
+      </ul>
+      <div class="navbar-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </button>
+        <a href="https://github.com/nmn3m/pulsar" class="btn btn-outline" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="docs-layout">
+    <aside class="docs-sidebar">
+      <ul class="docs-sidebar-nav">
+        <li class="nav-section">Getting Started</li>
+        <li><a href="../docs.html">Overview</a></li>
+        <li><a href="../installation.html">Installation</a></li>
+        <li><a href="../api.html">API Reference</a></li>
+        <li class="nav-section">Features</li>
+        <li><a href="alerts.html">Alerts</a></li>
+        <li><a href="incidents.html">Incidents</a></li>
+        <li><a href="schedules.html">On-Call Schedules</a></li>
+        <li><a href="escalations.html" class="active">Escalation Policies</a></li>
+        <li><a href="webhooks.html">Webhooks</a></li>
+      </ul>
+    </aside>
+
+    <main class="docs-content">
+      <h1>Escalation Policies</h1>
+
+      <p>Escalation policies define how alerts are routed and escalated when they're not acknowledged. They ensure critical alerts reach the right people, even if the primary responder is unavailable.</p>
+
+      <h2>How Escalation Works</h2>
+
+      <div class="code-block">
+        <pre><code>Alert Created
+     |
+     v
+[Level 1] Notify on-call from Schedule A
+     |
+     | (wait 5 minutes)
+     |
+     v
+Not Acknowledged? --> [Level 2] Notify Team Lead
+     |
+     | (wait 10 minutes)
+     |
+     v
+Not Acknowledged? --> [Level 3] Notify Engineering Manager
+     |
+     v
+Continue until acknowledged or max levels reached</code></pre>
+      </div>
+
+      <h2>Key Concepts</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Concept</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Escalation Policy</strong></td>
+            <td>A named set of escalation rules</td>
+          </tr>
+          <tr>
+            <td><strong>Escalation Rule</strong></td>
+            <td>A level in the escalation chain</td>
+          </tr>
+          <tr>
+            <td><strong>Target</strong></td>
+            <td>Who to notify (user, team, or schedule)</td>
+          </tr>
+          <tr>
+            <td><strong>Delay</strong></td>
+            <td>Time to wait before escalating</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Creating an Escalation Policy</h2>
+
+      <h3>Via Web UI</h3>
+      <ol>
+        <li>Navigate to <strong>Escalation Policies</strong></li>
+        <li>Click <strong>Create Policy</strong></li>
+        <li>Add escalation rules with targets and delays</li>
+        <li>Save the policy</li>
+      </ol>
+
+      <h3>Via API</h3>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/escalation-policies \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Platform Critical Alerts",
+    "description": "Escalation for critical platform issues",
+    "repeat_enabled": true,
+    "repeat_limit": 3
+  }'</code></pre>
+      </div>
+
+      <h2>Adding Escalation Rules</h2>
+
+      <p>Rules define each level in the escalation chain:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/escalation-policies/{id}/rules \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "level": 1,
+    "delay_minutes": 0,
+    "targets": [
+      {
+        "type": "schedule",
+        "target_id": "schedule-uuid"
+      }
+    ]
+  }'
+
+<span class="token-comment"># Add Level 2</span>
+curl -X POST http://localhost:8081/api/v1/escalation-policies/{id}/rules \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "level": 2,
+    "delay_minutes": 5,
+    "targets": [
+      {
+        "type": "user",
+        "target_id": "team-lead-uuid"
+      }
+    ]
+  }'
+
+<span class="token-comment"># Add Level 3</span>
+curl -X POST http://localhost:8081/api/v1/escalation-policies/{id}/rules \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "level": 3,
+    "delay_minutes": 10,
+    "targets": [
+      {
+        "type": "team",
+        "target_id": "engineering-team-uuid"
+      }
+    ]
+  }'</code></pre>
+      </div>
+
+      <h2>Target Types</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>user</code></td>
+            <td>Notify a specific user</td>
+          </tr>
+          <tr>
+            <td><code>team</code></td>
+            <td>Notify all members of a team</td>
+          </tr>
+          <tr>
+            <td><code>schedule</code></td>
+            <td>Notify current on-call from a schedule</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Repeat Behavior</h2>
+
+      <p>When all levels are exhausted without acknowledgment:</p>
+
+      <ul>
+        <li><strong>repeat_enabled: true</strong> - Start over from Level 1</li>
+        <li><strong>repeat_limit: N</strong> - Maximum number of repeat cycles</li>
+      </ul>
+
+      <div class="code-block">
+        <pre><code>{
+  "repeat_enabled": true,
+  "repeat_limit": 3  // Will repeat escalation up to 3 times
+}</code></pre>
+      </div>
+
+      <h2>Example: 3-Level Escalation</h2>
+
+      <div class="code-block">
+        <pre><code>Policy: "Critical Infrastructure Alerts"
+
+Level 1 (immediate):
+  - Target: "Infrastructure On-Call" schedule
+  - Notify current on-call engineer
+
+Level 2 (after 5 min):
+  - Target: Infrastructure Team Lead
+  - Notify if Level 1 not acknowledged
+
+Level 3 (after 10 min):
+  - Target: VP of Engineering
+  - Notify if Level 2 not acknowledged
+
+Repeat: Enabled (max 2 cycles)</code></pre>
+      </div>
+
+      <h2>Escalation Policy Fields</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>id</code></td>
+            <td>UUID</td>
+            <td>Unique identifier</td>
+          </tr>
+          <tr>
+            <td><code>name</code></td>
+            <td>string</td>
+            <td>Policy name</td>
+          </tr>
+          <tr>
+            <td><code>description</code></td>
+            <td>string</td>
+            <td>Optional description</td>
+          </tr>
+          <tr>
+            <td><code>rules</code></td>
+            <td>array</td>
+            <td>Escalation rules</td>
+          </tr>
+          <tr>
+            <td><code>repeat_enabled</code></td>
+            <td>boolean</td>
+            <td>Whether to repeat</td>
+          </tr>
+          <tr>
+            <td><code>repeat_limit</code></td>
+            <td>integer</td>
+            <td>Max repeat cycles</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">Important</div>
+        <p>Escalation processing runs automatically every 30 seconds. Ensure your delay times account for this interval.</p>
+      </div>
+
+      <div class="callout callout-success">
+        <div class="callout-title">Best Practice</div>
+        <p>Always include a schedule as Level 1 to ensure the current on-call person is notified first. Add individual users or teams as backup levels.</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pulsar Installation Guide - Get started with Docker Compose or manual setup.">
+  <title>Installation - Pulsar Documentation</title>
+  <link rel="icon" type="image/svg+xml" href="assets/pulsar.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-brand">
+        <img src="assets/pulsar.svg" alt="Pulsar Logo">
+        <span>Pulsar</span>
+      </a>
+
+      <ul class="navbar-nav">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+        <li><a href="api.html">API Reference</a></li>
+      </ul>
+
+      <div class="navbar-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </button>
+        <a href="https://github.com/nmn3m/pulsar" class="btn btn-outline" target="_blank" rel="noopener">GitHub</a>
+        <button class="mobile-menu-btn" aria-label="Toggle menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12h18M3 6h18M3 18h18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="docs-layout">
+    <!-- Sidebar -->
+    <aside class="docs-sidebar">
+      <ul class="docs-sidebar-nav">
+        <li class="nav-section">Getting Started</li>
+        <li><a href="docs.html">Overview</a></li>
+        <li><a href="installation.html" class="active">Installation</a></li>
+        <li><a href="api.html">API Reference</a></li>
+
+        <li class="nav-section">Features</li>
+        <li><a href="features/alerts.html">Alerts</a></li>
+        <li><a href="features/incidents.html">Incidents</a></li>
+        <li><a href="features/schedules.html">On-Call Schedules</a></li>
+        <li><a href="features/escalations.html">Escalation Policies</a></li>
+        <li><a href="features/webhooks.html">Webhooks</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="docs-content">
+      <h1>Installation</h1>
+
+      <p>This guide will help you get Pulsar up and running in your environment. Choose the method that works best for you.</p>
+
+      <h2>Prerequisites</h2>
+
+      <ul>
+        <li><strong>Docker</strong> and <strong>Docker Compose</strong> (recommended)</li>
+        <li>Or for manual setup:
+          <ul>
+            <li>Go 1.24+</li>
+            <li>Node.js 20+</li>
+            <li>PostgreSQL 16+</li>
+          </ul>
+        </li>
+      </ul>
+
+      <h2>Quick Start with Docker</h2>
+
+      <p>The fastest way to get started is using Docker Compose:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code><span class="token-comment"># Clone the repository</span>
+git clone https://github.com/nmn3m/pulsar.git
+cd pulsar
+
+<span class="token-comment"># Copy environment file</span>
+cp .env.example .env
+
+<span class="token-comment"># Start all services</span>
+make up
+
+<span class="token-comment"># Run database migrations</span>
+make migrate-up</code></pre>
+      </div>
+
+      <p>That's it! Access Pulsar at:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>URL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Frontend</td>
+            <td><a href="http://localhost:5173" target="_blank">http://localhost:5173</a></td>
+          </tr>
+          <tr>
+            <td>Backend API</td>
+            <td><a href="http://localhost:8081" target="_blank">http://localhost:8081</a></td>
+          </tr>
+          <tr>
+            <td>Swagger Docs</td>
+            <td><a href="http://localhost:8081/swagger/index.html" target="_blank">http://localhost:8081/swagger/index.html</a></td>
+          </tr>
+          <tr>
+            <td>Email Testing (Mailpit)</td>
+            <td><a href="http://localhost:8025" target="_blank">http://localhost:8025</a></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Environment Configuration</h2>
+
+      <p>Copy <code>.env.example</code> to <code>.env</code> and configure the following variables:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code><span class="token-comment"># Database</span>
+DATABASE_URL=postgres://pulsar:pulsar@localhost:5433/pulsar?sslmode=disable
+
+<span class="token-comment"># JWT Authentication</span>
+JWT_SECRET=your-super-secret-jwt-key-min-32-chars
+JWT_REFRESH_SECRET=your-refresh-secret-key-min-32-chars
+
+<span class="token-comment"># SMTP Configuration (for notifications)</span>
+SMTP_HOST=localhost
+SMTP_PORT=1025
+SMTP_USERNAME=
+SMTP_PASSWORD=
+SMTP_FROM=noreply@pulsar.local
+
+<span class="token-comment"># Environment</span>
+ENV=development</code></pre>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">Security Note</div>
+        <p>Always use strong, unique secrets for <code>JWT_SECRET</code> and <code>JWT_REFRESH_SECRET</code> in production environments.</p>
+      </div>
+
+      <h2>Manual Setup</h2>
+
+      <p>For development or custom deployments, you can run each component separately.</p>
+
+      <h3>1. Database Setup</h3>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code><span class="token-comment"># Create PostgreSQL database</span>
+createdb pulsar
+
+<span class="token-comment"># Run migrations</span>
+cd backend
+go run cmd/migrate/main.go up</code></pre>
+      </div>
+
+      <h3>2. Backend Setup</h3>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code><span class="token-comment"># Navigate to backend directory</span>
+cd backend
+
+<span class="token-comment"># Download dependencies</span>
+go mod download
+
+<span class="token-comment"># Run the API server</span>
+go run cmd/api/main.go</code></pre>
+      </div>
+
+      <h3>3. Frontend Setup</h3>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code><span class="token-comment"># Navigate to frontend directory</span>
+cd frontend
+
+<span class="token-comment"># Install dependencies</span>
+npm install
+
+<span class="token-comment"># Start development server</span>
+npm run dev</code></pre>
+      </div>
+
+      <h2>Development Commands</h2>
+
+      <p>Pulsar includes a Makefile with helpful commands:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Command</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>make up</code></td>
+            <td>Start all services with Docker Compose</td>
+          </tr>
+          <tr>
+            <td><code>make down</code></td>
+            <td>Stop all services</td>
+          </tr>
+          <tr>
+            <td><code>make logs</code></td>
+            <td>View service logs</td>
+          </tr>
+          <tr>
+            <td><code>make migrate-up</code></td>
+            <td>Run database migrations</td>
+          </tr>
+          <tr>
+            <td><code>make migrate-down</code></td>
+            <td>Rollback last migration</td>
+          </tr>
+          <tr>
+            <td><code>make test</code></td>
+            <td>Run all tests</td>
+          </tr>
+          <tr>
+            <td><code>make lint</code></td>
+            <td>Run linters</td>
+          </tr>
+          <tr>
+            <td><code>make fmt</code></td>
+            <td>Format code</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>First Steps After Installation</h2>
+
+      <ol>
+        <li><strong>Register an account</strong> - Go to <code>/register</code> to create your first user and organization</li>
+        <li><strong>Create a team</strong> - Set up your first team to organize users</li>
+        <li><strong>Configure schedules</strong> - Create on-call schedules for your team</li>
+        <li><strong>Set up escalation policies</strong> - Define how alerts should escalate</li>
+        <li><strong>Create a webhook</strong> - Generate an incoming webhook to receive alerts</li>
+      </ol>
+
+      <div class="callout callout-info">
+        <div class="callout-title">Next Steps</div>
+        <p>Check out the <a href="api.html">API Reference</a> to learn how to integrate Pulsar with your monitoring tools.</p>
+      </div>
+
+      <h2>Troubleshooting</h2>
+
+      <h3>Port Conflicts</h3>
+      <p>If you have port conflicts, you can modify the ports in <code>docker-compose.yml</code>:</p>
+
+      <ul>
+        <li>Frontend: 5173</li>
+        <li>Backend: 8081</li>
+        <li>PostgreSQL: 5433</li>
+        <li>Mailpit UI: 8025, SMTP: 1025</li>
+      </ul>
+
+      <h3>Database Connection Issues</h3>
+      <p>Ensure PostgreSQL is running and the <code>DATABASE_URL</code> in your <code>.env</code> file is correct.</p>
+
+      <h3>Migration Errors</h3>
+      <p>If migrations fail, try resetting the database:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>make migrate-down  <span class="token-comment"># Rollback all</span>
+make migrate-up    <span class="token-comment"># Re-run migrations</span></code></pre>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

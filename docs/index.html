@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pulsar - Open-source incident management and alerting platform. An Opsgenie alternative built with Go and Svelte.">
+  <meta name="keywords" content="incident management, alerting, on-call, escalation, opsgenie alternative, open source">
+  <title>Pulsar - Open Source Incident Management Platform</title>
+  <link rel="icon" type="image/svg+xml" href="assets/pulsar.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-brand">
+        <img src="assets/pulsar.svg" alt="Pulsar Logo">
+        <span>Pulsar</span>
+      </a>
+
+      <ul class="navbar-nav">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#quick-start">Quick Start</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+      </ul>
+
+      <div class="navbar-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </button>
+        <a href="https://github.com/nmn3m/pulsar" class="btn btn-outline" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <button class="mobile-menu-btn" aria-label="Toggle menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12h18M3 6h18M3 18h18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <img src="assets/pulsar.svg" alt="Pulsar" class="hero-logo">
+      <h1>Pulsar</h1>
+      <p class="hero-tagline">Open-source incident management and alerting platform. A modern, self-hosted alternative to Opsgenie.</p>
+      <div class="hero-buttons">
+        <a href="#quick-start" class="btn btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Get Started
+        </a>
+        <a href="docs.html" class="btn btn-secondary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Documentation
+        </a>
+        <a href="https://github.com/nmn3m/pulsar" class="btn btn-outline" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features">
+    <div class="section-container">
+      <div class="section-header">
+        <h2>Everything You Need for Incident Management</h2>
+        <p>A complete platform for managing alerts, incidents, on-call schedules, and team collaboration in real-time.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <h3>Alert Management</h3>
+          <p>Create, acknowledge, snooze, assign, and resolve alerts with full lifecycle tracking and priority levels.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          </div>
+          <h3>Incident Management</h3>
+          <p>Track incidents with responders, timeline, notes, and linked alerts. Full incident lifecycle support.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <h3>On-Call Schedules</h3>
+          <p>Flexible scheduling with rotations, participants, and schedule overrides. Know who's on-call anytime.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          </div>
+          <h3>Escalation Policies</h3>
+          <p>Multi-level escalation rules with configurable targets and delays. Never miss a critical alert.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Team Management</h3>
+          <p>Organize users into teams with role-based member management and access control.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <h3>Notifications</h3>
+          <p>Multi-channel notifications via Email, Slack, and Microsoft Teams with user preferences.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <h3>Webhooks</h3>
+          <p>Incoming and outgoing webhooks for seamless integration with your existing tools and workflows.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <h3>Real-time Updates</h3>
+          <p>WebSocket support for live dashboard updates. See changes instantly without refreshing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="how-it-works">
+    <div class="section-container">
+      <div class="section-header">
+        <h2>How It Works</h2>
+        <p>Get up and running with Pulsar in minutes, not hours.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Deploy</h3>
+          <p>Run Pulsar with Docker Compose in seconds. One command to start the entire stack.</p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Configure</h3>
+          <p>Set up teams, schedules, and escalation policies through the intuitive web UI.</p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Integrate</h3>
+          <p>Connect your monitoring tools via webhooks or the comprehensive REST API.</p>
+        </div>
+
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>Respond</h3>
+          <p>Receive alerts, manage incidents, and keep your services running smoothly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack Section -->
+  <section class="tech-stack">
+    <div class="section-container">
+      <div class="section-header">
+        <h2>Built with Modern Technologies</h2>
+        <p>Reliable, performant, and easy to maintain.</p>
+      </div>
+
+      <div class="tech-grid">
+        <div class="tech-item">
+          <h4>Go</h4>
+          <p>High-performance backend</p>
+        </div>
+        <div class="tech-item">
+          <h4>PostgreSQL</h4>
+          <p>Reliable data storage</p>
+        </div>
+        <div class="tech-item">
+          <h4>SvelteKit</h4>
+          <p>Fast, reactive frontend</p>
+        </div>
+        <div class="tech-item">
+          <h4>TypeScript</h4>
+          <p>Type-safe codebase</p>
+        </div>
+        <div class="tech-item">
+          <h4>Tailwind CSS</h4>
+          <p>Beautiful UI design</p>
+        </div>
+        <div class="tech-item">
+          <h4>Docker</h4>
+          <p>Easy deployment</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start Section -->
+  <section id="quick-start" class="quick-start">
+    <div class="section-container">
+      <div class="section-header">
+        <h2>Quick Start</h2>
+        <p>Get Pulsar running in under a minute.</p>
+      </div>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code><span class="token-comment"># Clone the repository</span>
+git clone https://github.com/nmn3m/pulsar.git && cd pulsar
+
+<span class="token-comment"># Copy environment file</span>
+cp .env.example .env
+
+<span class="token-comment"># Start all services</span>
+make up
+
+<span class="token-comment"># Run database migrations</span>
+make migrate-up</code></pre>
+      </div>
+
+      <p class="text-center text-muted mt-2">
+        Then open <a href="http://localhost:5173">http://localhost:5173</a> in your browser.
+      </p>
+
+      <div class="text-center mt-4">
+        <a href="installation.html" class="btn btn-primary">Full Installation Guide</a>
+        <a href="api.html" class="btn btn-secondary">API Documentation</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div>
+        <div class="footer-brand">
+          <img src="assets/pulsar.svg" alt="Pulsar">
+          <span>Pulsar</span>
+        </div>
+        <p class="text-muted">Open-source incident management platform.</p>
+      </div>
+
+      <div>
+        <h4>Documentation</h4>
+        <ul class="footer-links">
+          <li><a href="installation.html">Installation</a></li>
+          <li><a href="api.html">API Reference</a></li>
+          <li><a href="features/alerts.html">Alerts</a></li>
+          <li><a href="features/incidents.html">Incidents</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Features</h4>
+        <ul class="footer-links">
+          <li><a href="features/schedules.html">On-Call Schedules</a></li>
+          <li><a href="features/escalations.html">Escalation Policies</a></li>
+          <li><a href="features/webhooks.html">Webhooks</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Community</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/nmn3m/pulsar" target="_blank" rel="noopener">GitHub</a></li>
+          <li><a href="https://github.com/nmn3m/pulsar/issues" target="_blank" rel="noopener">Issues</a></li>
+          <li><a href="https://github.com/nmn3m/pulsar/discussions" target="_blank" rel="noopener">Discussions</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>Released under the Apache 2.0 License. Built with care.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

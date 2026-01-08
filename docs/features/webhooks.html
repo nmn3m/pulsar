@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pulsar Webhooks - Integrate with external tools using incoming and outgoing webhooks.">
+  <title>Webhooks - Pulsar Documentation</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/pulsar.svg">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="../index.html" class="navbar-brand">
+        <img src="../assets/pulsar.svg" alt="Pulsar Logo">
+        <span>Pulsar</span>
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+        <li><a href="../api.html">API Reference</a></li>
+      </ul>
+      <div class="navbar-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </button>
+        <a href="https://github.com/nmn3m/pulsar" class="btn btn-outline" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="docs-layout">
+    <aside class="docs-sidebar">
+      <ul class="docs-sidebar-nav">
+        <li class="nav-section">Getting Started</li>
+        <li><a href="../docs.html">Overview</a></li>
+        <li><a href="../installation.html">Installation</a></li>
+        <li><a href="../api.html">API Reference</a></li>
+        <li class="nav-section">Features</li>
+        <li><a href="alerts.html">Alerts</a></li>
+        <li><a href="incidents.html">Incidents</a></li>
+        <li><a href="schedules.html">On-Call Schedules</a></li>
+        <li><a href="escalations.html">Escalation Policies</a></li>
+        <li><a href="webhooks.html" class="active">Webhooks</a></li>
+      </ul>
+    </aside>
+
+    <main class="docs-content">
+      <h1>Webhooks</h1>
+
+      <p>Webhooks enable seamless integration between Pulsar and your existing tools. Pulsar supports both incoming webhooks (receive alerts) and outgoing webhooks (send events).</p>
+
+      <h2>Webhook Types</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Direction</th>
+            <th>Use Case</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Incoming</strong></td>
+            <td>External tools --> Pulsar</td>
+            <td>Receive alerts from monitoring tools</td>
+          </tr>
+          <tr>
+            <td><strong>Outgoing</strong></td>
+            <td>Pulsar --> External tools</td>
+            <td>Send events to Slack, Teams, custom endpoints</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Incoming Webhooks</h2>
+
+      <p>Incoming webhooks allow external tools to create alerts in Pulsar.</p>
+
+      <h3>Create a Webhook Token</h3>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/webhooks/tokens \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Prometheus Alerts",
+    "description": "Webhook for Prometheus alertmanager"
+  }'
+
+<span class="token-comment"># Response</span>
+{
+  "id": "token-uuid",
+  "name": "Prometheus Alerts",
+  "token": "whk_abc123xyz...",
+  "webhook_url": "http://localhost:8081/api/v1/webhook/whk_abc123xyz..."
+}</code></pre>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">Important</div>
+        <p>Save the token immediately! It's only shown once and cannot be retrieved later.</p>
+      </div>
+
+      <h3>Send Alerts to Pulsar</h3>
+
+      <p>Use the webhook URL to send alerts:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/webhook/&lt;token&gt; \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "High CPU Usage on web-server-01",
+    "description": "CPU usage exceeded 90% for 5 minutes",
+    "priority": "high",
+    "source": "prometheus",
+    "tags": ["cpu", "production", "web"]
+  }'</code></pre>
+      </div>
+
+      <h3>Webhook Payload Format</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Required</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>title</code></td>
+            <td>Yes</td>
+            <td>Alert title</td>
+          </tr>
+          <tr>
+            <td><code>description</code></td>
+            <td>No</td>
+            <td>Detailed description</td>
+          </tr>
+          <tr>
+            <td><code>priority</code></td>
+            <td>No</td>
+            <td>critical, high, medium, low (default: medium)</td>
+          </tr>
+          <tr>
+            <td><code>source</code></td>
+            <td>No</td>
+            <td>Origin of the alert</td>
+          </tr>
+          <tr>
+            <td><code>tags</code></td>
+            <td>No</td>
+            <td>Array of string tags</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Outgoing Webhooks</h2>
+
+      <p>Outgoing webhooks send Pulsar events to external systems.</p>
+
+      <h3>Create an Outgoing Webhook</h3>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/webhooks \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Slack Notifications",
+    "url": "https://hooks.slack.com/services/xxx/yyy/zzz",
+    "events": ["alert.created", "alert.acknowledged", "alert.closed"],
+    "enabled": true
+  }'</code></pre>
+      </div>
+
+      <h3>Supported Events</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Event</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>alert.created</code></td>
+            <td>New alert created</td>
+          </tr>
+          <tr>
+            <td><code>alert.acknowledged</code></td>
+            <td>Alert acknowledged</td>
+          </tr>
+          <tr>
+            <td><code>alert.closed</code></td>
+            <td>Alert closed</td>
+          </tr>
+          <tr>
+            <td><code>alert.escalated</code></td>
+            <td>Alert escalated to next level</td>
+          </tr>
+          <tr>
+            <td><code>incident.created</code></td>
+            <td>New incident created</td>
+          </tr>
+          <tr>
+            <td><code>incident.resolved</code></td>
+            <td>Incident resolved</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Outgoing Webhook Payload</h3>
+
+      <p>Pulsar sends JSON payloads to your webhook URL:</p>
+
+      <div class="code-block">
+        <pre><code>{
+  "event": "alert.created",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "data": {
+    "id": "alert-uuid",
+    "title": "Database Connection Error",
+    "description": "Unable to connect to primary database",
+    "priority": "critical",
+    "status": "open",
+    "source": "healthcheck",
+    "created_at": "2024-01-15T10:30:00Z"
+  }
+}</code></pre>
+      </div>
+
+      <h2>Integration Examples</h2>
+
+      <h3>Prometheus Alertmanager</h3>
+
+      <p>Configure Alertmanager to send alerts to Pulsar:</p>
+
+      <div class="code-block">
+        <pre><code><span class="token-comment"># alertmanager.yml</span>
+receivers:
+  - name: pulsar
+    webhook_configs:
+      - url: 'http://pulsar:8081/api/v1/webhook/&lt;token&gt;'
+        send_resolved: true</code></pre>
+      </div>
+
+      <h3>Slack Integration</h3>
+
+      <p>Send alerts to Slack channel:</p>
+
+      <ol>
+        <li>Create a Slack Incoming Webhook in your Slack workspace</li>
+        <li>Create an outgoing webhook in Pulsar with the Slack URL</li>
+        <li>Select events to send to Slack</li>
+      </ol>
+
+      <h3>Microsoft Teams</h3>
+
+      <p>Send alerts to Teams channel:</p>
+
+      <ol>
+        <li>Create an Incoming Webhook connector in Teams</li>
+        <li>Create an outgoing webhook in Pulsar with the Teams URL</li>
+        <li>Select events to send to Teams</li>
+      </ol>
+
+      <h2>Webhook Delivery</h2>
+
+      <p>Pulsar handles webhook delivery reliably:</p>
+
+      <ul>
+        <li><strong>Automatic retries</strong> - Failed deliveries are retried</li>
+        <li><strong>Delivery logs</strong> - Track delivery status and response</li>
+        <li><strong>Background processing</strong> - Webhooks don't block API responses</li>
+      </ul>
+
+      <h3>View Delivery History</h3>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl http://localhost:8081/api/v1/webhooks/{id}/deliveries \
+  -H "Authorization: Bearer &lt;token&gt;"</code></pre>
+      </div>
+
+      <h2>Security Best Practices</h2>
+
+      <ul>
+        <li>Keep webhook tokens secret - treat them like passwords</li>
+        <li>Use HTTPS for outgoing webhook URLs in production</li>
+        <li>Rotate webhook tokens periodically</li>
+        <li>Monitor delivery logs for failures</li>
+        <li>Disable unused webhooks</li>
+      </ul>
+
+      <div class="callout callout-info">
+        <div class="callout-title">Rate Limiting</div>
+        <p>Incoming webhooks are rate limited to 100 requests/minute per token to prevent abuse.</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>

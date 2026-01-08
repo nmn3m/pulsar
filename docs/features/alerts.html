@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pulsar Alert Management - Learn how to create, manage, and respond to alerts.">
+  <title>Alert Management - Pulsar Documentation</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/pulsar.svg">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="../index.html" class="navbar-brand">
+        <img src="../assets/pulsar.svg" alt="Pulsar Logo">
+        <span>Pulsar</span>
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+        <li><a href="../api.html">API Reference</a></li>
+      </ul>
+      <div class="navbar-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </button>
+        <a href="https://github.com/nmn3m/pulsar" class="btn btn-outline" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="docs-layout">
+    <aside class="docs-sidebar">
+      <ul class="docs-sidebar-nav">
+        <li class="nav-section">Getting Started</li>
+        <li><a href="../docs.html">Overview</a></li>
+        <li><a href="../installation.html">Installation</a></li>
+        <li><a href="../api.html">API Reference</a></li>
+        <li class="nav-section">Features</li>
+        <li><a href="alerts.html" class="active">Alerts</a></li>
+        <li><a href="incidents.html">Incidents</a></li>
+        <li><a href="schedules.html">On-Call Schedules</a></li>
+        <li><a href="escalations.html">Escalation Policies</a></li>
+        <li><a href="webhooks.html">Webhooks</a></li>
+      </ul>
+    </aside>
+
+    <main class="docs-content">
+      <h1>Alert Management</h1>
+
+      <p>Alerts are the core of Pulsar's incident management system. They represent events that require attention from your team, such as system failures, performance issues, or security threats.</p>
+
+      <h2>Alert Lifecycle</h2>
+
+      <p>Alerts in Pulsar follow a defined lifecycle:</p>
+
+      <div class="code-block">
+        <pre><code>Open --> Acknowledged --> Closed
+  |          |
+  |          v
+  +-----> Snoozed ----+
+                      |
+                      v
+                   Reopened</code></pre>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Open</strong></td>
+            <td>New alert that needs attention</td>
+          </tr>
+          <tr>
+            <td><strong>Acknowledged</strong></td>
+            <td>Someone is working on it</td>
+          </tr>
+          <tr>
+            <td><strong>Snoozed</strong></td>
+            <td>Temporarily silenced until a specified time</td>
+          </tr>
+          <tr>
+            <td><strong>Closed</strong></td>
+            <td>Issue resolved or no longer relevant</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Priority Levels</h2>
+
+      <p>Alerts have priority levels that determine their urgency:</p>
+
+      <ul>
+        <li><strong>Critical (P1)</strong> - Immediate action required, major service impact</li>
+        <li><strong>High (P2)</strong> - Urgent, significant impact</li>
+        <li><strong>Medium (P3)</strong> - Important but not urgent</li>
+        <li><strong>Low (P4)</strong> - Informational, can be addressed later</li>
+      </ul>
+
+      <h2>Creating Alerts</h2>
+
+      <h3>Via Web UI</h3>
+      <ol>
+        <li>Navigate to <strong>Alerts</strong> in the sidebar</li>
+        <li>Click <strong>Create Alert</strong></li>
+        <li>Fill in the title, description, priority, and optional tags</li>
+        <li>Assign to a team or user (optional)</li>
+        <li>Click <strong>Create</strong></li>
+      </ol>
+
+      <h3>Via API</h3>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/alerts \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Database connection pool exhausted",
+    "description": "All 100 connections are in use",
+    "priority": "critical",
+    "source": "connection-monitor",
+    "tags": ["database", "production"]
+  }'</code></pre>
+      </div>
+
+      <h3>Via Webhook</h3>
+
+      <p>For automated alerting from monitoring tools:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/webhook/&lt;token&gt; \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "High memory usage on server-01",
+    "description": "Memory at 95%",
+    "priority": "high",
+    "source": "prometheus"
+  }'</code></pre>
+      </div>
+
+      <h2>Managing Alerts</h2>
+
+      <h3>Acknowledge an Alert</h3>
+      <p>Acknowledging indicates someone is working on the issue:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/alerts/{id}/acknowledge \
+  -H "Authorization: Bearer &lt;token&gt;"</code></pre>
+      </div>
+
+      <h3>Snooze an Alert</h3>
+      <p>Temporarily silence an alert until a specific time:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/alerts/{id}/snooze \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "snooze_until": "2024-01-15T10:00:00Z"
+  }'</code></pre>
+      </div>
+
+      <h3>Close an Alert</h3>
+      <p>Mark an alert as resolved:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/alerts/{id}/close \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "close_reason": "Issue resolved after database restart"
+  }'</code></pre>
+      </div>
+
+      <h3>Assign an Alert</h3>
+      <p>Assign to a specific user or team:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/alerts/{id}/assign \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "assignee_id": "user-uuid",
+    "assignee_type": "user"
+  }'</code></pre>
+      </div>
+
+      <h2>Filtering Alerts</h2>
+
+      <p>List alerts with various filters:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code><span class="token-comment"># Filter by status</span>
+GET /api/v1/alerts?status=open
+
+<span class="token-comment"># Filter by priority</span>
+GET /api/v1/alerts?priority=critical
+
+<span class="token-comment"># Filter by source</span>
+GET /api/v1/alerts?source=prometheus
+
+<span class="token-comment"># Search by title</span>
+GET /api/v1/alerts?search=database
+
+<span class="token-comment"># Combine filters</span>
+GET /api/v1/alerts?status=open&priority=critical&limit=10</code></pre>
+      </div>
+
+      <h2>Alert Fields</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>id</code></td>
+            <td>UUID</td>
+            <td>Unique identifier</td>
+          </tr>
+          <tr>
+            <td><code>title</code></td>
+            <td>string</td>
+            <td>Alert title (required)</td>
+          </tr>
+          <tr>
+            <td><code>description</code></td>
+            <td>string</td>
+            <td>Detailed description</td>
+          </tr>
+          <tr>
+            <td><code>status</code></td>
+            <td>string</td>
+            <td>open, acknowledged, snoozed, closed</td>
+          </tr>
+          <tr>
+            <td><code>priority</code></td>
+            <td>string</td>
+            <td>critical, high, medium, low</td>
+          </tr>
+          <tr>
+            <td><code>source</code></td>
+            <td>string</td>
+            <td>Origin of the alert</td>
+          </tr>
+          <tr>
+            <td><code>tags</code></td>
+            <td>array</td>
+            <td>Labels for categorization</td>
+          </tr>
+          <tr>
+            <td><code>assigned_to</code></td>
+            <td>UUID</td>
+            <td>Assigned user or team ID</td>
+          </tr>
+          <tr>
+            <td><code>created_at</code></td>
+            <td>timestamp</td>
+            <td>When the alert was created</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-info">
+        <div class="callout-title">Related</div>
+        <p>Alerts can be linked to <a href="incidents.html">Incidents</a> and trigger <a href="escalations.html">Escalation Policies</a>.</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>

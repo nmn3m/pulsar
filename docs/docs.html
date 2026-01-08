@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pulsar Documentation - Complete guide for the open-source incident management platform.">
+  <title>Documentation - Pulsar</title>
+  <link rel="icon" type="image/svg+xml" href="assets/pulsar.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-brand">
+        <img src="assets/pulsar.svg" alt="Pulsar Logo">
+        <span>Pulsar</span>
+      </a>
+
+      <ul class="navbar-nav">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+        <li><a href="api.html">API Reference</a></li>
+      </ul>
+
+      <div class="navbar-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </button>
+        <a href="https://github.com/nmn3m/pulsar" class="btn btn-outline" target="_blank" rel="noopener">GitHub</a>
+        <button class="mobile-menu-btn" aria-label="Toggle menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12h18M3 6h18M3 18h18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="docs-layout">
+    <!-- Sidebar -->
+    <aside class="docs-sidebar">
+      <ul class="docs-sidebar-nav">
+        <li class="nav-section">Getting Started</li>
+        <li><a href="docs.html" class="active">Overview</a></li>
+        <li><a href="installation.html">Installation</a></li>
+        <li><a href="api.html">API Reference</a></li>
+
+        <li class="nav-section">Features</li>
+        <li><a href="features/alerts.html">Alerts</a></li>
+        <li><a href="features/incidents.html">Incidents</a></li>
+        <li><a href="features/schedules.html">On-Call Schedules</a></li>
+        <li><a href="features/escalations.html">Escalation Policies</a></li>
+        <li><a href="features/webhooks.html">Webhooks</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="docs-content">
+      <h1>Pulsar Documentation</h1>
+
+      <p>Welcome to the Pulsar documentation. Pulsar is an open-source incident management and alerting platform that helps you manage alerts, incidents, on-call schedules, and team collaboration.</p>
+
+      <div class="callout callout-info">
+        <div class="callout-title">New to Pulsar?</div>
+        <p>Start with the <a href="installation.html">Installation Guide</a> to get Pulsar running in minutes.</p>
+      </div>
+
+      <h2>Quick Links</h2>
+
+      <div class="docs-cards">
+        <a href="installation.html" class="docs-card">
+          <h3>Installation</h3>
+          <p>Get started with Docker Compose or manual setup instructions.</p>
+          <span class="btn btn-outline">Get Started</span>
+        </a>
+
+        <a href="api.html" class="docs-card">
+          <h3>API Reference</h3>
+          <p>Comprehensive REST API documentation with examples.</p>
+          <span class="btn btn-outline">View API</span>
+        </a>
+
+        <a href="features/alerts.html" class="docs-card">
+          <h3>Alert Management</h3>
+          <p>Learn how to create, manage, and respond to alerts.</p>
+          <span class="btn btn-outline">Learn More</span>
+        </a>
+
+        <a href="features/incidents.html" class="docs-card">
+          <h3>Incident Management</h3>
+          <p>Track incidents with timelines, responders, and notes.</p>
+          <span class="btn btn-outline">Learn More</span>
+        </a>
+
+        <a href="features/schedules.html" class="docs-card">
+          <h3>On-Call Schedules</h3>
+          <p>Set up rotation schedules and manage on-call coverage.</p>
+          <span class="btn btn-outline">Learn More</span>
+        </a>
+
+        <a href="features/escalations.html" class="docs-card">
+          <h3>Escalation Policies</h3>
+          <p>Configure multi-level escalation rules for alerts.</p>
+          <span class="btn btn-outline">Learn More</span>
+        </a>
+      </div>
+
+      <h2>Key Features</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Alert Management</strong></td>
+            <td>Create, acknowledge, snooze, assign, and resolve alerts with full lifecycle tracking</td>
+          </tr>
+          <tr>
+            <td><strong>Incident Management</strong></td>
+            <td>Track incidents with responders, timeline, notes, and linked alerts</td>
+          </tr>
+          <tr>
+            <td><strong>On-Call Schedules</strong></td>
+            <td>Flexible scheduling with rotations, participants, and schedule overrides</td>
+          </tr>
+          <tr>
+            <td><strong>Escalation Policies</strong></td>
+            <td>Multi-level escalation rules with configurable targets and delays</td>
+          </tr>
+          <tr>
+            <td><strong>Team Management</strong></td>
+            <td>Organize users into teams with role-based member management</td>
+          </tr>
+          <tr>
+            <td><strong>Notifications</strong></td>
+            <td>Multi-channel notifications via Email, Slack, and Microsoft Teams</td>
+          </tr>
+          <tr>
+            <td><strong>Webhooks</strong></td>
+            <td>Incoming and outgoing webhooks for integrations</td>
+          </tr>
+          <tr>
+            <td><strong>Real-time Updates</strong></td>
+            <td>WebSocket support for live dashboard updates</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Architecture</h2>
+
+      <p>Pulsar follows a clean architecture pattern with clear separation of concerns:</p>
+
+      <div class="code-block">
+        <pre><code>Frontend (Svelte) --> API Gateway (Go/Gin) --> Services Layer --> PostgreSQL
+                    |                            |
+               WebSocket Hub <-- Background Workers (Escalation, Notifications)
+                                       |
+                         External Integrations (Email, Slack, Teams)</code></pre>
+      </div>
+
+      <h2>Tech Stack</h2>
+
+      <ul>
+        <li><strong>Backend:</strong> Go 1.24, Gin framework, PostgreSQL 16</li>
+        <li><strong>Frontend:</strong> SvelteKit 2.0, TypeScript, Tailwind CSS</li>
+        <li><strong>Authentication:</strong> JWT with refresh tokens</li>
+        <li><strong>Real-time:</strong> WebSocket via gorilla/websocket</li>
+        <li><strong>API Docs:</strong> Swagger/OpenAPI 3.0</li>
+        <li><strong>Deployment:</strong> Docker & Docker Compose</li>
+      </ul>
+
+      <h2>Support</h2>
+
+      <p>Need help? Here are some resources:</p>
+
+      <ul>
+        <li><a href="https://github.com/nmn3m/pulsar/issues" target="_blank" rel="noopener">GitHub Issues</a> - Report bugs or request features</li>
+        <li><a href="https://github.com/nmn3m/pulsar/discussions" target="_blank" rel="noopener">GitHub Discussions</a> - Ask questions and share ideas</li>
+        <li><a href="https://github.com/nmn3m/pulsar" target="_blank" rel="noopener">GitHub Repository</a> - View source code and contribute</li>
+      </ul>
+    </main>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

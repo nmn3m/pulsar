@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pulsar On-Call Schedules - Set up rotation schedules and manage on-call coverage.">
+  <title>On-Call Schedules - Pulsar Documentation</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/pulsar.svg">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="../index.html" class="navbar-brand">
+        <img src="../assets/pulsar.svg" alt="Pulsar Logo">
+        <span>Pulsar</span>
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+        <li><a href="../api.html">API Reference</a></li>
+      </ul>
+      <div class="navbar-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </button>
+        <a href="https://github.com/nmn3m/pulsar" class="btn btn-outline" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="docs-layout">
+    <aside class="docs-sidebar">
+      <ul class="docs-sidebar-nav">
+        <li class="nav-section">Getting Started</li>
+        <li><a href="../docs.html">Overview</a></li>
+        <li><a href="../installation.html">Installation</a></li>
+        <li><a href="../api.html">API Reference</a></li>
+        <li class="nav-section">Features</li>
+        <li><a href="alerts.html">Alerts</a></li>
+        <li><a href="incidents.html">Incidents</a></li>
+        <li><a href="schedules.html" class="active">On-Call Schedules</a></li>
+        <li><a href="escalations.html">Escalation Policies</a></li>
+        <li><a href="webhooks.html">Webhooks</a></li>
+      </ul>
+    </aside>
+
+    <main class="docs-content">
+      <h1>On-Call Schedules</h1>
+
+      <p>On-call schedules define who is responsible for responding to alerts at any given time. Pulsar supports flexible rotation patterns, multiple participants, and schedule overrides.</p>
+
+      <h2>Key Concepts</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Concept</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Schedule</strong></td>
+            <td>A named on-call schedule for a team</td>
+          </tr>
+          <tr>
+            <td><strong>Rotation</strong></td>
+            <td>A repeating pattern of on-call shifts</td>
+          </tr>
+          <tr>
+            <td><strong>Participant</strong></td>
+            <td>A user included in the rotation</td>
+          </tr>
+          <tr>
+            <td><strong>Override</strong></td>
+            <td>Temporary change to the schedule</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Creating a Schedule</h2>
+
+      <h3>Via Web UI</h3>
+      <ol>
+        <li>Navigate to <strong>Schedules</strong></li>
+        <li>Click <strong>Create Schedule</strong></li>
+        <li>Enter name, description, and timezone</li>
+        <li>Add rotations with participants</li>
+        <li>Save the schedule</li>
+      </ol>
+
+      <h3>Via API</h3>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/schedules \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Platform Team On-Call",
+    "description": "Primary on-call for platform services",
+    "timezone": "America/New_York"
+  }'</code></pre>
+      </div>
+
+      <h2>Rotations</h2>
+
+      <p>Rotations define the pattern for cycling through participants:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/schedules/{id}/rotations \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Weekly Rotation",
+    "rotation_type": "weekly",
+    "start_time": "2024-01-01T09:00:00Z",
+    "handoff_day": "monday",
+    "handoff_time": "09:00",
+    "participants": [
+      {"user_id": "user-1-uuid", "position": 1},
+      {"user_id": "user-2-uuid", "position": 2},
+      {"user_id": "user-3-uuid", "position": 3}
+    ]
+  }'</code></pre>
+      </div>
+
+      <h3>Rotation Types</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>daily</code></td>
+            <td>Rotates every day</td>
+          </tr>
+          <tr>
+            <td><code>weekly</code></td>
+            <td>Rotates every week on handoff day</td>
+          </tr>
+          <tr>
+            <td><code>custom</code></td>
+            <td>Custom rotation interval</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Schedule Overrides</h2>
+
+      <p>Overrides allow temporary changes (vacations, swap shifts, etc.):</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/schedules/{id}/overrides \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "replacement-user-uuid",
+    "start_time": "2024-01-15T09:00:00Z",
+    "end_time": "2024-01-22T09:00:00Z",
+    "reason": "Covering for John vacation"
+  }'</code></pre>
+      </div>
+
+      <h2>Get Current On-Call</h2>
+
+      <p>Find out who is currently on-call for a schedule:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl http://localhost:8081/api/v1/schedules/{id}/on-call \
+  -H "Authorization: Bearer &lt;token&gt;"
+
+<span class="token-comment"># Response</span>
+{
+  "user": {
+    "id": "user-uuid",
+    "name": "Jane Smith",
+    "email": "jane@example.com"
+  },
+  "schedule": {
+    "id": "schedule-uuid",
+    "name": "Platform Team On-Call"
+  },
+  "started_at": "2024-01-08T09:00:00Z",
+  "ends_at": "2024-01-15T09:00:00Z"
+}</code></pre>
+      </div>
+
+      <h2>Example: Weekly Rotation</h2>
+
+      <p>A typical weekly rotation schedule:</p>
+
+      <div class="code-block">
+        <pre><code>Week 1: Alice  (Mon 9am - Mon 9am)
+Week 2: Bob    (Mon 9am - Mon 9am)
+Week 3: Carol  (Mon 9am - Mon 9am)
+Week 4: Alice  (cycle repeats)</code></pre>
+      </div>
+
+      <h2>Schedule Fields</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>id</code></td>
+            <td>UUID</td>
+            <td>Unique identifier</td>
+          </tr>
+          <tr>
+            <td><code>name</code></td>
+            <td>string</td>
+            <td>Schedule name</td>
+          </tr>
+          <tr>
+            <td><code>description</code></td>
+            <td>string</td>
+            <td>Optional description</td>
+          </tr>
+          <tr>
+            <td><code>timezone</code></td>
+            <td>string</td>
+            <td>IANA timezone (e.g., America/New_York)</td>
+          </tr>
+          <tr>
+            <td><code>rotations</code></td>
+            <td>array</td>
+            <td>List of rotations</td>
+          </tr>
+          <tr>
+            <td><code>overrides</code></td>
+            <td>array</td>
+            <td>Active overrides</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-info">
+        <div class="callout-title">Tip</div>
+        <p>Schedules are used in <a href="escalations.html">Escalation Policies</a> to determine who gets notified when alerts trigger.</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>

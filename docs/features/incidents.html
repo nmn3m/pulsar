@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Pulsar Incident Management - Track incidents with timelines, responders, and linked alerts.">
+  <title>Incident Management - Pulsar Documentation</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/pulsar.svg">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="../index.html" class="navbar-brand">
+        <img src="../assets/pulsar.svg" alt="Pulsar Logo">
+        <span>Pulsar</span>
+      </a>
+      <ul class="navbar-nav">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+        <li><a href="../api.html">API Reference</a></li>
+      </ul>
+      <div class="navbar-actions">
+        <button class="theme-toggle" aria-label="Toggle theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </button>
+        <a href="https://github.com/nmn3m/pulsar" class="btn btn-outline" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="docs-layout">
+    <aside class="docs-sidebar">
+      <ul class="docs-sidebar-nav">
+        <li class="nav-section">Getting Started</li>
+        <li><a href="../docs.html">Overview</a></li>
+        <li><a href="../installation.html">Installation</a></li>
+        <li><a href="../api.html">API Reference</a></li>
+        <li class="nav-section">Features</li>
+        <li><a href="alerts.html">Alerts</a></li>
+        <li><a href="incidents.html" class="active">Incidents</a></li>
+        <li><a href="schedules.html">On-Call Schedules</a></li>
+        <li><a href="escalations.html">Escalation Policies</a></li>
+        <li><a href="webhooks.html">Webhooks</a></li>
+      </ul>
+    </aside>
+
+    <main class="docs-content">
+      <h1>Incident Management</h1>
+
+      <p>Incidents represent major issues that require coordinated response from your team. They group related alerts, track responders, and maintain a timeline of events.</p>
+
+      <h2>Incident vs Alert</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Alert</th>
+            <th>Incident</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Single event or notification</td>
+            <td>Major issue requiring coordination</td>
+          </tr>
+          <tr>
+            <td>May be auto-resolved</td>
+            <td>Requires human intervention</td>
+          </tr>
+          <tr>
+            <td>Handled by one person</td>
+            <td>Multiple responders</td>
+          </tr>
+          <tr>
+            <td>Short-lived</td>
+            <td>May span hours or days</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Incident Lifecycle</h2>
+
+      <div class="code-block">
+        <pre><code>Triggered --> Investigating --> Identified --> Monitoring --> Resolved
+                                                                  |
+                                                                  v
+                                                             Postmortem</code></pre>
+      </div>
+
+      <h2>Severity Levels</h2>
+
+      <ul>
+        <li><strong>SEV1</strong> - Critical impact, all hands on deck</li>
+        <li><strong>SEV2</strong> - Major impact, significant degradation</li>
+        <li><strong>SEV3</strong> - Minor impact, limited scope</li>
+        <li><strong>SEV4</strong> - Minimal impact, low urgency</li>
+      </ul>
+
+      <h2>Creating an Incident</h2>
+
+      <h3>Via Web UI</h3>
+      <ol>
+        <li>Navigate to <strong>Incidents</strong></li>
+        <li>Click <strong>Create Incident</strong></li>
+        <li>Enter title, description, and severity</li>
+        <li>Add initial responders</li>
+        <li>Link related alerts (optional)</li>
+      </ol>
+
+      <h3>Via API</h3>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/incidents \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Production Database Outage",
+    "description": "Primary database is unresponsive",
+    "severity": "sev1",
+    "status": "triggered"
+  }'</code></pre>
+      </div>
+
+      <h2>Managing Responders</h2>
+
+      <p>Add responders with specific roles:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/incidents/{id}/responders \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user-uuid",
+    "role": "incident_commander"
+  }'</code></pre>
+      </div>
+
+      <h3>Responder Roles</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Responsibility</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Incident Commander</strong></td>
+            <td>Leads the response, coordinates team</td>
+          </tr>
+          <tr>
+            <td><strong>Responder</strong></td>
+            <td>Works on resolving the issue</td>
+          </tr>
+          <tr>
+            <td><strong>Observer</strong></td>
+            <td>Monitors progress, provides input</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Timeline</h2>
+
+      <p>The timeline tracks all incident activity automatically:</p>
+
+      <ul>
+        <li>Status changes</li>
+        <li>Responder additions/removals</li>
+        <li>Notes and updates</li>
+        <li>Linked alerts</li>
+      </ul>
+
+      <h3>Add a Note</h3>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/incidents/{id}/notes \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Database team is investigating connection pool issues"
+  }'</code></pre>
+      </div>
+
+      <h3>Get Timeline</h3>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl http://localhost:8081/api/v1/incidents/{id}/timeline \
+  -H "Authorization: Bearer &lt;token&gt;"</code></pre>
+      </div>
+
+      <h2>Linking Alerts</h2>
+
+      <p>Associate related alerts with an incident:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X POST http://localhost:8081/api/v1/incidents/{id}/alerts \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "alert_id": "alert-uuid"
+  }'</code></pre>
+      </div>
+
+      <h2>Updating Status</h2>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>curl -X PATCH http://localhost:8081/api/v1/incidents/{id} \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "resolved",
+    "resolved_at": "2024-01-15T14:30:00Z"
+  }'</code></pre>
+      </div>
+
+      <h2>Incident Fields</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>id</code></td>
+            <td>UUID</td>
+            <td>Unique identifier</td>
+          </tr>
+          <tr>
+            <td><code>title</code></td>
+            <td>string</td>
+            <td>Incident title</td>
+          </tr>
+          <tr>
+            <td><code>description</code></td>
+            <td>string</td>
+            <td>Detailed description</td>
+          </tr>
+          <tr>
+            <td><code>status</code></td>
+            <td>string</td>
+            <td>Current status</td>
+          </tr>
+          <tr>
+            <td><code>severity</code></td>
+            <td>string</td>
+            <td>sev1, sev2, sev3, sev4</td>
+          </tr>
+          <tr>
+            <td><code>responders</code></td>
+            <td>array</td>
+            <td>List of responders with roles</td>
+          </tr>
+          <tr>
+            <td><code>created_at</code></td>
+            <td>timestamp</td>
+            <td>When incident was created</td>
+          </tr>
+          <tr>
+            <td><code>resolved_at</code></td>
+            <td>timestamp</td>
+            <td>When incident was resolved</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-success">
+        <div class="callout-title">Best Practice</div>
+        <p>Always assign an Incident Commander for SEV1 and SEV2 incidents to ensure clear ownership and coordination.</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>
