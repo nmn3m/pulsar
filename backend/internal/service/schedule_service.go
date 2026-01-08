@@ -62,7 +62,7 @@ type UpdateRotationRequest struct {
 
 type AddParticipantRequest struct {
 	UserID   uuid.UUID `json:"user_id" binding:"required"`
-	Position int       `json:"position" binding:"required"`
+	Position int       `json:"position" binding:"min=0"`
 }
 
 type ReorderParticipantsRequest struct {
