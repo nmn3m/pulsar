@@ -1,289 +1,348 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { api } from '$lib/api/client';
-	import Button from '$lib/components/ui/Button.svelte';
-	import type { IncomingWebhookToken, CreateIncomingWebhookTokenRequest, IncomingWebhookIntegrationType } from '$lib/types/webhook';
+  import { onMount } from 'svelte';
+  import { api } from '$lib/api/client';
+  import Button from '$lib/components/ui/Button.svelte';
+  import type {
+    IncomingWebhookToken,
+    CreateIncomingWebhookTokenRequest,
+    IncomingWebhookIntegrationType,
+  } from '$lib/types/webhook';
 
-	let tokens: IncomingWebhookToken[] = [];
-	let isLoading = true;
-	let error: string | null = null;
+  let tokens: IncomingWebhookToken[] = [];
+  let isLoading = true;
+  let error: string | null = null;
 
-	// Create form state
-	let showCreateForm = false;
-	let name = '';
-	let integrationType: IncomingWebhookIntegrationType = 'generic';
-	let defaultPriority = 'P3';
-	let defaultTags = '';
-	let createError = '';
-	let creating = false;
+  // Create form state
+  let showCreateForm = false;
+  let name = '';
+  let integrationType: IncomingWebhookIntegrationType = 'generic';
+  let defaultPriority = 'P3';
+  let defaultTags = '';
+  let createError = '';
+  let creating = false;
 
-	onMount(async () => {
-		await loadTokens();
-	});
+  onMount(async () => {
+    await loadTokens();
+  });
 
-	async function loadTokens() {
-		isLoading = true;
-		error = null;
+  async function loadTokens() {
+    isLoading = true;
+    error = null;
 
-		try {
-			tokens = (await api.listIncomingWebhookTokens()) || [];
-		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to load incoming webhook tokens';
-		} finally {
-			isLoading = false;
-		}
-	}
+    try {
+      tokens = (await api.listIncomingWebhookTokens()) || [];
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Failed to load incoming webhook tokens';
+    } finally {
+      isLoading = false;
+    }
+  }
 
-	async function handleCreate() {
-		createError = '';
-		creating = true;
+  async function handleCreate() {
+    createError = '';
+    creating = true;
 
-		try {
-			const data: CreateIncomingWebhookTokenRequest = {
-				name: name.trim(),
-				integration_type: integrationType,
-				default_priority: defaultPriority,
-				default_tags: defaultTags ? defaultTags.split(',').map(t => t.trim()) : []
-			};
+    try {
+      const data: CreateIncomingWebhookTokenRequest = {
+        name: name.trim(),
+        integration_type: integrationType,
+        default_priority: defaultPriority,
+        default_tags: defaultTags ? defaultTags.split(',').map((t) => t.trim()) : [],
+      };
 
-			await api.createIncomingWebhookToken(data);
-			await loadTokens();
+      await api.createIncomingWebhookToken(data);
+      await loadTokens();
 
-			// Reset form
-			name = '';
-			integrationType = 'generic';
-			defaultPriority = 'P3';
-			defaultTags = '';
-			showCreateForm = false;
-		} catch (err) {
-			createError = err instanceof Error ? err.message : 'Failed to create incoming webhook token';
-		} finally {
-			creating = false;
-		}
-	}
+      // Reset form
+      name = '';
+      integrationType = 'generic';
+      defaultPriority = 'P3';
+      defaultTags = '';
+      showCreateForm = false;
+    } catch (err) {
+      createError = err instanceof Error ? err.message : 'Failed to create incoming webhook token';
+    } finally {
+      creating = false;
+    }
+  }
 
-	async function handleDelete(id: string) {
-		if (!confirm('Are you sure you want to delete this incoming webhook token?')) return;
+  async function handleDelete(id: string) {
+    if (!confirm('Are you sure you want to delete this incoming webhook token?')) return;
 
-		try {
-			await api.deleteIncomingWebhookToken(id);
-			await loadTokens();
-		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to delete incoming webhook token';
-		}
-	}
+    try {
+      await api.deleteIncomingWebhookToken(id);
+      await loadTokens();
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Failed to delete incoming webhook token';
+    }
+  }
 
-	function copyToClipboard(text: string) {
-		navigator.clipboard.writeText(text);
-		alert('Copied to clipboard!');
-	}
+  function copyToClipboard(text: string) {
+    navigator.clipboard.writeText(text);
+    alert('Copied to clipboard!');
+  }
 
-	function getWebhookURL(token: string): string {
-		const baseUrl = window.location.origin;
-		return `${baseUrl}/api/v1/webhook/${token}`;
-	}
+  function getWebhookURL(token: string): string {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/api/v1/webhook/${token}`;
+  }
 
-	function formatDate(dateStr?: string): string {
-		if (!dateStr) return 'Never';
-		const date = new Date(dateStr);
-		return date.toLocaleString();
-	}
+  function formatDate(dateStr?: string): string {
+    if (!dateStr) return 'Never';
+    const date = new Date(dateStr);
+    return date.toLocaleString();
+  }
 </script>
 
 <svelte:head>
-	<title>Incoming Webhooks - Pulsar</title>
+  <title>Incoming Webhooks - Pulsar</title>
 </svelte:head>
 
 <div class="space-y-6">
-	<div class="flex justify-between items-center">
-		<div>
-			<h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Incoming Webhooks</h2>
-			<p class="mt-2 text-gray-500 dark:text-gray-400">Receive alerts from external monitoring tools</p>
-		</div>
-		<Button variant="primary" on:click={() => (showCreateForm = !showCreateForm)}>
-			{showCreateForm ? 'Cancel' : 'Create Token'}
-		</Button>
-	</div>
+  <div class="flex justify-between items-center">
+    <div>
+      <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Incoming Webhooks</h2>
+      <p class="mt-2 text-gray-500 dark:text-gray-400">
+        Receive alerts from external monitoring tools
+      </p>
+    </div>
+    <Button variant="primary" on:click={() => (showCreateForm = !showCreateForm)}>
+      {showCreateForm ? 'Cancel' : 'Create Token'}
+    </Button>
+  </div>
 
-	{#if error}
-		<div class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg">
-			{error}
-		</div>
-	{/if}
+  {#if error}
+    <div
+      class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg"
+    >
+      {error}
+    </div>
+  {/if}
 
-	{#if showCreateForm}
-		<div class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-primary-200 dark:border-primary-500/30 shadow-sm">
-			<h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Create Incoming Webhook Token</h3>
-			<form on:submit|preventDefault={handleCreate} class="space-y-4">
-				<div>
-					<label for="name" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-						Name *
-					</label>
-					<input
-						id="name"
-						type="text"
-						bind:value={name}
-						required
-						class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-						placeholder="Prometheus Production"
-					/>
-				</div>
+  {#if showCreateForm}
+    <div
+      class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-primary-200 dark:border-primary-500/30 shadow-sm"
+    >
+      <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+        Create Incoming Webhook Token
+      </h3>
+      <form on:submit|preventDefault={handleCreate} class="space-y-4">
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+            Name *
+          </label>
+          <input
+            id="name"
+            type="text"
+            bind:value={name}
+            required
+            class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+            placeholder="Prometheus Production"
+          />
+        </div>
 
-				<div>
-					<label for="integration-type" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-						Integration Type *
-					</label>
-					<select
-						id="integration-type"
-						bind:value={integrationType}
-						class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white"
-					>
-						<option value="generic">Generic</option>
-						<option value="prometheus">Prometheus Alertmanager</option>
-						<option value="grafana">Grafana</option>
-						<option value="datadog">Datadog</option>
-					</select>
-				</div>
+        <div>
+          <label
+            for="integration-type"
+            class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1"
+          >
+            Integration Type *
+          </label>
+          <select
+            id="integration-type"
+            bind:value={integrationType}
+            class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white"
+          >
+            <option value="generic">Generic</option>
+            <option value="prometheus">Prometheus Alertmanager</option>
+            <option value="grafana">Grafana</option>
+            <option value="datadog">Datadog</option>
+          </select>
+        </div>
 
-				<div>
-					<label for="priority" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-						Default Priority
-					</label>
-					<select
-						id="priority"
-						bind:value={defaultPriority}
-						class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white"
-					>
-						<option value="P1">P1 - Critical</option>
-						<option value="P2">P2 - High</option>
-						<option value="P3">P3 - Medium</option>
-						<option value="P4">P4 - Low</option>
-						<option value="P5">P5 - Info</option>
-					</select>
-				</div>
+        <div>
+          <label
+            for="priority"
+            class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1"
+          >
+            Default Priority
+          </label>
+          <select
+            id="priority"
+            bind:value={defaultPriority}
+            class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white"
+          >
+            <option value="P1">P1 - Critical</option>
+            <option value="P2">P2 - High</option>
+            <option value="P3">P3 - Medium</option>
+            <option value="P4">P4 - Low</option>
+            <option value="P5">P5 - Info</option>
+          </select>
+        </div>
 
-				<div>
-					<label for="tags" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
-						Default Tags (comma-separated)
-					</label>
-					<input
-						id="tags"
-						type="text"
-						bind:value={defaultTags}
-						class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-						placeholder="production, monitoring"
-					/>
-				</div>
+        <div>
+          <label for="tags" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+            Default Tags (comma-separated)
+          </label>
+          <input
+            id="tags"
+            type="text"
+            bind:value={defaultTags}
+            class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+            placeholder="production, monitoring"
+          />
+        </div>
 
-				{#if createError}
-					<div class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg">
-						{createError}
-					</div>
-				{/if}
+        {#if createError}
+          <div
+            class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg"
+          >
+            {createError}
+          </div>
+        {/if}
 
-				<div class="flex gap-2">
-					<Button type="submit" variant="primary" disabled={creating}>
-						{creating ? 'Creating...' : 'Create Token'}
-					</Button>
-					<Button type="button" variant="secondary" on:click={() => (showCreateForm = false)}>
-						Cancel
-					</Button>
-				</div>
-			</form>
-		</div>
-	{/if}
+        <div class="flex gap-2">
+          <Button type="submit" variant="primary" disabled={creating}>
+            {creating ? 'Creating...' : 'Create Token'}
+          </Button>
+          <Button type="button" variant="secondary" on:click={() => (showCreateForm = false)}>
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </div>
+  {/if}
 
-	{#if isLoading}
-		<div class="text-center py-12">
-			<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-			<p class="mt-2 text-gray-500 dark:text-gray-400">Loading incoming webhook tokens...</p>
-		</div>
-	{:else if tokens.length === 0}
-		<div class="text-center py-12 bg-white dark:bg-space-800/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-space-600 shadow-sm">
-			<p class="text-gray-600 dark:text-gray-300">No incoming webhook tokens configured</p>
-			<p class="text-sm text-gray-400 dark:text-gray-500 mt-2">Create a token to receive alerts from external monitoring tools</p>
-		</div>
-	{:else}
-		<div class="grid grid-cols-1 gap-4">
-			{#each tokens as token (token.id)}
-				<div class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-200 dark:border-space-600 hover:border-primary-400 dark:hover:border-primary-500/30 transition-all duration-300 shadow-sm hover:shadow-lg dark:hover:shadow-primary-500/10">
-					<div class="flex items-start justify-between mb-4">
-						<div class="flex-1">
-							<div class="flex items-center gap-3 mb-2">
-								<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{token.name}</h3>
-								<span class="px-2 py-1 text-xs rounded bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-500/30">
-									{token.integration_type}
-								</span>
-								<span class="px-2 py-1 text-xs rounded border {token.enabled ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border-green-300 dark:border-green-500/30' : 'bg-gray-100 dark:bg-space-700 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-space-500'}">
-									{token.enabled ? 'Enabled' : 'Disabled'}
-								</span>
-							</div>
+  {#if isLoading}
+    <div class="text-center py-12">
+      <div
+        class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"
+      ></div>
+      <p class="mt-2 text-gray-500 dark:text-gray-400">Loading incoming webhook tokens...</p>
+    </div>
+  {:else if tokens.length === 0}
+    <div
+      class="text-center py-12 bg-white dark:bg-space-800/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-space-600 shadow-sm"
+    >
+      <p class="text-gray-600 dark:text-gray-300">No incoming webhook tokens configured</p>
+      <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">
+        Create a token to receive alerts from external monitoring tools
+      </p>
+    </div>
+  {:else}
+    <div class="grid grid-cols-1 gap-4">
+      {#each tokens as token (token.id)}
+        <div
+          class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-200 dark:border-space-600 hover:border-primary-400 dark:hover:border-primary-500/30 transition-all duration-300 shadow-sm hover:shadow-lg dark:hover:shadow-primary-500/10"
+        >
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-2">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{token.name}</h3>
+                <span
+                  class="px-2 py-1 text-xs rounded bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-500/30"
+                >
+                  {token.integration_type}
+                </span>
+                <span
+                  class="px-2 py-1 text-xs rounded border {token.enabled
+                    ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border-green-300 dark:border-green-500/30'
+                    : 'bg-gray-100 dark:bg-space-700 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-space-500'}"
+                >
+                  {token.enabled ? 'Enabled' : 'Disabled'}
+                </span>
+              </div>
 
-							<div class="space-y-2 text-sm text-gray-500 dark:text-gray-400">
-								<div>
-									<span class="font-medium text-gray-700 dark:text-gray-300">Default Priority:</span> {token.default_priority}
-								</div>
-								{#if token.default_tags.length > 0}
-									<div class="flex flex-wrap gap-1">
-										<span class="font-medium text-gray-700 dark:text-gray-300">Default Tags:</span>
-										{#each token.default_tags as tag}
-											<span class="px-2 py-0.5 bg-gray-100 dark:bg-space-700 text-gray-700 dark:text-gray-300 text-xs rounded border border-gray-200 dark:border-space-500">{tag}</span>
-										{/each}
-									</div>
-								{/if}
-								<div>
-									<span class="font-medium text-gray-700 dark:text-gray-300">Requests:</span> {token.request_count}
-								</div>
-								<div>
-									<span class="font-medium text-gray-700 dark:text-gray-300">Last Used:</span> {formatDate(token.last_used_at)}
-								</div>
-							</div>
-						</div>
+              <div class="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+                <div>
+                  <span class="font-medium text-gray-700 dark:text-gray-300">Default Priority:</span
+                  >
+                  {token.default_priority}
+                </div>
+                {#if token.default_tags.length > 0}
+                  <div class="flex flex-wrap gap-1">
+                    <span class="font-medium text-gray-700 dark:text-gray-300">Default Tags:</span>
+                    {#each token.default_tags as tag}
+                      <span
+                        class="px-2 py-0.5 bg-gray-100 dark:bg-space-700 text-gray-700 dark:text-gray-300 text-xs rounded border border-gray-200 dark:border-space-500"
+                        >{tag}</span
+                      >
+                    {/each}
+                  </div>
+                {/if}
+                <div>
+                  <span class="font-medium text-gray-700 dark:text-gray-300">Requests:</span>
+                  {token.request_count}
+                </div>
+                <div>
+                  <span class="font-medium text-gray-700 dark:text-gray-300">Last Used:</span>
+                  {formatDate(token.last_used_at)}
+                </div>
+              </div>
+            </div>
 
-						<div class="flex gap-2">
-							<Button variant="danger" size="sm" on:click={() => handleDelete(token.id)}>
-								Delete
-							</Button>
-						</div>
-					</div>
+            <div class="flex gap-2">
+              <Button variant="danger" size="sm" on:click={() => handleDelete(token.id)}>
+                Delete
+              </Button>
+            </div>
+          </div>
 
-					<div class="border-t border-gray-200 dark:border-space-600 pt-4">
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-							Webhook URL
-						</label>
-						<div class="flex gap-2">
-							<input
-								type="text"
-								value={getWebhookURL(token.token)}
-								readonly
-								class="flex-1 px-3 py-2 bg-gray-100 dark:bg-space-700 border border-gray-200 dark:border-space-500 rounded-lg font-mono text-sm text-primary-600 dark:text-primary-300"
-							/>
-							<Button variant="secondary" size="sm" on:click={() => copyToClipboard(getWebhookURL(token.token))}>
-								Copy
-							</Button>
-						</div>
-						<p class="mt-2 text-xs text-gray-400 dark:text-gray-500">
-							Use this URL to send webhooks from {token.integration_type === 'generic' ? 'your service' : token.integration_type}
-						</p>
-					</div>
+          <div class="border-t border-gray-200 dark:border-space-600 pt-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Webhook URL
+            </label>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                value={getWebhookURL(token.token)}
+                readonly
+                class="flex-1 px-3 py-2 bg-gray-100 dark:bg-space-700 border border-gray-200 dark:border-space-500 rounded-lg font-mono text-sm text-primary-600 dark:text-primary-300"
+              />
+              <Button
+                variant="secondary"
+                size="sm"
+                on:click={() => copyToClipboard(getWebhookURL(token.token))}
+              >
+                Copy
+              </Button>
+            </div>
+            <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">
+              Use this URL to send webhooks from {token.integration_type === 'generic'
+                ? 'your service'
+                : token.integration_type}
+            </p>
+          </div>
 
-					{#if token.integration_type === 'prometheus'}
-						<div class="mt-4 p-3 bg-gray-100 dark:bg-space-700 rounded-lg border border-gray-200 dark:border-space-500 text-xs">
-							<p class="font-medium mb-1 text-gray-700 dark:text-gray-300">Prometheus Alertmanager Configuration:</p>
-							<pre class="overflow-x-auto text-primary-600 dark:text-primary-300"><code>receivers:
+          {#if token.integration_type === 'prometheus'}
+            <div
+              class="mt-4 p-3 bg-gray-100 dark:bg-space-700 rounded-lg border border-gray-200 dark:border-space-500 text-xs"
+            >
+              <p class="font-medium mb-1 text-gray-700 dark:text-gray-300">
+                Prometheus Alertmanager Configuration:
+              </p>
+              <pre class="overflow-x-auto text-primary-600 dark:text-primary-300"><code
+                  >receivers:
   - name: 'pulsar'
     webhook_configs:
       - url: '{getWebhookURL(token.token)}'
-        send_resolved: false</code></pre>
-						</div>
-					{:else if token.integration_type === 'grafana'}
-						<div class="mt-4 p-3 bg-gray-100 dark:bg-space-700 rounded-lg border border-gray-200 dark:border-space-500 text-xs">
-							<p class="font-medium mb-1 text-gray-700 dark:text-gray-300">Grafana Webhook Configuration:</p>
-							<p class="text-gray-500 dark:text-gray-400">Add this URL as a webhook notification channel in Grafana.</p>
-						</div>
-					{/if}
-				</div>
-			{/each}
-		</div>
-	{/if}
+        send_resolved: false</code
+                ></pre>
+            </div>
+          {:else if token.integration_type === 'grafana'}
+            <div
+              class="mt-4 p-3 bg-gray-100 dark:bg-space-700 rounded-lg border border-gray-200 dark:border-space-500 text-xs"
+            >
+              <p class="font-medium mb-1 text-gray-700 dark:text-gray-300">
+                Grafana Webhook Configuration:
+              </p>
+              <p class="text-gray-500 dark:text-gray-400">
+                Add this URL as a webhook notification channel in Grafana.
+              </p>
+            </div>
+          {/if}
+        </div>
+      {/each}
+    </div>
+  {/if}
 </div>
