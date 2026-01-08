@@ -197,10 +197,10 @@ func (h *IncomingWebhookHandler) parsePrometheusWebhook(body []byte) ([]*service
 
 func (h *IncomingWebhookHandler) parseGrafanaWebhook(body []byte) ([]*service.CreateAlertRequest, error) {
 	var payload struct {
-		Title   string `json:"title"`
-		State   string `json:"state"`
-		Message string `json:"message"`
-		RuleURL string `json:"ruleUrl"`
+		Title   string            `json:"title"`
+		State   string            `json:"state"`
+		Message string            `json:"message"`
+		RuleURL string            `json:"ruleUrl"`
 		Tags    map[string]string `json:"tags"`
 	}
 

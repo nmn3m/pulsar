@@ -27,9 +27,9 @@ type Alert struct {
 	AcknowledgedAt *time.Time `json:"acknowledged_at,omitempty" db:"acknowledged_at"`
 
 	// Closure
-	ClosedBy     *uuid.UUID `json:"closed_by,omitempty" db:"closed_by"`
-	ClosedAt     *time.Time `json:"closed_at,omitempty" db:"closed_at"`
-	CloseReason  *string    `json:"close_reason,omitempty" db:"close_reason"`
+	ClosedBy    *uuid.UUID `json:"closed_by,omitempty" db:"closed_by"`
+	ClosedAt    *time.Time `json:"closed_at,omitempty" db:"closed_at"`
+	CloseReason *string    `json:"close_reason,omitempty" db:"close_reason"`
 
 	// Snooze
 	SnoozedUntil *time.Time `json:"snoozed_until,omitempty" db:"snoozed_until"`

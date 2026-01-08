@@ -141,11 +141,11 @@ func (s *WebSocketService) broadcastMessage(message *domain.WSMessage) {
 // BroadcastAlertEvent broadcasts an alert-related event
 func (s *WebSocketService) BroadcastAlertEvent(eventType domain.WSEventType, orgID uuid.UUID, alert *domain.Alert) {
 	payload := map[string]interface{}{
-		"alert_id":  alert.ID.String(),
-		"message":   alert.Message,
-		"priority":  alert.Priority,
-		"status":    alert.Status,
-		"source":    alert.Source,
+		"alert_id":   alert.ID.String(),
+		"message":    alert.Message,
+		"priority":   alert.Priority,
+		"status":     alert.Status,
+		"source":     alert.Source,
 		"created_at": alert.CreatedAt,
 	}
 

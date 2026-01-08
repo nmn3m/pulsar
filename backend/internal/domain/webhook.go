@@ -8,22 +8,22 @@ import (
 
 // WebhookEndpoint represents an outgoing webhook configuration
 type WebhookEndpoint struct {
-	ID             uuid.UUID              `json:"id" db:"id"`
-	OrganizationID uuid.UUID              `json:"organization_id" db:"organization_id"`
-	Name           string                 `json:"name" db:"name"`
-	URL            string                 `json:"url" db:"url"`
-	Secret         string                 `json:"-" db:"secret"` // Never expose in JSON
-	Enabled        bool                   `json:"enabled" db:"enabled"`
+	ID             uuid.UUID `json:"id" db:"id"`
+	OrganizationID uuid.UUID `json:"organization_id" db:"organization_id"`
+	Name           string    `json:"name" db:"name"`
+	URL            string    `json:"url" db:"url"`
+	Secret         string    `json:"-" db:"secret"` // Never expose in JSON
+	Enabled        bool      `json:"enabled" db:"enabled"`
 
 	// Event filters
-	AlertCreated       bool `json:"alert_created" db:"alert_created"`
-	AlertUpdated       bool `json:"alert_updated" db:"alert_updated"`
-	AlertAcknowledged  bool `json:"alert_acknowledged" db:"alert_acknowledged"`
-	AlertClosed        bool `json:"alert_closed" db:"alert_closed"`
-	AlertEscalated     bool `json:"alert_escalated" db:"alert_escalated"`
-	IncidentCreated    bool `json:"incident_created" db:"incident_created"`
-	IncidentUpdated    bool `json:"incident_updated" db:"incident_updated"`
-	IncidentResolved   bool `json:"incident_resolved" db:"incident_resolved"`
+	AlertCreated      bool `json:"alert_created" db:"alert_created"`
+	AlertUpdated      bool `json:"alert_updated" db:"alert_updated"`
+	AlertAcknowledged bool `json:"alert_acknowledged" db:"alert_acknowledged"`
+	AlertClosed       bool `json:"alert_closed" db:"alert_closed"`
+	AlertEscalated    bool `json:"alert_escalated" db:"alert_escalated"`
+	IncidentCreated   bool `json:"incident_created" db:"incident_created"`
+	IncidentUpdated   bool `json:"incident_updated" db:"incident_updated"`
+	IncidentResolved  bool `json:"incident_resolved" db:"incident_resolved"`
 
 	// HTTP configuration
 	Headers        map[string]string `json:"headers" db:"headers"`
@@ -48,20 +48,20 @@ const (
 
 // WebhookDelivery represents a webhook delivery attempt
 type WebhookDelivery struct {
-	ID                uuid.UUID                    `json:"id" db:"id"`
-	WebhookEndpointID uuid.UUID                    `json:"webhook_endpoint_id" db:"webhook_endpoint_id"`
-	OrganizationID    uuid.UUID                    `json:"organization_id" db:"organization_id"`
-	EventType         string                       `json:"event_type" db:"event_type"`
-	Payload           map[string]interface{}       `json:"payload" db:"payload"`
-	Status            WebhookDeliveryStatus        `json:"status" db:"status"`
-	Attempts          int                          `json:"attempts" db:"attempts"`
-	LastAttemptAt     *time.Time                   `json:"last_attempt_at,omitempty" db:"last_attempt_at"`
-	NextRetryAt       *time.Time                   `json:"next_retry_at,omitempty" db:"next_retry_at"`
-	ResponseStatus    *int                         `json:"response_status_code,omitempty" db:"response_status_code"`
-	ResponseBody      *string                      `json:"response_body,omitempty" db:"response_body"`
-	ErrorMessage      *string                      `json:"error_message,omitempty" db:"error_message"`
-	CreatedAt         time.Time                    `json:"created_at" db:"created_at"`
-	UpdatedAt         time.Time                    `json:"updated_at" db:"updated_at"`
+	ID                uuid.UUID              `json:"id" db:"id"`
+	WebhookEndpointID uuid.UUID              `json:"webhook_endpoint_id" db:"webhook_endpoint_id"`
+	OrganizationID    uuid.UUID              `json:"organization_id" db:"organization_id"`
+	EventType         string                 `json:"event_type" db:"event_type"`
+	Payload           map[string]interface{} `json:"payload" db:"payload"`
+	Status            WebhookDeliveryStatus  `json:"status" db:"status"`
+	Attempts          int                    `json:"attempts" db:"attempts"`
+	LastAttemptAt     *time.Time             `json:"last_attempt_at,omitempty" db:"last_attempt_at"`
+	NextRetryAt       *time.Time             `json:"next_retry_at,omitempty" db:"next_retry_at"`
+	ResponseStatus    *int                   `json:"response_status_code,omitempty" db:"response_status_code"`
+	ResponseBody      *string                `json:"response_body,omitempty" db:"response_body"`
+	ErrorMessage      *string                `json:"error_message,omitempty" db:"error_message"`
+	CreatedAt         time.Time              `json:"created_at" db:"created_at"`
+	UpdatedAt         time.Time              `json:"updated_at" db:"updated_at"`
 }
 
 // IncomingWebhookIntegrationType represents the type of incoming webhook integration

@@ -27,11 +27,11 @@ type EscalationRule struct {
 }
 
 type EscalationTarget struct {
-	ID         uuid.UUID      `json:"id" db:"id"`
-	RuleID     uuid.UUID      `json:"rule_id" db:"rule_id"`
+	ID         uuid.UUID            `json:"id" db:"id"`
+	RuleID     uuid.UUID            `json:"rule_id" db:"rule_id"`
 	TargetType EscalationTargetType `json:"target_type" db:"target_type"`
-	TargetID   uuid.UUID      `json:"target_id" db:"target_id"`
-	CreatedAt  time.Time      `json:"created_at" db:"created_at"`
+	TargetID   uuid.UUID            `json:"target_id" db:"target_id"`
+	CreatedAt  time.Time            `json:"created_at" db:"created_at"`
 }
 
 type AlertEscalationEvent struct {
@@ -70,10 +70,10 @@ func (t EscalationTargetType) Validate() error {
 type EscalationEventType string
 
 const (
-	EscalationEventTriggered     EscalationEventType = "triggered"
-	EscalationEventAcknowledged  EscalationEventType = "acknowledged"
-	EscalationEventCompleted     EscalationEventType = "completed"
-	EscalationEventStopped       EscalationEventType = "stopped"
+	EscalationEventTriggered    EscalationEventType = "triggered"
+	EscalationEventAcknowledged EscalationEventType = "acknowledged"
+	EscalationEventCompleted    EscalationEventType = "completed"
+	EscalationEventStopped      EscalationEventType = "stopped"
 )
 
 func (t EscalationEventType) String() string {

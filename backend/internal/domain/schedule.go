@@ -18,18 +18,18 @@ type Schedule struct {
 }
 
 type ScheduleRotation struct {
-	ID             uuid.UUID      `json:"id" db:"id"`
-	ScheduleID     uuid.UUID      `json:"schedule_id" db:"schedule_id"`
-	Name           string         `json:"name" db:"name"`
-	RotationType   RotationType   `json:"rotation_type" db:"rotation_type"`
-	RotationLength int            `json:"rotation_length" db:"rotation_length"`
-	StartDate      time.Time      `json:"start_date" db:"start_date"`
-	StartTime      time.Time      `json:"start_time" db:"start_time"`
-	EndTime        *time.Time     `json:"end_time,omitempty" db:"end_time"`
-	HandoffDay     *int           `json:"handoff_day,omitempty" db:"handoff_day"`
-	HandoffTime    time.Time      `json:"handoff_time" db:"handoff_time"`
-	CreatedAt      time.Time      `json:"created_at" db:"created_at"`
-	UpdatedAt      time.Time      `json:"updated_at" db:"updated_at"`
+	ID             uuid.UUID    `json:"id" db:"id"`
+	ScheduleID     uuid.UUID    `json:"schedule_id" db:"schedule_id"`
+	Name           string       `json:"name" db:"name"`
+	RotationType   RotationType `json:"rotation_type" db:"rotation_type"`
+	RotationLength int          `json:"rotation_length" db:"rotation_length"`
+	StartDate      time.Time    `json:"start_date" db:"start_date"`
+	StartTime      time.Time    `json:"start_time" db:"start_time"`
+	EndTime        *time.Time   `json:"end_time,omitempty" db:"end_time"`
+	HandoffDay     *int         `json:"handoff_day,omitempty" db:"handoff_day"`
+	HandoffTime    time.Time    `json:"handoff_time" db:"handoff_time"`
+	CreatedAt      time.Time    `json:"created_at" db:"created_at"`
+	UpdatedAt      time.Time    `json:"updated_at" db:"updated_at"`
 }
 
 type ScheduleRotationParticipant struct {

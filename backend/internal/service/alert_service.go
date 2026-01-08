@@ -308,13 +308,13 @@ func (s *AlertService) AcknowledgeAlert(ctx context.Context, id, userID uuid.UUI
 			}
 			if s.webhookService != nil {
 				s.webhookService.TriggerWebhooks(ctx, alert.OrganizationID, "alert.acknowledged", map[string]interface{}{
-					"alert_id":         alert.ID.String(),
-					"source":           alert.Source,
-					"priority":         string(alert.Priority),
-					"status":           string(alert.Status),
-					"message":          alert.Message,
-					"acknowledged_at":  alert.AcknowledgedAt,
-					"acknowledged_by":  userID.String(),
+					"alert_id":        alert.ID.String(),
+					"source":          alert.Source,
+					"priority":        string(alert.Priority),
+					"status":          string(alert.Status),
+					"message":         alert.Message,
+					"acknowledged_at": alert.AcknowledgedAt,
+					"acknowledged_by": userID.String(),
 				})
 			}
 		}
@@ -349,13 +349,13 @@ func (s *AlertService) CloseAlert(ctx context.Context, id, userID uuid.UUID, rea
 			}
 			if s.webhookService != nil {
 				s.webhookService.TriggerWebhooks(ctx, alert.OrganizationID, "alert.closed", map[string]interface{}{
-					"alert_id":    alert.ID.String(),
-					"source":      alert.Source,
-					"priority":    string(alert.Priority),
-					"status":      string(alert.Status),
-					"message":     alert.Message,
-					"closed_at":   alert.ClosedAt,
-					"closed_by":   userID.String(),
+					"alert_id":     alert.ID.String(),
+					"source":       alert.Source,
+					"priority":     string(alert.Priority),
+					"status":       string(alert.Status),
+					"message":      alert.Message,
+					"closed_at":    alert.ClosedAt,
+					"closed_by":    userID.String(),
 					"close_reason": reason,
 				})
 			}

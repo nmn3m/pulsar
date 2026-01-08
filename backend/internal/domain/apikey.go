@@ -33,20 +33,20 @@ type APIKey struct {
 type APIKeyScope string
 
 const (
-	ScopeAlertsRead       APIKeyScope = "alerts:read"
-	ScopeAlertsWrite      APIKeyScope = "alerts:write"
-	ScopeIncidentsRead    APIKeyScope = "incidents:read"
-	ScopeIncidentsWrite   APIKeyScope = "incidents:write"
-	ScopeTeamsRead        APIKeyScope = "teams:read"
-	ScopeTeamsWrite       APIKeyScope = "teams:write"
-	ScopeSchedulesRead    APIKeyScope = "schedules:read"
-	ScopeSchedulesWrite   APIKeyScope = "schedules:write"
-	ScopeWebhooksRead     APIKeyScope = "webhooks:read"
-	ScopeWebhooksWrite    APIKeyScope = "webhooks:write"
+	ScopeAlertsRead         APIKeyScope = "alerts:read"
+	ScopeAlertsWrite        APIKeyScope = "alerts:write"
+	ScopeIncidentsRead      APIKeyScope = "incidents:read"
+	ScopeIncidentsWrite     APIKeyScope = "incidents:write"
+	ScopeTeamsRead          APIKeyScope = "teams:read"
+	ScopeTeamsWrite         APIKeyScope = "teams:write"
+	ScopeSchedulesRead      APIKeyScope = "schedules:read"
+	ScopeSchedulesWrite     APIKeyScope = "schedules:write"
+	ScopeWebhooksRead       APIKeyScope = "webhooks:read"
+	ScopeWebhooksWrite      APIKeyScope = "webhooks:write"
 	ScopeNotificationsRead  APIKeyScope = "notifications:read"
 	ScopeNotificationsWrite APIKeyScope = "notifications:write"
-	ScopeUsersRead        APIKeyScope = "users:read"
-	ScopeAll              APIKeyScope = "*"
+	ScopeUsersRead          APIKeyScope = "users:read"
+	ScopeAll                APIKeyScope = "*"
 )
 
 // ValidScopes returns all valid API key scopes

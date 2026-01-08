@@ -11,28 +11,28 @@ type WSEventType string
 
 const (
 	// Alert events
-	WSEventAlertCreated       WSEventType = "alert.created"
-	WSEventAlertUpdated       WSEventType = "alert.updated"
-	WSEventAlertDeleted       WSEventType = "alert.deleted"
-	WSEventAlertAcknowledged  WSEventType = "alert.acknowledged"
-	WSEventAlertClosed        WSEventType = "alert.closed"
-	WSEventAlertEscalated     WSEventType = "alert.escalated"
+	WSEventAlertCreated      WSEventType = "alert.created"
+	WSEventAlertUpdated      WSEventType = "alert.updated"
+	WSEventAlertDeleted      WSEventType = "alert.deleted"
+	WSEventAlertAcknowledged WSEventType = "alert.acknowledged"
+	WSEventAlertClosed       WSEventType = "alert.closed"
+	WSEventAlertEscalated    WSEventType = "alert.escalated"
 
 	// Incident events
-	WSEventIncidentCreated    WSEventType = "incident.created"
-	WSEventIncidentUpdated    WSEventType = "incident.updated"
-	WSEventIncidentDeleted    WSEventType = "incident.deleted"
-	WSEventIncidentTimelineAdded WSEventType = "incident.timeline_added"
-	WSEventIncidentResponderAdded WSEventType = "incident.responder_added"
+	WSEventIncidentCreated          WSEventType = "incident.created"
+	WSEventIncidentUpdated          WSEventType = "incident.updated"
+	WSEventIncidentDeleted          WSEventType = "incident.deleted"
+	WSEventIncidentTimelineAdded    WSEventType = "incident.timeline_added"
+	WSEventIncidentResponderAdded   WSEventType = "incident.responder_added"
 	WSEventIncidentResponderRemoved WSEventType = "incident.responder_removed"
-	WSEventIncidentAlertLinked WSEventType = "incident.alert_linked"
-	WSEventIncidentAlertUnlinked WSEventType = "incident.alert_unlinked"
+	WSEventIncidentAlertLinked      WSEventType = "incident.alert_linked"
+	WSEventIncidentAlertUnlinked    WSEventType = "incident.alert_unlinked"
 
 	// Connection events
-	WSEventConnected          WSEventType = "connection.connected"
-	WSEventError              WSEventType = "connection.error"
-	WSEventPing               WSEventType = "connection.ping"
-	WSEventPong               WSEventType = "connection.pong"
+	WSEventConnected WSEventType = "connection.connected"
+	WSEventError     WSEventType = "connection.error"
+	WSEventPing      WSEventType = "connection.ping"
+	WSEventPong      WSEventType = "connection.pong"
 )
 
 // WSMessage represents a WebSocket message

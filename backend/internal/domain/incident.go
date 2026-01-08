@@ -55,19 +55,19 @@ func (s IncidentStatus) String() string {
 
 // Incident represents an incident
 type Incident struct {
-	ID                uuid.UUID        `json:"id" db:"id"`
-	OrganizationID    uuid.UUID        `json:"organization_id" db:"organization_id"`
-	Title             string           `json:"title" db:"title"`
-	Description       *string          `json:"description" db:"description"`
-	Severity          IncidentSeverity `json:"severity" db:"severity"`
-	Status            IncidentStatus   `json:"status" db:"status"`
-	Priority          AlertPriority    `json:"priority" db:"priority"`
-	CreatedByUserID   uuid.UUID        `json:"created_by_user_id" db:"created_by_user_id"`
-	AssignedToTeamID  *uuid.UUID       `json:"assigned_to_team_id" db:"assigned_to_team_id"`
-	StartedAt         time.Time        `json:"started_at" db:"started_at"`
-	ResolvedAt        *time.Time       `json:"resolved_at" db:"resolved_at"`
-	CreatedAt         time.Time        `json:"created_at" db:"created_at"`
-	UpdatedAt         time.Time        `json:"updated_at" db:"updated_at"`
+	ID               uuid.UUID        `json:"id" db:"id"`
+	OrganizationID   uuid.UUID        `json:"organization_id" db:"organization_id"`
+	Title            string           `json:"title" db:"title"`
+	Description      *string          `json:"description" db:"description"`
+	Severity         IncidentSeverity `json:"severity" db:"severity"`
+	Status           IncidentStatus   `json:"status" db:"status"`
+	Priority         AlertPriority    `json:"priority" db:"priority"`
+	CreatedByUserID  uuid.UUID        `json:"created_by_user_id" db:"created_by_user_id"`
+	AssignedToTeamID *uuid.UUID       `json:"assigned_to_team_id" db:"assigned_to_team_id"`
+	StartedAt        time.Time        `json:"started_at" db:"started_at"`
+	ResolvedAt       *time.Time       `json:"resolved_at" db:"resolved_at"`
+	CreatedAt        time.Time        `json:"created_at" db:"created_at"`
+	UpdatedAt        time.Time        `json:"updated_at" db:"updated_at"`
 }
 
 // ResponderRole represents the role of an incident responder
@@ -193,7 +193,7 @@ func (f *IncidentFilter) Validate() error {
 // IncidentWithDetails extends Incident with related data
 type IncidentWithDetails struct {
 	Incident
-	Responders []*ResponderWithUser          `json:"responders,omitempty"`
-	Alerts     []*IncidentAlertWithDetails   `json:"alerts,omitempty"`
-	Timeline   []*TimelineEventWithUser      `json:"timeline,omitempty"`
+	Responders []*ResponderWithUser        `json:"responders,omitempty"`
+	Alerts     []*IncidentAlertWithDetails `json:"alerts,omitempty"`
+	Timeline   []*TimelineEventWithUser    `json:"timeline,omitempty"`
 }
