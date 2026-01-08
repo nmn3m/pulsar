@@ -12,7 +12,6 @@ type Config struct {
 	Database DatabaseConfig
 	JWT      JWTConfig
 	CORS     CORSConfig
-	Firebase FirebaseConfig
 	SMTP     SMTPConfig
 }
 
@@ -25,13 +24,6 @@ type SMTPConfig struct {
 	FromName string // Sender display name
 	Enabled  bool
 	UseTLS   bool
-}
-
-type FirebaseConfig struct {
-	ProjectID       string
-	CredentialsJSON string // Base64-encoded or raw JSON
-	CredentialsFile string // Path to credentials file
-	Enabled         bool
 }
 
 type ServerConfig struct {
@@ -71,12 +63,6 @@ func Load() (*Config, error) {
 		},
 		CORS: CORSConfig{
 			AllowedOrigins: parseAllowedOrigins(getEnv("CORS_ALLOWED_ORIGINS", "http://localhost:3000")),
-		},
-		Firebase: FirebaseConfig{
-			ProjectID:       getEnv("FIREBASE_PROJECT_ID", ""),
-			CredentialsJSON: getEnv("FIREBASE_CREDENTIALS_JSON", ""),
-			CredentialsFile: getEnv("FIREBASE_CREDENTIALS_FILE", ""),
-			Enabled:         getEnv("FIREBASE_ENABLED", "false") == "true",
 		},
 		SMTP: SMTPConfig{
 			Host:     getEnv("SMTP_HOST", "localhost"),

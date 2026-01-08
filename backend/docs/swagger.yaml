@@ -140,12 +140,10 @@ definitions:
         type: number
       by_priority:
         additionalProperties:
-          format: int64
           type: integer
         type: object
       by_source:
         additionalProperties:
-          format: int64
           type: integer
         type: object
       closed:
@@ -171,12 +169,6 @@ definitions:
       PriorityP3: Medium
       PriorityP4: Low
       PriorityP5: Informational
-    x-enum-descriptions:
-    - Critical
-    - High
-    - Medium
-    - Low
-    - Informational
     x-enum-varnames:
     - PriorityP1
     - PriorityP2
@@ -215,26 +207,12 @@ definitions:
     - slack
     - teams
     - webhook
-    - push
-    - push_apns
     type: string
-    x-enum-comments:
-      ChannelTypePush: Firebase Cloud Messaging
-      ChannelTypePushAPNS: Apple Push Notification Service (future)
-    x-enum-descriptions:
-    - ""
-    - ""
-    - ""
-    - ""
-    - Firebase Cloud Messaging
-    - Apple Push Notification Service (future)
     x-enum-varnames:
     - ChannelTypeEmail
     - ChannelTypeSlack
     - ChannelTypeTeams
     - ChannelTypeWebhook
-    - ChannelTypePush
-    - ChannelTypePushAPNS
   domain.CreateAPIKeyRequest:
     properties:
       expires_at:
@@ -518,7 +496,6 @@ definitions:
         type: number
       by_severity:
         additionalProperties:
-          format: int64
           type: integer
         type: object
       closed:
@@ -723,7 +700,6 @@ definitions:
     properties:
       by_channel:
         additionalProperties:
-          format: int64
           type: integer
         type: object
       failed:
@@ -1257,11 +1233,11 @@ definitions:
   service.AddParticipantRequest:
     properties:
       position:
+        minimum: 0
         type: integer
       user_id:
         type: string
     required:
-    - position
     - user_id
     type: object
   service.AddResponderRequest:

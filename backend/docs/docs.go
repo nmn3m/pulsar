@@ -6774,15 +6774,13 @@ const docTemplate = `{
                 "by_priority": {
                     "type": "object",
                     "additionalProperties": {
-                        "type": "integer",
-                        "format": "int64"
+                        "type": "integer"
                     }
                 },
                 "by_source": {
                     "type": "object",
                     "additionalProperties": {
-                        "type": "integer",
-                        "format": "int64"
+                        "type": "integer"
                     }
                 },
                 "closed": {
@@ -6815,13 +6813,6 @@ const docTemplate = `{
                 "PriorityP4": "Low",
                 "PriorityP5": "Informational"
             },
-            "x-enum-descriptions": [
-                "Critical",
-                "High",
-                "Medium",
-                "Low",
-                "Informational"
-            ],
             "x-enum-varnames": [
                 "PriorityP1",
                 "PriorityP2",
@@ -6872,29 +6863,13 @@ const docTemplate = `{
                 "email",
                 "slack",
                 "teams",
-                "webhook",
-                "push",
-                "push_apns"
-            ],
-            "x-enum-comments": {
-                "ChannelTypePush": "Firebase Cloud Messaging",
-                "ChannelTypePushAPNS": "Apple Push Notification Service (future)"
-            },
-            "x-enum-descriptions": [
-                "",
-                "",
-                "",
-                "",
-                "Firebase Cloud Messaging",
-                "Apple Push Notification Service (future)"
+                "webhook"
             ],
             "x-enum-varnames": [
                 "ChannelTypeEmail",
                 "ChannelTypeSlack",
                 "ChannelTypeTeams",
-                "ChannelTypeWebhook",
-                "ChannelTypePush",
-                "ChannelTypePushAPNS"
+                "ChannelTypeWebhook"
             ]
         },
         "domain.CreateAPIKeyRequest": {
@@ -7320,8 +7295,7 @@ const docTemplate = `{
                 "by_severity": {
                     "type": "object",
                     "additionalProperties": {
-                        "type": "integer",
-                        "format": "int64"
+                        "type": "integer"
                     }
                 },
                 "closed": {
@@ -7621,8 +7595,7 @@ const docTemplate = `{
                 "by_channel": {
                     "type": "object",
                     "additionalProperties": {
-                        "type": "integer",
-                        "format": "int64"
+                        "type": "integer"
                     }
                 },
                 "failed": {
@@ -8415,12 +8388,12 @@ const docTemplate = `{
         "service.AddParticipantRequest": {
             "type": "object",
             "required": [
-                "position",
                 "user_id"
             ],
             "properties": {
                 "position": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "user_id": {
                     "type": "string"

@@ -426,7 +426,6 @@ pulsar/
 ### 🚧 In Progress
 - [x] API key authentication for programmatic access
 - [x] Metrics and reporting dashboard (API complete)
-- [ ] Mobile push notifications (Firebase/APNS)
 
 ### 📋 Planned
 - [ ] Slack App (OAuth, interactive messages)

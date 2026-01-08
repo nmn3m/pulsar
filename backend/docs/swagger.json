@@ -6768,15 +6768,13 @@
                 "by_priority": {
                     "type": "object",
                     "additionalProperties": {
-                        "type": "integer",
-                        "format": "int64"
+                        "type": "integer"
                     }
                 },
                 "by_source": {
                     "type": "object",
                     "additionalProperties": {
-                        "type": "integer",
-                        "format": "int64"
+                        "type": "integer"
                     }
                 },
                 "closed": {
@@ -6809,13 +6807,6 @@
                 "PriorityP4": "Low",
                 "PriorityP5": "Informational"
             },
-            "x-enum-descriptions": [
-                "Critical",
-                "High",
-                "Medium",
-                "Low",
-                "Informational"
-            ],
             "x-enum-varnames": [
                 "PriorityP1",
                 "PriorityP2",
@@ -6866,29 +6857,13 @@
                 "email",
                 "slack",
                 "teams",
-                "webhook",
-                "push",
-                "push_apns"
-            ],
-            "x-enum-comments": {
-                "ChannelTypePush": "Firebase Cloud Messaging",
-                "ChannelTypePushAPNS": "Apple Push Notification Service (future)"
-            },
-            "x-enum-descriptions": [
-                "",
-                "",
-                "",
-                "",
-                "Firebase Cloud Messaging",
-                "Apple Push Notification Service (future)"
+                "webhook"
             ],
             "x-enum-varnames": [
                 "ChannelTypeEmail",
                 "ChannelTypeSlack",
                 "ChannelTypeTeams",
-                "ChannelTypeWebhook",
-                "ChannelTypePush",
-                "ChannelTypePushAPNS"
+                "ChannelTypeWebhook"
             ]
         },
         "domain.CreateAPIKeyRequest": {
@@ -7314,8 +7289,7 @@
                 "by_severity": {
                     "type": "object",
                     "additionalProperties": {
-                        "type": "integer",
-                        "format": "int64"
+                        "type": "integer"
                     }
                 },
                 "closed": {
@@ -7615,8 +7589,7 @@
                 "by_channel": {
                     "type": "object",
                     "additionalProperties": {
-                        "type": "integer",
-                        "format": "int64"
+                        "type": "integer"
                     }
                 },
                 "failed": {
@@ -8409,12 +8382,12 @@
         "service.AddParticipantRequest": {
             "type": "object",
             "required": [
-                "position",
                 "user_id"
             ],
             "properties": {
                 "position": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "user_id": {
                     "type": "string"
