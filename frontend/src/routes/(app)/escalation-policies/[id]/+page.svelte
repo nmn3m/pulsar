@@ -63,8 +63,8 @@
 
     try {
       await api.createEscalationRule(policyId, {
-        position: rulePosition,
-        escalation_delay: escalationDelay,
+        position: Number(rulePosition),
+        escalation_delay: Number(escalationDelay),
       });
 
       await loadPolicy();

@@ -399,8 +399,8 @@ func (r *incidentRepository) ListAlerts(ctx context.Context, incidentID uuid.UUI
 			a.id, a.organization_id, a.source, a.source_id, a.priority, a.status,
 			a.message, a.description, a.tags, a.custom_fields,
 			a.assigned_to_user_id, a.assigned_to_team_id, a.escalation_policy_id,
-			a.escalation_level, a.acknowledged_at, a.acknowledged_by_user_id,
-			a.closed_at, a.closed_by_user_id, a.close_reason, a.snoozed_until,
+			a.escalation_level, a.acknowledged_at, a.acknowledged_by,
+			a.closed_at, a.closed_by, a.close_reason, a.snoozed_until,
 			a.last_escalated_at, a.created_at, a.updated_at
 		FROM incident_alerts ia
 		JOIN alerts a ON ia.alert_id = a.id
