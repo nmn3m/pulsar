@@ -8,11 +8,12 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/nmn3m/pulsar/backend/internal/config"
 	"github.com/nmn3m/pulsar/backend/internal/domain"
 	"github.com/nmn3m/pulsar/backend/internal/middleware"
 	"github.com/nmn3m/pulsar/backend/internal/repository"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService struct {

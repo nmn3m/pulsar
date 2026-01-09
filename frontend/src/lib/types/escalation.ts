@@ -25,7 +25,14 @@ export interface EscalationTarget {
   rule_id: string;
   target_type: EscalationTargetType;
   target_id: string;
+  notification_channels?: TargetNotificationConfig;
   created_at: string;
+}
+
+// Notification channel override configuration for escalation targets
+export interface TargetNotificationConfig {
+  channels: string[]; // e.g., ["email", "slack", "sms", "webhook"]
+  urgent?: boolean;   // If true, use urgent/high-priority notification
 }
 
 export interface EscalationRuleWithTargets extends EscalationRule {
@@ -65,6 +72,7 @@ export interface UpdateEscalationRuleRequest {
 export interface AddEscalationTargetRequest {
   target_type: EscalationTargetType;
   target_id: string;
+  notification_channels?: TargetNotificationConfig;
 }
 
 // Response types

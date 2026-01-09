@@ -8,9 +8,10 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+
 	"github.com/nmn3m/pulsar/backend/internal/domain"
 	"github.com/nmn3m/pulsar/backend/internal/service"
-	"go.uber.org/zap"
 )
 
 type IncomingWebhookHandler struct {

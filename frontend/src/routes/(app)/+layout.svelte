@@ -166,6 +166,14 @@
                 {#if showSettingsMenu}
                   <div class="absolute top-full right-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[9999]">
                     <a
+                      href="/settings/routing-rules"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {isActive('/settings/routing-rules') ? 'bg-gray-50' : ''}"
+                      on:click={() => (showSettingsMenu = false)}
+                    >
+                      <div class="font-medium">Routing Rules</div>
+                      <div class="text-xs text-gray-500">Auto-route alerts to teams</div>
+                    </a>
+                    <a
                       href="/webhooks/endpoints"
                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {isActive('/webhooks') ? 'bg-gray-50' : ''}"
                       on:click={() => (showSettingsMenu = false)}
@@ -188,6 +196,14 @@
                     >
                       <div class="font-medium">API Keys</div>
                       <div class="text-xs text-gray-500">Manage programmatic access</div>
+                    </a>
+                    <a
+                      href="/settings/dnd"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {isActive('/settings/dnd') ? 'bg-gray-50' : ''}"
+                      on:click={() => (showSettingsMenu = false)}
+                    >
+                      <div class="font-medium">Do Not Disturb</div>
+                      <div class="text-xs text-gray-500">Configure quiet hours</div>
                     </a>
                   </div>
                 {/if}

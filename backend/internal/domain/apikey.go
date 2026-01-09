@@ -104,7 +104,7 @@ func (k *APIKey) HasScope(scope APIKeyScope) bool {
 
 // GenerateAPIKey generates a new API key and returns the raw key and its hash
 // The raw key format: pls_<32 random hex chars>
-func GenerateAPIKey() (rawKey string, keyPrefix string, keyHash string, err error) {
+func GenerateAPIKey() (rawKey, keyPrefix, keyHash string, err error) {
 	// Generate 32 random bytes
 	randomBytes := make([]byte, 32)
 	if _, err := rand.Read(randomBytes); err != nil {

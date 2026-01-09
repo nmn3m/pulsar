@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
-	ejson "encoding/json"
 )
 
 // TeamsConfig represents the configuration for the Microsoft Teams provider
@@ -40,7 +38,7 @@ func NewTeamsProvider(config TeamsConfig) *TeamsProvider {
 }
 
 // Send sends a Microsoft Teams notification
-func (p *TeamsProvider) Send(recipient string, subject string, message string) error {
+func (p *TeamsProvider) Send(recipient, subject, message string) error {
 	// Build the Teams MessageCard payload
 	payload := TeamsMessageCard{
 		Type:    "MessageCard",
@@ -89,7 +87,7 @@ func (p *TeamsProvider) Send(recipient string, subject string, message string) e
 // ValidateConfig validates the Microsoft Teams provider configuration
 func (p *TeamsProvider) ValidateConfig(config json.RawMessage) error {
 	var teamsConfig TeamsConfig
-	if err := ejson.Unmarshal(config, &teamsConfig); err != nil {
+	if err := json.Unmarshal(config, &teamsConfig); err != nil {
 		return fmt.Errorf("invalid configuration format: %w", err)
 	}
 

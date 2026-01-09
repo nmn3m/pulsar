@@ -4,8 +4,9 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
-	"github.com/nmn3m/pulsar/backend/internal/domain"
 	"go.uber.org/zap"
+
+	"github.com/nmn3m/pulsar/backend/internal/domain"
 )
 
 // WebSocketService manages WebSocket connections and message broadcasting

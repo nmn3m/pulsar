@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/nmn3m/pulsar/backend/internal/domain"
 	"github.com/nmn3m/pulsar/backend/internal/repository"
 )
@@ -55,8 +57,9 @@ type UpdateEscalationRuleRequest struct {
 }
 
 type AddEscalationTargetRequest struct {
-	TargetType string    `json:"target_type" binding:"required"`
-	TargetID   uuid.UUID `json:"target_id" binding:"required"`
+	TargetType           string          `json:"target_type" binding:"required"`
+	TargetID             uuid.UUID       `json:"target_id" binding:"required"`
+	NotificationChannels json.RawMessage `json:"notification_channels,omitempty"` // Optional channel override
 }
 
 // Policy CRUD
@@ -224,10 +227,11 @@ func (s *EscalationService) AddTarget(ctx context.Context, ruleID uuid.UUID, req
 	}
 
 	target := &domain.EscalationTarget{
-		ID:         uuid.New(),
-		RuleID:     ruleID,
-		TargetType: targetType,
-		TargetID:   req.TargetID,
+		ID:                   uuid.New(),
+		RuleID:               ruleID,
+		TargetType:           targetType,
+		TargetID:             req.TargetID,
+		NotificationChannels: req.NotificationChannels,
 	}
 
 	if err := s.escalationRepo.AddTarget(ctx, target); err != nil {

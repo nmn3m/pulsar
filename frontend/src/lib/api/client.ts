@@ -113,6 +113,18 @@ import type {
   UpdateAPIKeyRequest,
   ListAPIKeysResponse,
 } from '$lib/types/apikey';
+import type {
+  AlertRoutingRule,
+  CreateRoutingRuleRequest,
+  UpdateRoutingRuleRequest,
+  ReorderRoutingRulesRequest,
+} from '$lib/types/routing';
+import type {
+  DNDSettings,
+  UpdateDNDSettingsRequest,
+  AddDNDOverrideRequest,
+  DNDStatusResponse,
+} from '$lib/types/dnd';
 
 const API_URL = browser
   ? import.meta.env.VITE_API_URL || 'http://localhost:8080'
@@ -1095,6 +1107,82 @@ class APIClient {
   async revokeAPIKey(id: string): Promise<void> {
     await this.request(`/api/v1/api-keys/${id}/revoke`, {
       method: 'POST',
+    });
+  }
+
+  // ==================== Routing Rules ====================
+
+  async listRoutingRules(page = 1, pageSize = 50): Promise<{ rules: AlertRoutingRule[] }> {
+    return this.request<{ rules: AlertRoutingRule[] }>(
+      `/api/v1/routing-rules?page=${page}&page_size=${pageSize}`
+    );
+  }
+
+  async createRoutingRule(data: CreateRoutingRuleRequest): Promise<AlertRoutingRule> {
+    return this.request<AlertRoutingRule>('/api/v1/routing-rules', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getRoutingRule(id: string): Promise<AlertRoutingRule> {
+    return this.request<AlertRoutingRule>(`/api/v1/routing-rules/${id}`);
+  }
+
+  async updateRoutingRule(id: string, data: UpdateRoutingRuleRequest): Promise<AlertRoutingRule> {
+    return this.request<AlertRoutingRule>(`/api/v1/routing-rules/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteRoutingRule(id: string): Promise<void> {
+    await this.request(`/api/v1/routing-rules/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async reorderRoutingRules(data: ReorderRoutingRulesRequest): Promise<void> {
+    await this.request('/api/v1/routing-rules/reorder', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // ==================== DND (Do Not Disturb) ====================
+
+  async getDNDSettings(): Promise<DNDSettings> {
+    return this.request<DNDSettings>('/api/v1/users/me/dnd');
+  }
+
+  async updateDNDSettings(data: UpdateDNDSettingsRequest): Promise<DNDSettings> {
+    return this.request<DNDSettings>('/api/v1/users/me/dnd', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteDNDSettings(): Promise<void> {
+    await this.request('/api/v1/users/me/dnd', {
+      method: 'DELETE',
+    });
+  }
+
+  async checkDNDStatus(priority?: string): Promise<DNDStatusResponse> {
+    const params = priority ? `?priority=${priority}` : '';
+    return this.request<DNDStatusResponse>(`/api/v1/users/me/dnd/status${params}`);
+  }
+
+  async addDNDOverride(data: AddDNDOverrideRequest): Promise<DNDSettings> {
+    return this.request<DNDSettings>('/api/v1/users/me/dnd/overrides', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async removeDNDOverride(index: number): Promise<DNDSettings> {
+    return this.request<DNDSettings>(`/api/v1/users/me/dnd/overrides/${index}`, {
+      method: 'DELETE',
     });
   }
 }

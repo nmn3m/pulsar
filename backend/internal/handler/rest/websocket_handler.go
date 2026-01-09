@@ -8,10 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"go.uber.org/zap"
+
 	"github.com/nmn3m/pulsar/backend/internal/domain"
 	"github.com/nmn3m/pulsar/backend/internal/middleware"
 	"github.com/nmn3m/pulsar/backend/internal/service"
-	"go.uber.org/zap"
 )
 
 const (

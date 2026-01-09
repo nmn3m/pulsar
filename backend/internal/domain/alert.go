@@ -39,6 +39,12 @@ type Alert struct {
 	EscalationLevel    int        `json:"escalation_level" db:"escalation_level"`
 	LastEscalatedAt    *time.Time `json:"last_escalated_at,omitempty" db:"last_escalated_at"`
 
+	// Deduplication
+	DedupKey          *string    `json:"dedup_key,omitempty" db:"dedup_key"`
+	DedupCount        int        `json:"dedup_count" db:"dedup_count"`
+	FirstOccurrenceAt *time.Time `json:"first_occurrence_at,omitempty" db:"first_occurrence_at"`
+	LastOccurrenceAt  *time.Time `json:"last_occurrence_at,omitempty" db:"last_occurrence_at"`
+
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }

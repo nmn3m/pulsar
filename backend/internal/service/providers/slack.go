@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
-	ejson "encoding/json"
 )
 
 // SlackConfig represents the configuration for the Slack provider
@@ -39,7 +37,7 @@ func NewSlackProvider(config SlackConfig) *SlackProvider {
 }
 
 // Send sends a Slack notification
-func (p *SlackProvider) Send(recipient string, subject string, message string) error {
+func (p *SlackProvider) Send(recipient, subject, message string) error {
 	// Build the full message
 	fullMessage := message
 	if subject != "" {
@@ -91,7 +89,7 @@ func (p *SlackProvider) Send(recipient string, subject string, message string) e
 // ValidateConfig validates the Slack provider configuration
 func (p *SlackProvider) ValidateConfig(config json.RawMessage) error {
 	var slackConfig SlackConfig
-	if err := ejson.Unmarshal(config, &slackConfig); err != nil {
+	if err := json.Unmarshal(config, &slackConfig); err != nil {
 		return fmt.Errorf("invalid configuration format: %w", err)
 	}
 

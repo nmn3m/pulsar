@@ -38,6 +38,8 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
+	"go.uber.org/zap"
+
 	_ "github.com/nmn3m/pulsar/backend/docs"
 	"github.com/nmn3m/pulsar/backend/internal/config"
 	"github.com/nmn3m/pulsar/backend/internal/handler/rest"
@@ -45,7 +47,6 @@ import (
 	"github.com/nmn3m/pulsar/backend/internal/pkg/logger"
 	"github.com/nmn3m/pulsar/backend/internal/repository/postgres"
 	"github.com/nmn3m/pulsar/backend/internal/service"
-	"go.uber.org/zap"
 )
 
 func main() {
@@ -91,6 +92,8 @@ func main() {
 	apiKeyRepo := postgres.NewAPIKeyRepository(db.DB)
 	metricsRepo := postgres.NewMetricsRepository(db.DB)
 	emailVerificationRepo := postgres.NewEmailVerificationRepository(db)
+	routingRepo := postgres.NewRoutingRuleRepository(db)
+	dndRepo := postgres.NewDNDSettingsRepository(db)
 
 	// Initialize email service (for OTP verification)
 	var emailService *service.EmailService
@@ -118,8 +121,12 @@ func main() {
 	apiKeyService := service.NewAPIKeyService(apiKeyRepo)
 	metricsService := service.NewMetricsService(metricsRepo)
 
-	// Initialize alert notifier with dependencies
-	alertNotifier := service.NewAlertNotifier(notificationService, userRepo, teamRepo, scheduleService)
+	// Initialize DND and routing services
+	dndService := service.NewDNDService(dndRepo)
+	routingService := service.NewRoutingService(routingRepo)
+
+	// Initialize alert notifier with dependencies (including DND service for quiet hours)
+	alertNotifier := service.NewAlertNotifier(notificationService, userRepo, teamRepo, scheduleService, dndService)
 
 	// Initialize alert and escalation services with notifier
 	alertService := service.NewAlertService(alertRepo, alertNotifier, wsService, webhookService)
@@ -139,6 +146,8 @@ func main() {
 	incomingWebhookHandler := rest.NewIncomingWebhookHandler(webhookService, alertService, log)
 	apiKeyHandler := rest.NewAPIKeyHandler(apiKeyService)
 	metricsHandler := rest.NewMetricsHandler(metricsService)
+	routingHandler := rest.NewRoutingHandler(routingService)
+	dndHandler := rest.NewDNDHandler(dndService)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret)
@@ -281,6 +290,28 @@ func main() {
 				escalations.GET("/:id/rules/:ruleId/targets", escalationHandler.ListTargets)
 				escalations.POST("/:id/rules/:ruleId/targets", escalationHandler.AddTarget)
 				escalations.DELETE("/:id/rules/:ruleId/targets/:targetId", escalationHandler.RemoveTarget)
+			}
+
+			// Routing rules routes
+			routing := protected.Group("/routing-rules")
+			{
+				routing.GET("", routingHandler.List)
+				routing.POST("", routingHandler.Create)
+				routing.PUT("/reorder", routingHandler.Reorder)
+				routing.GET("/:id", routingHandler.Get)
+				routing.PATCH("/:id", routingHandler.Update)
+				routing.DELETE("/:id", routingHandler.Delete)
+			}
+
+			// User DND (Do Not Disturb) routes
+			usersDND := protected.Group("/users/me/dnd")
+			{
+				usersDND.GET("", dndHandler.GetDNDSettings)
+				usersDND.PUT("", dndHandler.UpdateDNDSettings)
+				usersDND.DELETE("", dndHandler.DeleteDNDSettings)
+				usersDND.GET("/status", dndHandler.CheckDNDStatus)
+				usersDND.POST("/overrides", dndHandler.AddDNDOverride)
+				usersDND.DELETE("/overrides/:index", dndHandler.RemoveDNDOverride)
 			}
 
 			// Notification routes

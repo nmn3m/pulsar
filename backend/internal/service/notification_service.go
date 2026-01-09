@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/nmn3m/pulsar/backend/internal/domain"
 	"github.com/nmn3m/pulsar/backend/internal/service/providers"
 )
@@ -53,7 +54,7 @@ func (s *NotificationService) createProviderFromChannel(channel *domain.Notifica
 		if err := json.Unmarshal(channel.Config, &config); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal email config: %w", err)
 		}
-		return providers.NewEmailProvider(config), nil
+		return providers.NewEmailProvider(&config), nil
 
 	case domain.ChannelTypeSlack:
 		var config providers.SlackConfig

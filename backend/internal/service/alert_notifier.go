@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/nmn3m/pulsar/backend/internal/domain"
 )
 
@@ -15,6 +16,7 @@ type AlertNotifier struct {
 	userRepo            UserRepository
 	teamRepo            TeamRepository
 	scheduleService     *ScheduleService
+	dndService          *DNDService
 }
 
 type UserRepository interface {
@@ -31,12 +33,14 @@ func NewAlertNotifier(
 	userRepo UserRepository,
 	teamRepo TeamRepository,
 	scheduleService *ScheduleService,
+	dndService *DNDService,
 ) *AlertNotifier {
 	return &AlertNotifier{
 		notificationService: notificationService,
 		userRepo:            userRepo,
 		teamRepo:            teamRepo,
 		scheduleService:     scheduleService,
+		dndService:          dndService,
 	}
 }
 
@@ -104,11 +108,34 @@ func (n *AlertNotifier) NotifyAlertEscalated(
 			continue
 		}
 
+		// Check if target has notification channel override
+		targetChannelConfig, _ := target.ParseNotificationChannels()
+		var targetChannelTypes []string
+		if targetChannelConfig != nil && len(targetChannelConfig.Channels) > 0 {
+			targetChannelTypes = targetChannelConfig.Channels
+		}
+
 		for _, recipient := range recipients {
-			// Send through each enabled channel
+			// Check if user is in DND mode
+			if n.dndService != nil {
+				inDND, err := n.dndService.IsInDNDMode(ctx, recipient.UserID, alert.Priority)
+				if err == nil && inDND {
+					// User is in DND mode, skip notification
+					continue
+				}
+			}
+
+			// Send through appropriate channels
 			for _, channel := range channels {
 				if !channel.IsEnabled {
 					continue
+				}
+
+				// If target has specific channel override, only use those channels
+				if len(targetChannelTypes) > 0 {
+					if !containsChannelType(targetChannelTypes, string(channel.ChannelType)) {
+						continue
+					}
 				}
 
 				// Construct notification request
@@ -198,4 +225,14 @@ func getDescriptionOrDefault(description *string) string {
 		return *description
 	}
 	return "No additional description provided."
+}
+
+// containsChannelType checks if a channel type is in the list of allowed types
+func containsChannelType(channelTypes []string, channelType string) bool {
+	for _, ct := range channelTypes {
+		if ct == channelType {
+			return true
+		}
+	}
+	return false
 }

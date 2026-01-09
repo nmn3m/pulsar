@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/nmn3m/pulsar/backend/internal/domain"
 	"github.com/nmn3m/pulsar/backend/internal/repository"
 )
@@ -34,6 +35,7 @@ type CreateAlertRequest struct {
 	Description  *string                `json:"description"`
 	Tags         []string               `json:"tags"`
 	CustomFields map[string]interface{} `json:"custom_fields"`
+	DedupKey     *string                `json:"dedup_key"` // Optional deduplication key
 }
 
 type UpdateAlertRequest struct {
@@ -87,6 +89,34 @@ func (s *AlertService) CreateAlert(ctx context.Context, orgID uuid.UUID, req *Cr
 		return nil, fmt.Errorf("invalid priority: %s", req.Priority)
 	}
 
+	// Check for deduplication
+	if req.DedupKey != nil && *req.DedupKey != "" {
+		existingAlert, err := s.alertRepo.FindByDedupKey(ctx, orgID, *req.DedupKey)
+		if err != nil {
+			return nil, fmt.Errorf("failed to check for duplicate alert: %w", err)
+		}
+
+		if existingAlert != nil {
+			// Increment dedup count instead of creating new alert
+			if err := s.alertRepo.IncrementDedupCount(ctx, existingAlert.ID); err != nil {
+				return nil, fmt.Errorf("failed to increment dedup count: %w", err)
+			}
+
+			// Refresh the alert to get updated values
+			updatedAlert, err := s.alertRepo.GetByID(ctx, existingAlert.ID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get updated alert: %w", err)
+			}
+
+			// Broadcast WebSocket event for dedup
+			if s.wsService != nil {
+				s.wsService.BroadcastAlertEvent(domain.WSEventAlertUpdated, orgID, updatedAlert)
+			}
+
+			return updatedAlert, nil
+		}
+	}
+
 	// Initialize tags and custom fields if nil
 	tags := req.Tags
 	if tags == nil {
@@ -98,18 +128,23 @@ func (s *AlertService) CreateAlert(ctx context.Context, orgID uuid.UUID, req *Cr
 		customFields = make(map[string]interface{})
 	}
 
+	now := time.Now()
 	alert := &domain.Alert{
-		ID:              uuid.New(),
-		OrganizationID:  orgID,
-		Source:          req.Source,
-		SourceID:        req.SourceID,
-		Priority:        priority,
-		Status:          domain.AlertStatusOpen,
-		Message:         req.Message,
-		Description:     req.Description,
-		Tags:            tags,
-		CustomFields:    customFields,
-		EscalationLevel: 0,
+		ID:                uuid.New(),
+		OrganizationID:    orgID,
+		Source:            req.Source,
+		SourceID:          req.SourceID,
+		Priority:          priority,
+		Status:            domain.AlertStatusOpen,
+		Message:           req.Message,
+		Description:       req.Description,
+		Tags:              tags,
+		CustomFields:      customFields,
+		EscalationLevel:   0,
+		DedupKey:          req.DedupKey,
+		DedupCount:        1,
+		FirstOccurrenceAt: &now,
+		LastOccurrenceAt:  &now,
 	}
 
 	if err := s.alertRepo.Create(ctx, alert); err != nil {

@@ -7,8 +7,6 @@ import (
 	"io"
 	"net/http"
 	"time"
-
-	ejson "encoding/json"
 )
 
 // WebhookConfig represents the configuration for the generic webhook provider
@@ -40,7 +38,7 @@ func NewWebhookProvider(config WebhookConfig) *WebhookProvider {
 }
 
 // Send sends a notification to a generic webhook
-func (p *WebhookProvider) Send(recipient string, subject string, message string) error {
+func (p *WebhookProvider) Send(recipient, subject, message string) error {
 	// Build the webhook payload
 	payload := WebhookPayload{
 		Recipient: recipient,
@@ -104,7 +102,7 @@ func (p *WebhookProvider) Send(recipient string, subject string, message string)
 // ValidateConfig validates the generic webhook provider configuration
 func (p *WebhookProvider) ValidateConfig(config json.RawMessage) error {
 	var webhookConfig WebhookConfig
-	if err := ejson.Unmarshal(config, &webhookConfig); err != nil {
+	if err := json.Unmarshal(config, &webhookConfig); err != nil {
 		return fmt.Errorf("invalid configuration format: %w", err)
 	}
 

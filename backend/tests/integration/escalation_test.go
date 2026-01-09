@@ -264,10 +264,9 @@ func TestEscalationPolicies_ListRules_Success(t *testing.T) {
 	var result map[string]interface{}
 	client.ParseJSON(resp, &result)
 
-	// Handle nil or empty rules array
-	rulesRaw := result["rules"]
-	if rulesRaw == nil {
-		// Rules can be nil or empty for a new policy
+	// Handle nil or empty rules array - rules can be nil or empty for a new policy
+	if rulesRaw, ok := result["rules"].([]interface{}); ok && len(rulesRaw) > 0 {
+		t.Logf("Policy has %d rules", len(rulesRaw))
 	}
 }
 

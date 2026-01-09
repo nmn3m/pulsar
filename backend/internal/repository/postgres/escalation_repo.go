@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/nmn3m/pulsar/backend/internal/domain"
 )
 
@@ -322,8 +323,8 @@ func (r *EscalationPolicyRepository) ListRules(ctx context.Context, policyID uui
 
 func (r *EscalationPolicyRepository) AddTarget(ctx context.Context, target *domain.EscalationTarget) error {
 	query := `
-		INSERT INTO escalation_targets (id, rule_id, target_type, target_id)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO escalation_targets (id, rule_id, target_type, target_id, notification_channels)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING created_at
 	`
 
@@ -334,6 +335,7 @@ func (r *EscalationPolicyRepository) AddTarget(ctx context.Context, target *doma
 		target.RuleID,
 		target.TargetType.String(),
 		target.TargetID,
+		target.NotificationChannels,
 	).Scan(&target.CreatedAt)
 
 	if err != nil {
@@ -365,7 +367,7 @@ func (r *EscalationPolicyRepository) RemoveTarget(ctx context.Context, id uuid.U
 
 func (r *EscalationPolicyRepository) ListTargets(ctx context.Context, ruleID uuid.UUID) ([]*domain.EscalationTarget, error) {
 	query := `
-		SELECT id, rule_id, target_type, target_id, created_at
+		SELECT id, rule_id, target_type, target_id, notification_channels, created_at
 		FROM escalation_targets
 		WHERE rule_id = $1
 		ORDER BY created_at ASC
@@ -387,6 +389,7 @@ func (r *EscalationPolicyRepository) ListTargets(ctx context.Context, ruleID uui
 			&target.RuleID,
 			&targetType,
 			&target.TargetID,
+			&target.NotificationChannels,
 			&target.CreatedAt,
 		)
 		if err != nil {

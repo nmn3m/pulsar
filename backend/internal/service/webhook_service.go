@@ -14,9 +14,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"go.uber.org/zap"
+
 	"github.com/nmn3m/pulsar/backend/internal/domain"
 	"github.com/nmn3m/pulsar/backend/internal/repository"
-	"go.uber.org/zap"
 )
 
 type WebhookService struct {

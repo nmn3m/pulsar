@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+
 	"github.com/nmn3m/pulsar/backend/internal/domain"
 )
 
@@ -100,7 +101,7 @@ func extractAPIKey(c *gin.Context) string {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader != "" {
 		parts := strings.Split(authHeader, " ")
-		if len(parts) == 2 && strings.ToLower(parts[0]) == "apikey" {
+		if len(parts) == 2 && strings.EqualFold(parts[0], "apikey") {
 			return parts[1]
 		}
 	}

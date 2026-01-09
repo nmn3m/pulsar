@@ -250,10 +250,9 @@ func TestNotifications_ListPreferences_Success(t *testing.T) {
 	var result map[string]interface{}
 	client.ParseJSON(resp, &result)
 
-	// Expecting preferences wrapped in object
-	prefsRaw := result["preferences"]
-	if prefsRaw == nil {
-		// Preferences can be nil or empty initially
+	// Expecting preferences wrapped in object - preferences can be nil or empty initially
+	if prefsRaw, ok := result["preferences"].([]interface{}); ok && len(prefsRaw) > 0 {
+		t.Logf("User has %d preferences", len(prefsRaw))
 	}
 }
 

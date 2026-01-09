@@ -4,12 +4,13 @@ import (
 	"net/http/httptest"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+
 	"github.com/nmn3m/pulsar/backend/internal/config"
 	"github.com/nmn3m/pulsar/backend/internal/handler/rest"
 	"github.com/nmn3m/pulsar/backend/internal/middleware"
 	"github.com/nmn3m/pulsar/backend/internal/repository/postgres"
 	"github.com/nmn3m/pulsar/backend/internal/service"
-	"go.uber.org/zap"
 )
 
 // TestServer wraps httptest.Server with all dependencies
@@ -74,6 +75,7 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 	incidentRepo := postgres.NewIncidentRepository(testDB.DB)
 	webhookRepo := postgres.NewWebhookRepository(testDB.DB)
 	metricsRepo := postgres.NewMetricsRepository(testDB.DB)
+	dndRepo := postgres.NewDNDSettingsRepository(db)
 
 	// Initialize services
 	// Email verification is nil for tests (SMTP not configured)
@@ -87,9 +89,10 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 	incidentService := service.NewIncidentService(incidentRepo, wsService)
 	webhookService := service.NewWebhookService(webhookRepo, logger)
 	metricsService := service.NewMetricsService(metricsRepo)
+	dndService := service.NewDNDService(dndRepo)
 
 	// Initialize alert notifier with dependencies
-	alertNotifier := service.NewAlertNotifier(notificationService, userRepo, teamRepo, scheduleService)
+	alertNotifier := service.NewAlertNotifier(notificationService, userRepo, teamRepo, scheduleService, dndService)
 
 	// Initialize alert and escalation services with notifier
 	alertService := service.NewAlertService(alertRepo, alertNotifier, wsService, webhookService)

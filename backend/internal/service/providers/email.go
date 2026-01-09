@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/smtp"
 	"strings"
-
-	ejson "encoding/json"
 )
 
 // EmailConfig represents the configuration for the email provider
@@ -26,14 +24,14 @@ type EmailProvider struct {
 }
 
 // NewEmailProvider creates a new email notification provider
-func NewEmailProvider(config EmailConfig) *EmailProvider {
+func NewEmailProvider(config *EmailConfig) *EmailProvider {
 	return &EmailProvider{
-		config: config,
+		config: *config,
 	}
 }
 
 // Send sends an email notification
-func (p *EmailProvider) Send(recipient string, subject string, message string) error {
+func (p *EmailProvider) Send(recipient, subject, message string) error {
 	// Validate recipient is a valid email
 	if !strings.Contains(recipient, "@") {
 		return fmt.Errorf("invalid email address: %s", recipient)
@@ -75,7 +73,7 @@ func (p *EmailProvider) Send(recipient string, subject string, message string) e
 // ValidateConfig validates the email provider configuration
 func (p *EmailProvider) ValidateConfig(config json.RawMessage) error {
 	var emailConfig EmailConfig
-	if err := ejson.Unmarshal(config, &emailConfig); err != nil {
+	if err := json.Unmarshal(config, &emailConfig); err != nil {
 		return fmt.Errorf("invalid configuration format: %w", err)
 	}
 

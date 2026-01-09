@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/nmn3m/pulsar/backend/internal/domain"
 )
 
@@ -26,9 +27,10 @@ func (r *AlertRepository) Create(ctx context.Context, alert *domain.Alert) error
 			id, organization_id, source, source_id, priority, status,
 			message, description, tags, custom_fields,
 			assigned_to_user_id, assigned_to_team_id,
-			escalation_policy_id, escalation_level
+			escalation_policy_id, escalation_level,
+			dedup_key, dedup_count, first_occurrence_at, last_occurrence_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
 		RETURNING created_at, updated_at
 	`
 
@@ -59,6 +61,10 @@ func (r *AlertRepository) Create(ctx context.Context, alert *domain.Alert) error
 		alert.AssignedToTeamID,
 		alert.EscalationPolicyID,
 		alert.EscalationLevel,
+		alert.DedupKey,
+		alert.DedupCount,
+		alert.FirstOccurrenceAt,
+		alert.LastOccurrenceAt,
 	).Scan(&alert.CreatedAt, &alert.UpdatedAt)
 
 	if err != nil {
@@ -78,6 +84,7 @@ func (r *AlertRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Al
 			closed_by, closed_at, close_reason,
 			snoozed_until,
 			escalation_policy_id, escalation_level, last_escalated_at,
+			dedup_key, dedup_count, first_occurrence_at, last_occurrence_at,
 			created_at, updated_at
 		FROM alerts
 		WHERE id = $1
@@ -108,6 +115,10 @@ func (r *AlertRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Al
 		&alert.EscalationPolicyID,
 		&alert.EscalationLevel,
 		&alert.LastEscalatedAt,
+		&alert.DedupKey,
+		&alert.DedupCount,
+		&alert.FirstOccurrenceAt,
+		&alert.LastOccurrenceAt,
 		&alert.CreatedAt,
 		&alert.UpdatedAt,
 	)
@@ -281,6 +292,7 @@ func (r *AlertRepository) List(ctx context.Context, filter *domain.AlertFilter) 
 			closed_by, closed_at, close_reason,
 			snoozed_until,
 			escalation_policy_id, escalation_level, last_escalated_at,
+			dedup_key, dedup_count, first_occurrence_at, last_occurrence_at,
 			created_at, updated_at
 		FROM alerts
 		WHERE %s
@@ -323,6 +335,10 @@ func (r *AlertRepository) List(ctx context.Context, filter *domain.AlertFilter) 
 			&alert.EscalationPolicyID,
 			&alert.EscalationLevel,
 			&alert.LastEscalatedAt,
+			&alert.DedupKey,
+			&alert.DedupCount,
+			&alert.FirstOccurrenceAt,
+			&alert.LastOccurrenceAt,
 			&alert.CreatedAt,
 			&alert.UpdatedAt,
 		)
@@ -461,6 +477,100 @@ func (r *AlertRepository) Assign(ctx context.Context, id uuid.UUID, userID, team
 	}
 	if err != nil {
 		return fmt.Errorf("failed to assign alert: %w", err)
+	}
+
+	return nil
+}
+
+// FindByDedupKey finds an open alert with the given dedup key
+func (r *AlertRepository) FindByDedupKey(ctx context.Context, orgID uuid.UUID, dedupKey string) (*domain.Alert, error) {
+	query := `
+		SELECT
+			id, organization_id, source, source_id, priority, status,
+			message, description, tags, custom_fields,
+			assigned_to_user_id, assigned_to_team_id,
+			acknowledged_by, acknowledged_at,
+			closed_by, closed_at, close_reason,
+			snoozed_until,
+			escalation_policy_id, escalation_level, last_escalated_at,
+			dedup_key, dedup_count, first_occurrence_at, last_occurrence_at,
+			created_at, updated_at
+		FROM alerts
+		WHERE organization_id = $1 AND dedup_key = $2 AND status != 'closed'
+		ORDER BY created_at DESC
+		LIMIT 1
+	`
+
+	var alert domain.Alert
+	var tagsJSON, customFieldsJSON []byte
+
+	err := r.db.QueryRowContext(ctx, query, orgID, dedupKey).Scan(
+		&alert.ID,
+		&alert.OrganizationID,
+		&alert.Source,
+		&alert.SourceID,
+		&alert.Priority,
+		&alert.Status,
+		&alert.Message,
+		&alert.Description,
+		&tagsJSON,
+		&customFieldsJSON,
+		&alert.AssignedToUserID,
+		&alert.AssignedToTeamID,
+		&alert.AcknowledgedBy,
+		&alert.AcknowledgedAt,
+		&alert.ClosedBy,
+		&alert.ClosedAt,
+		&alert.CloseReason,
+		&alert.SnoozedUntil,
+		&alert.EscalationPolicyID,
+		&alert.EscalationLevel,
+		&alert.LastEscalatedAt,
+		&alert.DedupKey,
+		&alert.DedupCount,
+		&alert.FirstOccurrenceAt,
+		&alert.LastOccurrenceAt,
+		&alert.CreatedAt,
+		&alert.UpdatedAt,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, nil // No matching alert found (not an error)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to find alert by dedup key: %w", err)
+	}
+
+	if err := json.Unmarshal(tagsJSON, &alert.Tags); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal tags: %w", err)
+	}
+
+	if err := json.Unmarshal(customFieldsJSON, &alert.CustomFields); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal custom_fields: %w", err)
+	}
+
+	return &alert, nil
+}
+
+// IncrementDedupCount increments the dedup count and updates last_occurrence_at
+func (r *AlertRepository) IncrementDedupCount(ctx context.Context, id uuid.UUID) error {
+	query := `
+		UPDATE alerts
+		SET
+			dedup_count = dedup_count + 1,
+			last_occurrence_at = NOW()
+		WHERE id = $1
+		RETURNING dedup_count
+	`
+
+	var dedupCount int
+	err := r.db.QueryRowContext(ctx, query, id).Scan(&dedupCount)
+
+	if err == sql.ErrNoRows {
+		return fmt.Errorf("alert not found")
+	}
+	if err != nil {
+		return fmt.Errorf("failed to increment dedup count: %w", err)
 	}
 
 	return nil

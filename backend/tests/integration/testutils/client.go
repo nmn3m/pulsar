@@ -130,6 +130,7 @@ func (c *TestClient) ReadBody(resp *http.Response) string {
 
 // ExpectStatus asserts the response status code
 func (c *TestClient) ExpectStatus(resp *http.Response, expected int) {
+	defer resp.Body.Close()
 	if resp.StatusCode != expected {
 		body, _ := io.ReadAll(resp.Body)
 		c.t.Errorf("Expected status %d, got %d. Body: %s", expected, resp.StatusCode, string(body))
@@ -138,6 +139,7 @@ func (c *TestClient) ExpectStatus(resp *http.Response, expected int) {
 
 // AssertStatus asserts the response status code and fails immediately if wrong
 func (c *TestClient) AssertStatus(resp *http.Response, expected int) {
+	defer resp.Body.Close()
 	if resp.StatusCode != expected {
 		body, _ := io.ReadAll(resp.Body)
 		c.t.Fatalf("Expected status %d, got %d. Body: %s", expected, resp.StatusCode, string(body))

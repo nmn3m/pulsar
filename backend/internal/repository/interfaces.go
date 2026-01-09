@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/nmn3m/pulsar/backend/internal/domain"
 )
 
@@ -47,6 +48,10 @@ type AlertRepository interface {
 	Close(ctx context.Context, id, userID uuid.UUID, reason string) error
 	Snooze(ctx context.Context, id uuid.UUID, until time.Time) error
 	Assign(ctx context.Context, id uuid.UUID, userID, teamID *uuid.UUID) error
+
+	// Deduplication
+	FindByDedupKey(ctx context.Context, orgID uuid.UUID, dedupKey string) (*domain.Alert, error)
+	IncrementDedupCount(ctx context.Context, id uuid.UUID) error
 }
 
 type TeamRepository interface {
@@ -123,4 +128,22 @@ type EscalationPolicyRepository interface {
 	GetLatestEvent(ctx context.Context, alertID uuid.UUID) (*domain.AlertEscalationEvent, error)
 	UpdateEvent(ctx context.Context, event *domain.AlertEscalationEvent) error
 	ListPendingEscalations(ctx context.Context, before time.Time) ([]*domain.AlertEscalationEvent, error)
+}
+
+type RoutingRuleRepository interface {
+	Create(ctx context.Context, rule *domain.AlertRoutingRule) error
+	GetByID(ctx context.Context, id uuid.UUID) (*domain.AlertRoutingRule, error)
+	Update(ctx context.Context, rule *domain.AlertRoutingRule) error
+	Delete(ctx context.Context, id uuid.UUID) error
+	List(ctx context.Context, orgID uuid.UUID, limit, offset int) ([]*domain.AlertRoutingRule, error)
+	ListEnabled(ctx context.Context, orgID uuid.UUID) ([]*domain.AlertRoutingRule, error)
+	Reorder(ctx context.Context, orgID uuid.UUID, ruleIDs []uuid.UUID) error
+}
+
+type DNDSettingsRepository interface {
+	Create(ctx context.Context, settings *domain.UserDNDSettings) error
+	GetByUserID(ctx context.Context, userID uuid.UUID) (*domain.UserDNDSettings, error)
+	Update(ctx context.Context, settings *domain.UserDNDSettings) error
+	Delete(ctx context.Context, userID uuid.UUID) error
+	Upsert(ctx context.Context, settings *domain.UserDNDSettings) error
 }

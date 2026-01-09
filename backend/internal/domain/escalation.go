@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -27,11 +28,35 @@ type EscalationRule struct {
 }
 
 type EscalationTarget struct {
-	ID         uuid.UUID            `json:"id" db:"id"`
-	RuleID     uuid.UUID            `json:"rule_id" db:"rule_id"`
-	TargetType EscalationTargetType `json:"target_type" db:"target_type"`
-	TargetID   uuid.UUID            `json:"target_id" db:"target_id"`
-	CreatedAt  time.Time            `json:"created_at" db:"created_at"`
+	ID                   uuid.UUID            `json:"id" db:"id"`
+	RuleID               uuid.UUID            `json:"rule_id" db:"rule_id"`
+	TargetType           EscalationTargetType `json:"target_type" db:"target_type"`
+	TargetID             uuid.UUID            `json:"target_id" db:"target_id"`
+	NotificationChannels json.RawMessage      `json:"notification_channels,omitempty" db:"notification_channels"`
+	CreatedAt            time.Time            `json:"created_at" db:"created_at"`
+}
+
+// TargetNotificationConfig represents the notification channel override for a target
+type TargetNotificationConfig struct {
+	Channels []string `json:"channels"` // e.g., ["email", "slack", "sms", "webhook"]
+	Urgent   bool     `json:"urgent"`   // If true, use urgent/high-priority notification
+}
+
+// ParseNotificationChannels parses the notification channels config
+func (t *EscalationTarget) ParseNotificationChannels() (*TargetNotificationConfig, error) {
+	if len(t.NotificationChannels) == 0 {
+		return nil, nil // No override configured
+	}
+	var config TargetNotificationConfig
+	if err := json.Unmarshal(t.NotificationChannels, &config); err != nil {
+		return nil, err
+	}
+	return &config, nil
+}
+
+// HasNotificationOverride returns true if this target has custom notification channels
+func (t *EscalationTarget) HasNotificationOverride() bool {
+	return len(t.NotificationChannels) > 0
 }
 
 type AlertEscalationEvent struct {
