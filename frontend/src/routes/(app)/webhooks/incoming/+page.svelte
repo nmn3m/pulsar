@@ -101,8 +101,8 @@
 <div class="space-y-6">
   <div class="flex justify-between items-center">
     <div>
-      <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Incoming Webhooks</h2>
-      <p class="mt-2 text-gray-500 dark:text-gray-400">
+      <h2 class="text-3xl font-bold text-gray-900">Incoming Webhooks</h2>
+      <p class="mt-2 text-gray-500">
         Receive alerts from external monitoring tools
       </p>
     </div>
@@ -113,7 +113,7 @@
 
   {#if error}
     <div
-      class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg"
+      class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
     >
       {error}
     </div>
@@ -121,14 +121,14 @@
 
   {#if showCreateForm}
     <div
-      class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-primary-200 dark:border-primary-500/30 shadow-sm"
+      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm"
     >
-      <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900">
         Create Incoming Webhook Token
       </h3>
       <form on:submit|preventDefault={handleCreate} class="space-y-4">
         <div>
-          <label for="name" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+          <label for="name" class="block text-sm font-medium text-gray-600 mb-1">
             Name *
           </label>
           <input
@@ -136,7 +136,7 @@
             type="text"
             bind:value={name}
             required
-            class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 placeholder-gray-400"
             placeholder="Prometheus Production"
           />
         </div>
@@ -144,14 +144,14 @@
         <div>
           <label
             for="integration-type"
-            class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1"
+            class="block text-sm font-medium text-gray-600 mb-1"
           >
             Integration Type *
           </label>
           <select
             id="integration-type"
             bind:value={integrationType}
-            class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white"
+            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900"
           >
             <option value="generic">Generic</option>
             <option value="prometheus">Prometheus Alertmanager</option>
@@ -163,14 +163,14 @@
         <div>
           <label
             for="priority"
-            class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1"
+            class="block text-sm font-medium text-gray-600 mb-1"
           >
             Default Priority
           </label>
           <select
             id="priority"
             bind:value={defaultPriority}
-            class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white"
+            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900"
           >
             <option value="P1">P1 - Critical</option>
             <option value="P2">P2 - High</option>
@@ -181,21 +181,21 @@
         </div>
 
         <div>
-          <label for="tags" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+          <label for="tags" class="block text-sm font-medium text-gray-600 mb-1">
             Default Tags (comma-separated)
           </label>
           <input
             id="tags"
             type="text"
             bind:value={defaultTags}
-            class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 placeholder-gray-400"
             placeholder="production, monitoring"
           />
         </div>
 
         {#if createError}
           <div
-            class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg"
+            class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
           >
             {createError}
           </div>
@@ -218,14 +218,14 @@
       <div
         class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"
       ></div>
-      <p class="mt-2 text-gray-500 dark:text-gray-400">Loading incoming webhook tokens...</p>
+      <p class="mt-2 text-gray-500">Loading incoming webhook tokens...</p>
     </div>
   {:else if tokens.length === 0}
     <div
-      class="text-center py-12 bg-white dark:bg-space-800/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-space-600 shadow-sm"
+      class="text-center py-12 bg-white backdrop-blur-sm rounded-xl border border-gray-200 shadow-sm"
     >
-      <p class="text-gray-600 dark:text-gray-300">No incoming webhook tokens configured</p>
-      <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">
+      <p class="text-gray-600">No incoming webhook tokens configured</p>
+      <p class="text-sm text-gray-400 mt-2">
         Create a token to receive alerts from external monitoring tools
       </p>
     </div>
@@ -233,49 +233,48 @@
     <div class="grid grid-cols-1 gap-4">
       {#each tokens as token (token.id)}
         <div
-          class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-200 dark:border-space-600 hover:border-primary-400 dark:hover:border-primary-500/30 transition-all duration-300 shadow-sm hover:shadow-lg dark:hover:shadow-primary-500/10"
+          class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 hover:border-primary-400 transition-all duration-300 shadow-sm hover:shadow-lg"
         >
           <div class="flex items-start justify-between mb-4">
             <div class="flex-1">
               <div class="flex items-center gap-3 mb-2">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{token.name}</h3>
+                <h3 class="text-lg font-semibold text-gray-900">{token.name}</h3>
                 <span
-                  class="px-2 py-1 text-xs rounded bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-500/30"
+                  class="px-2 py-1 text-xs rounded bg-primary-100 text-primary-700 border border-primary-200"
                 >
                   {token.integration_type}
                 </span>
                 <span
                   class="px-2 py-1 text-xs rounded border {token.enabled
-                    ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border-green-300 dark:border-green-500/30'
-                    : 'bg-gray-100 dark:bg-space-700 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-space-500'}"
+                    ? 'bg-green-100 text-green-700 border-green-300'
+                    : 'bg-gray-100 text-gray-500 border-gray-300'}"
                 >
                   {token.enabled ? 'Enabled' : 'Disabled'}
                 </span>
               </div>
 
-              <div class="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+              <div class="space-y-2 text-sm text-gray-500">
                 <div>
-                  <span class="font-medium text-gray-700 dark:text-gray-300">Default Priority:</span
-                  >
+                  <span class="font-medium text-gray-700">Default Priority:</span>
                   {token.default_priority}
                 </div>
                 {#if token.default_tags.length > 0}
                   <div class="flex flex-wrap gap-1">
-                    <span class="font-medium text-gray-700 dark:text-gray-300">Default Tags:</span>
+                    <span class="font-medium text-gray-700">Default Tags:</span>
                     {#each token.default_tags as tag}
                       <span
-                        class="px-2 py-0.5 bg-gray-100 dark:bg-space-700 text-gray-700 dark:text-gray-300 text-xs rounded border border-gray-200 dark:border-space-500"
+                        class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded border border-gray-200"
                         >{tag}</span
                       >
                     {/each}
                   </div>
                 {/if}
                 <div>
-                  <span class="font-medium text-gray-700 dark:text-gray-300">Requests:</span>
+                  <span class="font-medium text-gray-700">Requests:</span>
                   {token.request_count}
                 </div>
                 <div>
-                  <span class="font-medium text-gray-700 dark:text-gray-300">Last Used:</span>
+                  <span class="font-medium text-gray-700">Last Used:</span>
                   {formatDate(token.last_used_at)}
                 </div>
               </div>
@@ -288,8 +287,8 @@
             </div>
           </div>
 
-          <div class="border-t border-gray-200 dark:border-space-600 pt-4">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div class="border-t border-gray-200 pt-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
               Webhook URL
             </label>
             <div class="flex gap-2">
@@ -297,7 +296,7 @@
                 type="text"
                 value={getWebhookURL(token.token)}
                 readonly
-                class="flex-1 px-3 py-2 bg-gray-100 dark:bg-space-700 border border-gray-200 dark:border-space-500 rounded-lg font-mono text-sm text-primary-600 dark:text-primary-300"
+                class="flex-1 px-3 py-2 bg-gray-100 border border-gray-200 rounded-lg font-mono text-sm text-primary-600"
               />
               <Button
                 variant="secondary"
@@ -307,7 +306,7 @@
                 Copy
               </Button>
             </div>
-            <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">
+            <p class="mt-2 text-xs text-gray-400">
               Use this URL to send webhooks from {token.integration_type === 'generic'
                 ? 'your service'
                 : token.integration_type}
@@ -316,12 +315,12 @@
 
           {#if token.integration_type === 'prometheus'}
             <div
-              class="mt-4 p-3 bg-gray-100 dark:bg-space-700 rounded-lg border border-gray-200 dark:border-space-500 text-xs"
+              class="mt-4 p-3 bg-gray-100 rounded-lg border border-gray-200 text-xs"
             >
-              <p class="font-medium mb-1 text-gray-700 dark:text-gray-300">
+              <p class="font-medium mb-1 text-gray-700">
                 Prometheus Alertmanager Configuration:
               </p>
-              <pre class="overflow-x-auto text-primary-600 dark:text-primary-300"><code
+              <pre class="overflow-x-auto text-primary-600"><code
                   >receivers:
   - name: 'pulsar'
     webhook_configs:
@@ -331,12 +330,12 @@
             </div>
           {:else if token.integration_type === 'grafana'}
             <div
-              class="mt-4 p-3 bg-gray-100 dark:bg-space-700 rounded-lg border border-gray-200 dark:border-space-500 text-xs"
+              class="mt-4 p-3 bg-gray-100 rounded-lg border border-gray-200 text-xs"
             >
-              <p class="font-medium mb-1 text-gray-700 dark:text-gray-300">
+              <p class="font-medium mb-1 text-gray-700">
                 Grafana Webhook Configuration:
               </p>
-              <p class="text-gray-500 dark:text-gray-400">
+              <p class="text-gray-500">
                 Add this URL as a webhook notification channel in Grafana.
               </p>
             </div>

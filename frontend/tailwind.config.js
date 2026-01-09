@@ -1,72 +1,90 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./src/**/*.{html,js,svelte,ts}'],
-  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        // Cosmic space background colors
-        space: {
-          950: '#050510',
-          900: '#0a0a1a',
-          800: '#0d1025',
-          700: '#121830',
-          600: '#1a2040',
-          500: '#252850',
+        // Catppuccin Latte inspired colors (pgvoyager light theme)
+        base: {
+          DEFAULT: '#eff1f5',
+          50: '#eff1f5',
+          100: '#e6e9ef',
+          200: '#dce0e8',
+          300: '#bcc0cc',
+          400: '#9ca0b0',
+          500: '#7c7f93',
+          600: '#6c6f85',
+          700: '#5c5f77',
+          800: '#4c4f69',
+          900: '#3c3f52',
         },
-        // Primary - Electric Cyan/Blue (main glow color)
+        // Primary - Blue (main accent color)
         primary: {
-          50: '#ecfeff',
-          100: '#cffafe',
-          200: '#a5f3fc',
-          300: '#67e8f9',
-          400: '#22d3ee',
-          500: '#00d4ff',
-          600: '#00b8e6',
-          700: '#0891b2',
-          800: '#0e7490',
-          900: '#155e75',
-          950: '#083344',
+          50: '#f0f5ff',
+          100: '#e0ebff',
+          200: '#c7d9fe',
+          300: '#a5c0fc',
+          400: '#7287fd',
+          500: '#1e66f5',
+          600: '#1a5ce0',
+          700: '#1652cc',
+          800: '#1248b8',
+          900: '#0e3ea4',
         },
-        // Accent - Hot Pink/Magenta (alert highlights)
-        accent: {
-          50: '#fdf2f8',
-          100: '#fce7f3',
-          200: '#fbcfe8',
-          300: '#f9a8d4',
-          400: '#f472b6',
-          500: '#ff0080',
-          600: '#db2777',
-          700: '#be185d',
-          800: '#9d174d',
-          900: '#831843',
-          950: '#500724',
+        // Secondary - Lavender
+        secondary: {
+          DEFAULT: '#7287fd',
+          light: '#8899ff',
+          dark: '#5c6cdb',
         },
-        // Neon colors for status indicators
-        neon: {
-          cyan: '#00ffff',
-          blue: '#00d4ff',
-          pink: '#ff0080',
-          purple: '#8b5cf6',
-          green: '#00ff88',
-          yellow: '#ffdd00',
-          orange: '#ff6b35',
-          red: '#ff3366',
+        // Surface colors
+        surface: {
+          DEFAULT: '#e6e9ef',
+          hover: '#dce0e8',
+          active: '#ccd0da',
+        },
+        // Status colors
+        success: {
+          DEFAULT: '#40a02b',
+          light: '#4db835',
+          dark: '#358f24',
+        },
+        warning: {
+          DEFAULT: '#df8e1d',
+          light: '#e9a033',
+          dark: '#c97d19',
+        },
+        error: {
+          DEFAULT: '#d20f39',
+          light: '#e5334d',
+          dark: '#b80d32',
+        },
+        info: {
+          DEFAULT: '#04a5e5',
+          light: '#1fb8f5',
+          dark: '#0394cc',
+        },
+        // Text colors
+        text: {
+          DEFAULT: '#4c4f69',
+          muted: '#6c6f85',
+          dim: '#8c8fa1',
+        },
+        // Border color
+        border: {
+          DEFAULT: '#ccd0da',
         },
       },
       backgroundImage: {
-        'space-gradient':
-          'radial-gradient(ellipse at center, #1a2040 0%, #0a0a1a 50%, #050510 100%)',
-        'glow-cyan':
-          'radial-gradient(ellipse at center, rgba(0, 212, 255, 0.15) 0%, transparent 70%)',
-        'glow-pink':
-          'radial-gradient(ellipse at center, rgba(255, 0, 128, 0.15) 0%, transparent 70%)',
+        'base-gradient':
+          'linear-gradient(135deg, #eff1f5 0%, #e6e9ef 100%)',
+        'glow-primary':
+          'radial-gradient(ellipse at center, rgba(30, 102, 245, 0.1) 0%, transparent 70%)',
       },
       boxShadow: {
-        'neon-cyan': '0 0 20px rgba(0, 212, 255, 0.5), 0 0 40px rgba(0, 212, 255, 0.3)',
-        'neon-pink': '0 0 20px rgba(255, 0, 128, 0.5), 0 0 40px rgba(255, 0, 128, 0.3)',
-        'neon-green': '0 0 20px rgba(0, 255, 136, 0.5), 0 0 40px rgba(0, 255, 136, 0.3)',
-        'neon-purple': '0 0 20px rgba(139, 92, 246, 0.5), 0 0 40px rgba(139, 92, 246, 0.3)',
+        'glow-primary': '0 0 20px rgba(30, 102, 245, 0.3), 0 0 40px rgba(30, 102, 245, 0.15)',
+        'glow-success': '0 0 20px rgba(64, 160, 43, 0.3), 0 0 40px rgba(64, 160, 43, 0.15)',
+        'glow-error': '0 0 20px rgba(210, 15, 57, 0.3), 0 0 40px rgba(210, 15, 57, 0.15)',
       },
       animation: {
         'pulse-glow': 'pulse-glow 2s ease-in-out infinite',

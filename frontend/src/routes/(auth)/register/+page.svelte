@@ -44,14 +44,14 @@
 <div class="min-h-screen flex items-center justify-center px-4 py-12">
   <div class="max-w-md w-full space-y-8">
     <div class="text-center">
-      <h1 class="text-4xl font-bold text-primary-600 dark:text-primary-400 dark:text-glow-cyan">
+      <h1 class="text-4xl font-bold text-primary-600">
         Pulsar
       </h1>
-      <p class="mt-2 text-gray-500 dark:text-gray-400">Create your account</p>
+      <p class="mt-2 text-gray-500">Create your account</p>
     </div>
 
     <div
-      class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-8 rounded-xl border border-gray-200 dark:border-space-600 shadow-lg"
+      class="bg-white backdrop-blur-sm p-8 rounded-xl border border-gray-200 shadow-lg"
     >
       <form on:submit|preventDefault={handleRegister} class="space-y-6">
         <Input
@@ -100,7 +100,7 @@
 
         {#if error}
           <div
-            class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg"
+            class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
           >
             {error}
           </div>
@@ -112,11 +112,11 @@
       </form>
 
       <div class="mt-6 text-center">
-        <p class="text-sm text-gray-500 dark:text-gray-400">
+        <p class="text-sm text-gray-500">
           Already have an account?
           <a
             href="/login"
-            class="text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 font-medium"
+            class="text-primary-600 hover:text-primary-500 font-medium"
           >
             Sign in
           </a>

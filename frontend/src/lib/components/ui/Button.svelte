@@ -7,13 +7,13 @@
 
   const variantClasses = {
     primary:
-      'bg-primary-600 hover:bg-primary-500 dark:bg-primary-500 dark:hover:bg-primary-400 text-white dark:text-space-900 font-semibold dark:shadow-neon-cyan hover:shadow-lg hover:shadow-primary-500/50 border border-primary-500 dark:border-primary-400/50',
+      'bg-primary-600 hover:bg-primary-500 text-white font-semibold hover:shadow-lg hover:shadow-primary-400/50 border border-primary-500',
     secondary:
-      'bg-gray-100 hover:bg-gray-200 dark:bg-space-700 dark:hover:bg-space-600 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-space-500 hover:border-primary-500/50',
+      'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 hover:border-primary-400/50',
     danger:
-      'bg-accent-600 hover:bg-accent-500 text-white dark:shadow-neon-pink hover:shadow-lg hover:shadow-accent-500/50 border border-accent-500 dark:border-accent-400/50',
+      'bg-error hover:bg-error-dark text-white hover:shadow-lg hover:shadow-error/50 border border-error',
     ghost:
-      'bg-transparent hover:bg-gray-100 dark:hover:bg-space-700/50 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 border border-transparent hover:border-primary-500/30',
+      'bg-transparent hover:bg-gray-100 text-gray-600 hover:text-primary-600 border border-transparent hover:border-primary-400/30',
   };
 
   const sizeClasses = {

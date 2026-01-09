@@ -67,30 +67,30 @@
   function getSeverityColor(sev: IncidentSeverity): string {
     switch (sev) {
       case 'critical':
-        return 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300';
+        return 'bg-red-100 text-red-800';
       case 'high':
-        return 'bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-300';
+        return 'bg-orange-100 text-orange-800';
       case 'medium':
-        return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300';
+        return 'bg-yellow-100 text-yellow-800';
       case 'low':
-        return 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300';
+        return 'bg-blue-100 text-blue-800';
       default:
-        return 'bg-gray-100 dark:bg-space-700 text-gray-800 dark:text-gray-300';
+        return 'bg-gray-100 text-gray-800';
     }
   }
 
   function getStatusColor(status: IncidentStatus): string {
     switch (status) {
       case 'investigating':
-        return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300';
+        return 'bg-yellow-100 text-yellow-800';
       case 'identified':
-        return 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300';
+        return 'bg-blue-100 text-blue-800';
       case 'monitoring':
-        return 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300';
+        return 'bg-purple-100 text-purple-800';
       case 'resolved':
-        return 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300';
+        return 'bg-green-100 text-green-800';
       default:
-        return 'bg-gray-100 dark:bg-space-700 text-gray-800 dark:text-gray-300';
+        return 'bg-gray-100 text-gray-800';
     }
   }
 
@@ -129,8 +129,8 @@
 <div class="space-y-6">
   <div class="flex justify-between items-center">
     <div>
-      <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Incidents</h2>
-      <p class="mt-2 text-gray-500 dark:text-gray-400">
+      <h2 class="text-3xl font-bold text-gray-900">Incidents</h2>
+      <p class="mt-2 text-gray-500">
         Manage and track incidents across your organization
       </p>
     </div>
@@ -142,22 +142,22 @@
   <!-- Create Incident Form -->
   {#if showCreateForm}
     <div
-      class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-primary-200 dark:border-primary-500/30 shadow-sm"
+      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm"
     >
-      <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900">
         Create New Incident
       </h3>
 
       <form on:submit|preventDefault={handleCreate} class="space-y-4">
         <div>
-          <label for="title" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1"
+          <label for="title" class="block text-sm font-medium text-gray-600 mb-1"
             >Title *</label
           >
           <input
             id="title"
             type="text"
             bind:value={title}
-            class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 placeholder-gray-400"
             placeholder="Brief description of the incident"
           />
         </div>
@@ -165,14 +165,14 @@
         <div>
           <label
             for="description"
-            class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1"
+            class="block text-sm font-medium text-gray-600 mb-1"
             >Description</label
           >
           <textarea
             id="description"
             bind:value={description}
             rows="3"
-            class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 placeholder-gray-400"
             placeholder="Detailed description of the incident"
           ></textarea>
         </div>
@@ -181,13 +181,13 @@
           <div>
             <label
               for="severity"
-              class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1"
+              class="block text-sm font-medium text-gray-600 mb-1"
               >Severity *</label
             >
             <select
               id="severity"
               bind:value={severity}
-              class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white"
+              class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900"
             >
               <option value="critical">Critical</option>
               <option value="high">High</option>
@@ -199,13 +199,13 @@
           <div>
             <label
               for="priority"
-              class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1"
+              class="block text-sm font-medium text-gray-600 mb-1"
               >Priority *</label
             >
             <select
               id="priority"
               bind:value={priority}
-              class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white"
+              class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900"
             >
               <option value="P1">P1 - Critical</option>
               <option value="P2">P2 - High</option>
@@ -230,12 +230,12 @@
 
   <!-- Filters -->
   <div
-    class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-4 rounded-xl border border-gray-200 dark:border-space-600 shadow-sm"
+    class="bg-white backdrop-blur-sm p-4 rounded-xl border border-gray-200 shadow-sm"
   >
     <div class="space-y-4">
       <!-- Status Filter -->
       <div>
-        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Status</label
+        <label class="block text-sm font-medium text-gray-600 mb-2">Status</label
         >
         <div class="flex flex-wrap gap-2">
           {#each ['investigating', 'identified', 'monitoring', 'resolved'] as status}
@@ -246,7 +246,7 @@
                 status
               )
                 ? getStatusColor(status)
-                : 'bg-gray-100 dark:bg-space-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-space-600 border border-gray-300 dark:border-space-500 hover:border-primary-500/50'}"
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-300 hover:border-primary-500/50'}"
             >
               {status.charAt(0).toUpperCase() + status.slice(1)}
             </button>
@@ -256,7 +256,7 @@
 
       <!-- Severity Filter -->
       <div>
-        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"
+        <label class="block text-sm font-medium text-gray-600 mb-2"
           >Severity</label
         >
         <div class="flex flex-wrap gap-2">
@@ -268,7 +268,7 @@
                 sev
               )
                 ? getSeverityColor(sev)
-                : 'bg-gray-100 dark:bg-space-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-space-600 border border-gray-300 dark:border-space-500 hover:border-accent-500/50'}"
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-300 hover:border-error/50'}"
             >
               {sev.charAt(0).toUpperCase() + sev.slice(1)}
             </button>
@@ -278,7 +278,7 @@
 
       <!-- Search -->
       <div>
-        <label for="search" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"
+        <label for="search" class="block text-sm font-medium text-gray-600 mb-2"
           >Search</label
         >
         <div class="flex gap-2">
@@ -287,7 +287,7 @@
             type="text"
             bind:value={searchQuery}
             placeholder="Search incidents..."
-            class="flex-1 px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+            class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 placeholder-gray-400"
           />
           <Button variant="primary" on:click={applyFilters}>Search</Button>
         </div>
@@ -298,7 +298,7 @@
   <!-- Error Display -->
   {#if error}
     <div
-      class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg"
+      class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
     >
       {error}
     </div>
@@ -311,32 +311,32 @@
         <div
           class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"
         ></div>
-        <p class="mt-2 text-gray-500 dark:text-gray-400">Loading incidents...</p>
+        <p class="mt-2 text-gray-500">Loading incidents...</p>
       </div>
     {:else if incidents.length === 0}
       <div
-        class="text-center py-12 bg-white dark:bg-space-800/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-space-600 shadow-sm"
+        class="text-center py-12 bg-white backdrop-blur-sm rounded-xl border border-gray-200 shadow-sm"
       >
-        <p class="text-gray-600 dark:text-gray-300">No incidents found</p>
-        <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">
+        <p class="text-gray-600">No incidents found</p>
+        <p class="text-sm text-gray-400 mt-2">
           Create your first incident to get started
         </p>
       </div>
     {:else}
       <div
-        class="bg-white dark:bg-space-800/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-space-600 overflow-hidden shadow-sm"
+        class="bg-white backdrop-blur-sm rounded-xl border border-gray-200 overflow-hidden shadow-sm"
       >
         <div
-          class="px-6 py-3 bg-gray-50 dark:bg-space-900/50 border-b border-gray-200 dark:border-space-600"
+          class="px-6 py-3 bg-gray-50 border-b border-gray-200"
         >
-          <p class="text-sm text-gray-600 dark:text-gray-400">
+          <p class="text-sm text-gray-600">
             Showing {incidents.length} of {total} incident{total !== 1 ? 's' : ''}
           </p>
         </div>
 
-        <ul class="divide-y divide-gray-200 dark:divide-space-600">
+        <ul class="divide-y divide-gray-200">
           {#each incidents as incident (incident.id)}
-            <li class="hover:bg-gray-50 dark:hover:bg-space-700/50 transition-colors">
+            <li class="hover:bg-gray-50 transition-colors">
               <button
                 type="button"
                 on:click={() => viewIncident(incident.id)}
@@ -360,20 +360,20 @@
                         {incident.status.charAt(0).toUpperCase() + incident.status.slice(1)}
                       </span>
                       <span
-                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-space-700 text-gray-800 dark:text-gray-300"
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
                       >
                         {incident.priority}
                       </span>
                     </div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <p class="text-sm font-medium text-gray-900">
                       {incident.title}
                     </p>
                     {#if incident.description}
-                      <p class="mt-1 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                      <p class="mt-1 text-sm text-gray-600 line-clamp-2">
                         {incident.description}
                       </p>
                     {/if}
-                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-500">
+                    <p class="mt-2 text-xs text-gray-500">
                       Started {formatDate(incident.started_at)}
                       {#if incident.resolved_at}
                         • Resolved {formatDate(incident.resolved_at)}
@@ -382,7 +382,7 @@
                   </div>
                   <div class="ml-4 flex-shrink-0">
                     <svg
-                      class="h-5 w-5 text-gray-400 dark:text-gray-500"
+                      class="h-5 w-5 text-gray-400"
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 20 20"
                       fill="currentColor"

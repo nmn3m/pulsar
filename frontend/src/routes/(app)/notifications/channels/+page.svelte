@@ -168,8 +168,8 @@
 <div class="space-y-6">
   <div class="flex justify-between items-center">
     <div>
-      <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Notification Channels</h2>
-      <p class="mt-2 text-gray-500 dark:text-gray-400">
+      <h2 class="text-3xl font-bold text-gray-900">Notification Channels</h2>
+      <p class="mt-2 text-gray-500">
         Configure notification delivery methods for your organization
       </p>
     </div>
@@ -186,9 +186,9 @@
 
   {#if showCreateForm}
     <div
-      class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-primary-200 dark:border-primary-500/30 shadow-sm"
+      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm"
     >
-      <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900">
         Create Notification Channel
       </h3>
       <form on:submit|preventDefault={handleCreateChannel} class="space-y-4">
@@ -197,14 +197,14 @@
         <div>
           <label
             for="channel-type"
-            class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1"
+            class="block text-sm font-medium text-gray-600 mb-1"
           >
             Channel Type
           </label>
           <select
             id="channel-type"
             bind:value={channelType}
-            class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white"
+            class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900"
           >
             <option value="email">Email (SMTP)</option>
             <option value="slack">Slack</option>
@@ -218,9 +218,9 @@
             id="is-enabled"
             type="checkbox"
             bind:checked={isEnabled}
-            class="rounded bg-white dark:bg-space-800 border-gray-300 dark:border-space-500 text-primary-600 focus:ring-primary-500"
+            class="rounded bg-white border-gray-300 text-primary-600 focus:ring-primary-500"
           />
-          <label for="is-enabled" class="text-sm font-medium text-gray-600 dark:text-gray-300">
+          <label for="is-enabled" class="text-sm font-medium text-gray-600">
             Enable this channel
           </label>
         </div>
@@ -228,9 +228,9 @@
         <!-- Email Configuration -->
         {#if channelType === 'email'}
           <div
-            class="space-y-3 p-4 bg-gray-50 dark:bg-space-900/50 rounded-lg border border-gray-200 dark:border-space-600"
+            class="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
           >
-            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <h4 class="text-sm font-semibold text-gray-900">
               Email Configuration
             </h4>
             <Input
@@ -278,9 +278,9 @@
                 id="use-tls"
                 type="checkbox"
                 bind:checked={emailConfig.use_tls}
-                class="rounded bg-white dark:bg-space-800 border-gray-300 dark:border-space-500 text-primary-600 focus:ring-primary-500"
+                class="rounded bg-white border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <label for="use-tls" class="text-sm font-medium text-gray-600 dark:text-gray-300"
+              <label for="use-tls" class="text-sm font-medium text-gray-600"
                 >Use TLS</label
               >
             </div>
@@ -290,9 +290,9 @@
         <!-- Slack Configuration -->
         {#if channelType === 'slack'}
           <div
-            class="space-y-3 p-4 bg-gray-50 dark:bg-space-900/50 rounded-lg border border-gray-200 dark:border-space-600"
+            class="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
           >
-            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <h4 class="text-sm font-semibold text-gray-900">
               Slack Configuration
             </h4>
             <Input
@@ -326,9 +326,9 @@
         <!-- Teams Configuration -->
         {#if channelType === 'teams'}
           <div
-            class="space-y-3 p-4 bg-gray-50 dark:bg-space-900/50 rounded-lg border border-gray-200 dark:border-space-600"
+            class="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
           >
-            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <h4 class="text-sm font-semibold text-gray-900">
               Microsoft Teams Configuration
             </h4>
             <Input
@@ -350,9 +350,9 @@
         <!-- Webhook Configuration -->
         {#if channelType === 'webhook'}
           <div
-            class="space-y-3 p-4 bg-gray-50 dark:bg-space-900/50 rounded-lg border border-gray-200 dark:border-space-600"
+            class="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
           >
-            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <h4 class="text-sm font-semibold text-gray-900">
               Webhook Configuration
             </h4>
             <Input
@@ -365,14 +365,14 @@
             <div>
               <label
                 for="method"
-                class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1"
+                class="block text-sm font-medium text-gray-600 mb-1"
               >
                 HTTP Method
               </label>
               <select
                 id="method"
                 bind:value={webhookConfig.method}
-                class="w-full px-3 py-2 bg-white dark:bg-space-800 border border-gray-300 dark:border-space-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white"
+                class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900"
               >
                 <option value="POST">POST</option>
                 <option value="PUT">PUT</option>
@@ -392,7 +392,7 @@
 
         {#if createError}
           <div
-            class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg"
+            class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
           >
             {createError}
           </div>
@@ -422,20 +422,20 @@
       <div
         class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"
       ></div>
-      <p class="mt-2 text-gray-500 dark:text-gray-400">Loading notification channels...</p>
+      <p class="mt-2 text-gray-500">Loading notification channels...</p>
     </div>
   {:else if $notificationChannelsStore.error}
     <div
-      class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg"
+      class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
     >
       {$notificationChannelsStore.error}
     </div>
   {:else if $notificationChannelsStore.channels.length === 0}
     <div
-      class="text-center py-12 bg-white dark:bg-space-800/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-space-600 shadow-sm"
+      class="text-center py-12 bg-white backdrop-blur-sm rounded-xl border border-gray-200 shadow-sm"
     >
-      <p class="text-gray-600 dark:text-gray-300">No notification channels configured</p>
-      <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">
+      <p class="text-gray-600">No notification channels configured</p>
+      <p class="text-sm text-gray-400 mt-2">
         Create your first channel to get started
       </p>
     </div>
@@ -443,17 +443,17 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {#each $notificationChannelsStore.channels as channel (channel.id)}
         <div
-          class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-200 dark:border-space-600 hover:border-primary-400 dark:hover:border-primary-500/30 transition-all duration-300 hover:shadow-lg dark:hover:shadow-primary-500/10 shadow-sm"
+          class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 hover:border-primary-400 transition-all duration-300 hover:shadow-lg shadow-sm"
         >
           <div class="flex justify-between items-start mb-4">
             <div class="flex-1">
               <div class="flex items-center gap-2 mb-2">
                 <span class="text-2xl">{getChannelTypeIcon(channel.channel_type)}</span>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900">
                   {channel.name}
                 </h3>
               </div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
+              <p class="text-sm text-gray-500">
                 {getChannelTypeDisplay(channel.channel_type)}
               </p>
             </div>
@@ -463,13 +463,13 @@
             <div class="flex items-center gap-2">
               <span
                 class="px-2 py-1 rounded text-xs font-medium {channel.is_enabled
-                  ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300'
-                  : 'bg-gray-100 dark:bg-space-700 text-gray-600 dark:text-gray-400'}"
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-gray-100 text-gray-600'}"
               >
                 {channel.is_enabled ? 'Enabled' : 'Disabled'}
               </span>
             </div>
-            <p class="text-xs text-gray-400 dark:text-gray-500">
+            <p class="text-xs text-gray-400">
               Created {new Date(channel.created_at).toLocaleDateString()}
             </p>
           </div>

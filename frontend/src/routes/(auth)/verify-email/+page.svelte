@@ -156,21 +156,21 @@
 <div class="min-h-screen flex items-center justify-center px-4 py-12">
   <div class="max-w-md w-full space-y-8">
     <div class="text-center">
-      <h1 class="text-4xl font-bold text-primary-600 dark:text-primary-400 dark:text-glow-cyan">
+      <h1 class="text-4xl font-bold text-primary-600">
         Pulsar
       </h1>
-      <p class="mt-2 text-gray-500 dark:text-gray-400">Verify your email</p>
+      <p class="mt-2 text-gray-500">Verify your email</p>
     </div>
 
     <div
-      class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-8 rounded-xl border border-gray-200 dark:border-space-600 shadow-lg"
+      class="bg-white backdrop-blur-sm p-8 rounded-xl border border-gray-200 shadow-lg"
     >
       <div class="text-center mb-8">
         <div
-          class="mx-auto w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mb-4"
+          class="mx-auto w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-4"
         >
           <svg
-            class="w-8 h-8 text-primary-600 dark:text-primary-400"
+            class="w-8 h-8 text-primary-600"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -183,8 +183,8 @@
             />
           </svg>
         </div>
-        <p class="text-gray-600 dark:text-gray-300">We've sent a 6-digit verification code to</p>
-        <p class="font-medium text-gray-900 dark:text-white mt-1">
+        <p class="text-gray-600">We've sent a 6-digit verification code to</p>
+        <p class="font-medium text-gray-900 mt-1">
           {maskEmail(email)}
         </p>
       </div>
@@ -192,7 +192,7 @@
       <form on:submit|preventDefault={handleVerify} class="space-y-6">
         <div>
           <label
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-center mb-4"
+            class="block text-sm font-medium text-gray-700 text-center mb-4"
           >
             Enter verification code
           </label>
@@ -207,11 +207,11 @@
                 on:input={(e) => handleInput(index, e)}
                 on:keydown={(e) => handleKeyDown(index, e)}
                 class="w-12 h-14 text-center text-2xl font-bold border-2 rounded-lg
-									   bg-white dark:bg-space-700
-									   border-gray-300 dark:border-space-500
-									   focus:border-primary-500 dark:focus:border-primary-400
+									   bg-white
+									   border-gray-300
+									   focus:border-primary-500
 									   focus:ring-2 focus:ring-primary-500/20
-									   text-gray-900 dark:text-white
+									   text-gray-900
 									   transition-colors"
                 disabled={loading}
               />
@@ -221,7 +221,7 @@
 
         {#if error}
           <div
-            class="bg-red-50 dark:bg-accent-900/30 border border-red-200 dark:border-accent-500/50 text-red-600 dark:text-accent-300 px-4 py-3 rounded-lg text-center"
+            class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-center"
           >
             {error}
           </div>
@@ -229,7 +229,7 @@
 
         {#if success}
           <div
-            class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-500/50 text-green-600 dark:text-green-300 px-4 py-3 rounded-lg text-center"
+            class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg text-center"
           >
             {success}
           </div>
@@ -241,11 +241,11 @@
       </form>
 
       <div class="mt-6 text-center">
-        <p class="text-sm text-gray-500 dark:text-gray-400">
+        <p class="text-sm text-gray-500">
           Didn't receive the code?
           <button
             on:click={handleResend}
-            class="text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            class="text-primary-600 hover:text-primary-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={resendLoading || resendCooldown > 0}
           >
             {#if resendLoading}
@@ -262,7 +262,7 @@
       <div class="mt-4 text-center">
         <a
           href="/login"
-          class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+          class="text-sm text-gray-500 hover:text-gray-700"
         >
           Back to login
         </a>

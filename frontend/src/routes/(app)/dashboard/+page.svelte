@@ -58,17 +58,17 @@
   function getPriorityColor(priority: string): string {
     switch (priority) {
       case 'P1':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+        return 'bg-red-100 text-red-800';
       case 'P2':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400';
+        return 'bg-orange-100 text-orange-800';
       case 'P3':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+        return 'bg-yellow-100 text-yellow-800';
       case 'P4':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+        return 'bg-blue-100 text-blue-800';
       case 'P5':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+        return 'bg-gray-100 text-gray-800';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+        return 'bg-gray-100 text-gray-800';
     }
   }
 
@@ -88,15 +88,15 @@
 <div class="space-y-6">
   <div class="flex justify-between items-center">
     <div>
-      <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h2>
-      <p class="mt-2 text-gray-500 dark:text-gray-400">
+      <h2 class="text-3xl font-bold text-gray-900">Dashboard</h2>
+      <p class="mt-2 text-gray-500">
         Overview of your incident management metrics
       </p>
     </div>
     <div class="flex items-center gap-2">
       <select
         bind:value={selectedPeriod}
-        class="px-3 py-2 bg-white dark:bg-space-800 border border-gray-200 dark:border-space-600 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        class="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
       >
         <option value="hourly">Hourly</option>
         <option value="daily">Daily</option>
@@ -104,7 +104,7 @@
       </select>
       <button
         on:click={loadMetrics}
-        class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        class="p-2 text-gray-500 hover:text-gray-700"
         title="Refresh metrics"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,7 +125,7 @@
     </div>
   {:else if error}
     <div
-      class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-red-700 dark:text-red-400"
+      class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700"
     >
       {error}
     </div>
@@ -134,11 +134,11 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <!-- Active Alerts Card -->
       <div
-        class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-accent-200 dark:border-accent-500/20 hover:border-accent-400 dark:hover:border-accent-500/40 transition-all duration-300 hover:shadow-lg dark:hover:shadow-accent-500/10 shadow-sm"
+        class="bg-white backdrop-blur-sm p-6 rounded-xl border border-error/20 hover:border-error/40 transition-all duration-300 hover:shadow-lg shadow-sm"
       >
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Open Alerts</h3>
-          <span class="text-accent-500 dark:text-accent-400">
+          <h3 class="text-sm font-medium text-gray-500">Open Alerts</h3>
+          <span class="text-error">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
@@ -149,21 +149,21 @@
             </svg>
           </span>
         </div>
-        <p class="mt-3 text-4xl font-bold text-gray-900 dark:text-gray-100">
+        <p class="mt-3 text-4xl font-bold text-gray-900">
           {metrics.alerts.open}
         </p>
-        <p class="mt-2 text-sm text-gray-400 dark:text-gray-500">
+        <p class="mt-2 text-sm text-gray-400">
           {metrics.alerts.total} total ({metrics.alerts.acknowledged} ack)
         </p>
       </div>
 
       <!-- Open Incidents Card -->
       <div
-        class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-red-200 dark:border-red-500/20 hover:border-red-400 dark:hover:border-red-500/40 transition-all duration-300 hover:shadow-lg dark:hover:shadow-red-500/10 shadow-sm"
+        class="bg-white backdrop-blur-sm p-6 rounded-xl border border-red-200 hover:border-red-400 transition-all duration-300 hover:shadow-lg shadow-sm"
       >
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Open Incidents</h3>
-          <span class="text-red-500 dark:text-red-400">
+          <h3 class="text-sm font-medium text-gray-500">Open Incidents</h3>
+          <span class="text-red-500">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
@@ -174,24 +174,24 @@
             </svg>
           </span>
         </div>
-        <p class="mt-3 text-4xl font-bold text-gray-900 dark:text-gray-100">
+        <p class="mt-3 text-4xl font-bold text-gray-900">
           {metrics.incidents.open +
             metrics.incidents.investigating +
             metrics.incidents.identified +
             metrics.incidents.monitoring}
         </p>
-        <p class="mt-2 text-sm text-gray-400 dark:text-gray-500">
+        <p class="mt-2 text-sm text-gray-400">
           {metrics.incidents.total} total ({metrics.incidents.resolved + metrics.incidents.closed} resolved)
         </p>
       </div>
 
       <!-- Avg Response Time Card -->
       <div
-        class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-primary-200 dark:border-primary-500/20 hover:border-primary-400 dark:hover:border-primary-500/40 transition-all duration-300 hover:shadow-lg dark:hover:shadow-primary-500/10 shadow-sm"
+        class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 hover:border-primary-400 transition-all duration-300 hover:shadow-lg shadow-sm"
       >
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Avg Response Time</h3>
-          <span class="text-primary-500 dark:text-primary-400">
+          <h3 class="text-sm font-medium text-gray-500">Avg Response Time</h3>
+          <span class="text-primary-500">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
@@ -202,19 +202,19 @@
             </svg>
           </span>
         </div>
-        <p class="mt-3 text-4xl font-bold text-gray-900 dark:text-gray-100">
+        <p class="mt-3 text-4xl font-bold text-gray-900">
           {formatDuration(metrics.alerts.avg_response_time_seconds)}
         </p>
-        <p class="mt-2 text-sm text-gray-400 dark:text-gray-500">Time to acknowledge</p>
+        <p class="mt-2 text-sm text-gray-400">Time to acknowledge</p>
       </div>
 
       <!-- Notifications Card -->
       <div
-        class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-green-200 dark:border-green-500/20 hover:border-green-400 dark:hover:border-green-500/40 transition-all duration-300 hover:shadow-lg dark:hover:shadow-green-500/10 shadow-sm"
+        class="bg-white backdrop-blur-sm p-6 rounded-xl border border-green-200 hover:border-green-400 transition-all duration-300 hover:shadow-lg shadow-sm"
       >
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Notifications Sent</h3>
-          <span class="text-green-500 dark:text-green-400">
+          <h3 class="text-sm font-medium text-gray-500">Notifications Sent</h3>
+          <span class="text-green-500">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
@@ -225,10 +225,10 @@
             </svg>
           </span>
         </div>
-        <p class="mt-3 text-4xl font-bold text-gray-900 dark:text-gray-100">
+        <p class="mt-3 text-4xl font-bold text-gray-900">
           {metrics.notifications.sent}
         </p>
-        <p class="mt-2 text-sm text-gray-400 dark:text-gray-500">
+        <p class="mt-2 text-sm text-gray-400">
           {metrics.notifications.failed > 0
             ? `${metrics.notifications.failed} failed`
             : 'All delivered'}
@@ -240,9 +240,9 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- By Priority -->
       <div
-        class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-200 dark:border-space-600 shadow-sm"
+        class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm"
       >
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
           Alerts by Priority
         </h3>
         {#if Object.keys(metrics.alerts.by_priority).length > 0}
@@ -257,7 +257,7 @@
                   {priority}
                 </span>
                 <div class="flex items-center gap-2">
-                  <div class="w-32 bg-gray-200 dark:bg-space-700 rounded-full h-2">
+                  <div class="w-32 bg-gray-200 rounded-full h-2">
                     <div
                       class="h-2 rounded-full {priority === 'P1'
                         ? 'bg-red-500'
@@ -269,7 +269,7 @@
                       style="width: {Math.min((count / metrics.alerts.total) * 100, 100)}%"
                     ></div>
                   </div>
-                  <span class="text-sm text-gray-600 dark:text-gray-400 w-8 text-right"
+                  <span class="text-sm text-gray-600 w-8 text-right"
                     >{count}</span
                   >
                 </div>
@@ -277,15 +277,15 @@
             {/each}
           </div>
         {:else}
-          <p class="text-gray-500 dark:text-gray-400 text-sm">No alerts in this period</p>
+          <p class="text-gray-500 text-sm">No alerts in this period</p>
         {/if}
       </div>
 
       <!-- By Source -->
       <div
-        class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-200 dark:border-space-600 shadow-sm"
+        class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm"
       >
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
           Alerts by Source
         </h3>
         {#if Object.keys(metrics.alerts.by_source).length > 0}
@@ -295,19 +295,19 @@
               .slice(0, 5) as [source, count]}
               <div class="flex items-center justify-between">
                 <span
-                  class="text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px]"
+                  class="text-sm text-gray-700 truncate max-w-[150px]"
                   title={source}
                 >
                   {source}
                 </span>
                 <div class="flex items-center gap-2">
-                  <div class="w-32 bg-gray-200 dark:bg-space-700 rounded-full h-2">
+                  <div class="w-32 bg-gray-200 rounded-full h-2">
                     <div
                       class="bg-primary-500 h-2 rounded-full"
                       style="width: {Math.min((count / metrics.alerts.total) * 100, 100)}%"
                     ></div>
                   </div>
-                  <span class="text-sm text-gray-600 dark:text-gray-400 w-8 text-right"
+                  <span class="text-sm text-gray-600 w-8 text-right"
                     >{count}</span
                   >
                 </div>
@@ -315,23 +315,23 @@
             {/each}
           </div>
         {:else}
-          <p class="text-gray-500 dark:text-gray-400 text-sm">No alerts in this period</p>
+          <p class="text-gray-500 text-sm">No alerts in this period</p>
         {/if}
       </div>
     </div>
 
     <!-- Incident Status Breakdown -->
     <div
-      class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-200 dark:border-space-600 shadow-sm"
+      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm"
     >
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Incident Status</h3>
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Incident Status</h3>
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         {#each [{ label: 'Open', value: metrics.incidents.open, color: 'red' }, { label: 'Investigating', value: metrics.incidents.investigating, color: 'orange' }, { label: 'Identified', value: metrics.incidents.identified, color: 'blue' }, { label: 'Monitoring', value: metrics.incidents.monitoring, color: 'purple' }, { label: 'Resolved', value: metrics.incidents.resolved, color: 'green' }, { label: 'Closed', value: metrics.incidents.closed, color: 'gray' }] as stat}
-          <div class="text-center p-3 bg-gray-50 dark:bg-space-700/50 rounded-lg">
-            <p class="text-2xl font-bold text-{stat.color}-600 dark:text-{stat.color}-400">
+          <div class="text-center p-3 bg-gray-50 rounded-lg">
+            <p class="text-2xl font-bold text-{stat.color}-600">
               {stat.value}
             </p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{stat.label}</p>
+            <p class="text-xs text-gray-500 mt-1">{stat.label}</p>
           </div>
         {/each}
       </div>
@@ -340,32 +340,32 @@
     <!-- Team Performance -->
     {#if teamMetrics.length > 0}
       <div
-        class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-200 dark:border-space-600 shadow-sm"
+        class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm"
       >
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
           Team Performance
         </h3>
         <div class="overflow-x-auto">
           <table class="min-w-full">
             <thead>
-              <tr class="border-b border-gray-200 dark:border-space-600">
-                <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400"
+              <tr class="border-b border-gray-200">
+                <th class="text-left py-3 px-4 text-sm font-medium text-gray-500"
                   >Team</th
                 >
                 <th
-                  class="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400"
+                  class="text-right py-3 px-4 text-sm font-medium text-gray-500"
                   >Total</th
                 >
                 <th
-                  class="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400"
+                  class="text-right py-3 px-4 text-sm font-medium text-gray-500"
                   >Acknowledged</th
                 >
                 <th
-                  class="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400"
+                  class="text-right py-3 px-4 text-sm font-medium text-gray-500"
                   >Closed</th
                 >
                 <th
-                  class="text-right py-3 px-4 text-sm font-medium text-gray-500 dark:text-gray-400"
+                  class="text-right py-3 px-4 text-sm font-medium text-gray-500"
                   >Avg Response</th
                 >
               </tr>
@@ -373,21 +373,21 @@
             <tbody>
               {#each teamMetrics as team}
                 <tr
-                  class="border-b border-gray-100 dark:border-space-700 hover:bg-gray-50 dark:hover:bg-space-700/50"
+                  class="border-b border-gray-100 hover:bg-gray-50"
                 >
-                  <td class="py-3 px-4 text-sm text-gray-900 dark:text-gray-100"
+                  <td class="py-3 px-4 text-sm text-gray-900"
                     >{team.team_name}</td
                   >
-                  <td class="py-3 px-4 text-sm text-gray-600 dark:text-gray-400 text-right"
+                  <td class="py-3 px-4 text-sm text-gray-600 text-right"
                     >{team.total_alerts}</td
                   >
-                  <td class="py-3 px-4 text-sm text-gray-600 dark:text-gray-400 text-right"
+                  <td class="py-3 px-4 text-sm text-gray-600 text-right"
                     >{team.acknowledged_alerts}</td
                   >
-                  <td class="py-3 px-4 text-sm text-gray-600 dark:text-gray-400 text-right"
+                  <td class="py-3 px-4 text-sm text-gray-600 text-right"
                     >{team.closed_alerts}</td
                   >
-                  <td class="py-3 px-4 text-sm text-gray-600 dark:text-gray-400 text-right">
+                  <td class="py-3 px-4 text-sm text-gray-600 text-right">
                     {formatDuration(team.avg_response_time_seconds)}
                   </td>
                 </tr>
@@ -400,31 +400,31 @@
 
     <!-- User Info Card -->
     <div
-      class="bg-white dark:bg-space-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-200 dark:border-space-600 shadow-sm"
+      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm"
     >
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Your Information</h3>
+      <h3 class="text-lg font-semibold text-gray-900">Your Information</h3>
       <dl class="mt-4 space-y-3">
         <div
-          class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-space-700"
+          class="flex justify-between items-center py-2 border-b border-gray-100"
         >
-          <dt class="text-sm font-medium text-gray-400 dark:text-gray-500">Email:</dt>
-          <dd class="text-sm text-primary-600 dark:text-primary-300">{$authStore.user?.email}</dd>
+          <dt class="text-sm font-medium text-gray-400">Email:</dt>
+          <dd class="text-sm text-primary-600">{$authStore.user?.email}</dd>
         </div>
         <div
-          class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-space-700"
+          class="flex justify-between items-center py-2 border-b border-gray-100"
         >
-          <dt class="text-sm font-medium text-gray-400 dark:text-gray-500">Username:</dt>
-          <dd class="text-sm text-gray-700 dark:text-gray-300">{$authStore.user?.username}</dd>
+          <dt class="text-sm font-medium text-gray-400">Username:</dt>
+          <dd class="text-sm text-gray-700">{$authStore.user?.username}</dd>
         </div>
         <div
-          class="flex justify-between items-center py-2 border-b border-gray-100 dark:border-space-700"
+          class="flex justify-between items-center py-2 border-b border-gray-100"
         >
-          <dt class="text-sm font-medium text-gray-400 dark:text-gray-500">Organization:</dt>
-          <dd class="text-sm text-gray-700 dark:text-gray-300">{$authStore.organization?.name}</dd>
+          <dt class="text-sm font-medium text-gray-400">Organization:</dt>
+          <dd class="text-sm text-gray-700">{$authStore.organization?.name}</dd>
         </div>
         <div class="flex justify-between items-center py-2">
-          <dt class="text-sm font-medium text-gray-400 dark:text-gray-500">Plan:</dt>
-          <dd class="text-sm text-primary-600 dark:text-primary-400 capitalize">
+          <dt class="text-sm font-medium text-gray-400">Plan:</dt>
+          <dd class="text-sm text-primary-600 capitalize">
             {$authStore.organization?.plan}
           </dd>
         </div>
