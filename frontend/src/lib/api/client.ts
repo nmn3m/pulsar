@@ -106,6 +106,13 @@ import type {
   TeamMetrics,
   MetricsFilter,
 } from '$lib/types/metrics';
+import type {
+  APIKey,
+  APIKeyResponse,
+  CreateAPIKeyRequest,
+  UpdateAPIKeyRequest,
+  ListAPIKeysResponse,
+} from '$lib/types/apikey';
 
 const API_URL = browser
   ? import.meta.env.VITE_API_URL || 'http://localhost:8080'
@@ -1045,6 +1052,50 @@ class APIClient {
     const endpoint = queryString ? `/api/v1/metrics/teams?${queryString}` : '/api/v1/metrics/teams';
 
     return this.request<{ teams: TeamMetrics[] }>(endpoint);
+  }
+
+  // ==================== API Keys ====================
+
+  async listAPIKeys(): Promise<ListAPIKeysResponse> {
+    return this.request<ListAPIKeysResponse>('/api/v1/api-keys');
+  }
+
+  async listAllAPIKeys(): Promise<ListAPIKeysResponse> {
+    return this.request<ListAPIKeysResponse>('/api/v1/api-keys/all');
+  }
+
+  async getAPIKeyScopes(): Promise<{ scopes: string[] }> {
+    return this.request<{ scopes: string[] }>('/api/v1/api-keys/scopes');
+  }
+
+  async createAPIKey(data: CreateAPIKeyRequest): Promise<APIKeyResponse> {
+    return this.request<APIKeyResponse>('/api/v1/api-keys', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getAPIKey(id: string): Promise<APIKey> {
+    return this.request<APIKey>(`/api/v1/api-keys/${id}`);
+  }
+
+  async updateAPIKey(id: string, data: UpdateAPIKeyRequest): Promise<APIKey> {
+    return this.request<APIKey>(`/api/v1/api-keys/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteAPIKey(id: string): Promise<void> {
+    await this.request(`/api/v1/api-keys/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async revokeAPIKey(id: string): Promise<void> {
+    await this.request(`/api/v1/api-keys/${id}/revoke`, {
+      method: 'POST',
+    });
   }
 }
 
