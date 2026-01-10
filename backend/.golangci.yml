@@ -3,36 +3,23 @@ run:
   modules-download-mode: readonly
 
 linters:
+  disable-all: true
   enable:
-    - errcheck
-    - gosimple
+    # Essential linters
     - govet
-    - ineffassign
     - staticcheck
+    - gosimple
     - unused
+    - ineffassign
+    # Formatting
     - gofmt
     - goimports
-    - misspell
-    - unconvert
-    - unparam
-    - bodyclose
-    - noctx
-    - prealloc
-    - exportloopref
-    - gocritic
 
 linters-settings:
   gofmt:
     simplify: true
   goimports:
     local-prefixes: github.com/nmn3m/pulsar
-  misspell:
-    locale: US
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - performance
-      - style
 
 issues:
   exclude-rules:

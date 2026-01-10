@@ -155,18 +155,13 @@ func (s *IncidentService) UpdateIncident(ctx context.Context, id, userID uuid.UU
 		return nil, fmt.Errorf("failed to get incident: %w", err)
 	}
 
-	// Track changes for timeline
-	var changes []string
-
 	// Update fields if provided
 	if req.Title != nil {
 		incident.Title = *req.Title
-		changes = append(changes, "title")
 	}
 
 	if req.Description != nil {
 		incident.Description = req.Description
-		changes = append(changes, "description")
 	}
 
 	if req.Severity != nil {
