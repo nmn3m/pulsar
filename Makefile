@@ -89,6 +89,7 @@ up:
 	@echo "  Frontend:  $(CYAN)http://localhost:5173$(RESET)"
 	@echo "  API:       $(CYAN)http://localhost:8081$(RESET)"
 	@echo "  Swagger:   $(CYAN)http://localhost:8081/swagger/index.html$(RESET)"
+	@echo "  Mailpit:   $(CYAN)http://localhost:8025$(RESET)"
 	@echo "  Database:  $(CYAN)localhost:5433$(RESET)"
 	@echo ""
 
