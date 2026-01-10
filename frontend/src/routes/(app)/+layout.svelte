@@ -13,8 +13,6 @@
     goto('/login');
   }
 
-  $: currentPath = $page.url.pathname;
-
   onMount(() => {
     if ($authStore.isAuthenticated) {
       wsStore.connect();
@@ -29,40 +27,6 @@
     wsStore.disconnect();
     await authStore.logout();
     goto('/login');
-  }
-
-  function getStatusColor(status: string): string {
-    switch (status) {
-      case 'connected':
-        return 'bg-success shadow-glow-success';
-      case 'connecting':
-        return 'bg-warning animate-pulse';
-      case 'disconnected':
-        return 'bg-gray-500';
-      case 'error':
-        return 'bg-error shadow-glow-error';
-      default:
-        return 'bg-gray-500';
-    }
-  }
-
-  function getStatusText(status: string): string {
-    switch (status) {
-      case 'connected':
-        return 'Connected';
-      case 'connecting':
-        return 'Connecting...';
-      case 'disconnected':
-        return 'Disconnected';
-      case 'error':
-        return 'Connection Error';
-      default:
-        return 'Unknown';
-    }
-  }
-
-  function isActive(path: string): boolean {
-    return currentPath.startsWith(path);
   }
 
   function handleClickOutside(event: MouseEvent) {
@@ -101,48 +65,48 @@
             <nav class="ml-10 flex space-x-1 overflow-visible">
               <a
                 href="/dashboard"
-                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {isActive('/dashboard')
-                  ? 'bg-primary-100 text-primary-700'
+                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith('/dashboard')
+                  ? 'bg-primary-100 text-primary-700 shadow-md'
                   : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}"
               >
                 Dashboard
               </a>
               <a
                 href="/alerts"
-                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {isActive('/alerts')
-                  ? 'bg-red-100 text-red-700'
+                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith('/alerts')
+                  ? 'bg-red-100 text-red-700 shadow-md'
                   : 'text-gray-600 hover:text-error hover:bg-gray-100'}"
               >
                 Alerts
               </a>
               <a
                 href="/incidents"
-                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {isActive('/incidents')
-                  ? 'bg-red-100 text-red-700'
+                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith('/incidents')
+                  ? 'bg-red-100 text-red-700 shadow-md'
                   : 'text-gray-600 hover:text-error hover:bg-gray-100'}"
               >
                 Incidents
               </a>
               <a
                 href="/teams"
-                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {isActive('/teams')
-                  ? 'bg-primary-100 text-primary-700'
+                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith('/teams')
+                  ? 'bg-primary-100 text-primary-700 shadow-md'
                   : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}"
               >
                 Teams
               </a>
               <a
                 href="/schedules"
-                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {isActive('/schedules')
-                  ? 'bg-primary-100 text-primary-700'
+                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith('/schedules')
+                  ? 'bg-primary-100 text-primary-700 shadow-md'
                   : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}"
               >
                 Schedules
               </a>
               <a
                 href="/escalation-policies"
-                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {isActive('/escalation-policies')
-                  ? 'bg-primary-100 text-primary-700'
+                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith('/escalation-policies')
+                  ? 'bg-primary-100 text-primary-700 shadow-md'
                   : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}"
               >
                 Escalations
@@ -153,8 +117,8 @@
                 <button
                   type="button"
                   on:click|stopPropagation={() => (showSettingsMenu = !showSettingsMenu)}
-                  class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 {isActive('/webhooks') || isActive('/notifications') || isActive('/settings')
-                    ? 'bg-primary-100 text-primary-700'
+                  class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 {$page.url.pathname.startsWith('/webhooks') || $page.url.pathname.startsWith('/notifications') || $page.url.pathname.startsWith('/settings')
+                    ? 'bg-primary-100 text-primary-700 shadow-md'
                     : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}"
                 >
                   Settings
@@ -167,7 +131,7 @@
                   <div class="absolute top-full right-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[9999]">
                     <a
                       href="/settings/routing-rules"
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {isActive('/settings/routing-rules') ? 'bg-gray-50' : ''}"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith('/settings/routing-rules') ? 'bg-gray-50' : ''}"
                       on:click={() => (showSettingsMenu = false)}
                     >
                       <div class="font-medium">Routing Rules</div>
@@ -175,7 +139,7 @@
                     </a>
                     <a
                       href="/webhooks/endpoints"
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {isActive('/webhooks') ? 'bg-gray-50' : ''}"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith('/webhooks') ? 'bg-gray-50' : ''}"
                       on:click={() => (showSettingsMenu = false)}
                     >
                       <div class="font-medium">Webhooks</div>
@@ -183,7 +147,7 @@
                     </a>
                     <a
                       href="/notifications/channels"
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {isActive('/notifications') ? 'bg-gray-50' : ''}"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith('/notifications') ? 'bg-gray-50' : ''}"
                       on:click={() => (showSettingsMenu = false)}
                     >
                       <div class="font-medium">Notifications</div>
@@ -191,7 +155,7 @@
                     </a>
                     <a
                       href="/settings/api-keys"
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {isActive('/settings/api-keys') ? 'bg-gray-50' : ''}"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith('/settings/api-keys') ? 'bg-gray-50' : ''}"
                       on:click={() => (showSettingsMenu = false)}
                     >
                       <div class="font-medium">API Keys</div>
@@ -199,7 +163,7 @@
                     </a>
                     <a
                       href="/settings/dnd"
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {isActive('/settings/dnd') ? 'bg-gray-50' : ''}"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith('/settings/dnd') ? 'bg-gray-50' : ''}"
                       on:click={() => (showSettingsMenu = false)}
                     >
                       <div class="font-medium">Do Not Disturb</div>
@@ -212,27 +176,6 @@
           </div>
 
           <div class="flex items-center space-x-4">
-            <!-- WebSocket Status Indicator -->
-            <div class="flex items-center space-x-2" title={getStatusText($wsStore.status)}>
-              <span class="relative flex h-3 w-3">
-                {#if $wsStore.status === 'connecting'}
-                  <span
-                    class="animate-ping absolute inline-flex h-full w-full rounded-full {getStatusColor(
-                      $wsStore.status
-                    )} opacity-75"
-                  />
-                {/if}
-                <span
-                  class="relative inline-flex rounded-full h-3 w-3 {getStatusColor(
-                    $wsStore.status
-                  )}"
-                />
-              </span>
-              <span class="text-xs text-gray-500 hidden sm:inline">
-                {getStatusText($wsStore.status)}
-              </span>
-            </div>
-
             <span class="text-sm text-primary-600">
               {$authStore.user?.email}
             </span>
