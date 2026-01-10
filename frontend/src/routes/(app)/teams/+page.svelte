@@ -65,9 +65,7 @@
   </div>
 
   {#if showCreateForm}
-    <div
-      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm"
-    >
+    <div class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm">
       <h3 class="text-lg font-semibold mb-4 text-gray-900">Create New Team</h3>
       <form on:submit|preventDefault={handleCreateTeam} class="space-y-4">
         <Input
@@ -79,10 +77,7 @@
         />
 
         <div>
-          <label
-            for="description"
-            class="block text-sm font-medium text-gray-600 mb-1"
-          >
+          <label for="description" class="block text-sm font-medium text-gray-600 mb-1">
             Description
           </label>
           <textarea
@@ -95,9 +90,7 @@
         </div>
 
         {#if createError}
-          <div
-            class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-          >
+          <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
             {createError}
           </div>
         {/if}
@@ -124,9 +117,7 @@
         <p class="mt-2 text-gray-500">Loading teams...</p>
       </div>
     {:else if $teamsStore.error}
-      <div
-        class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-      >
+      <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
         {$teamsStore.error}
       </div>
     {:else if $teamsStore.teams.length === 0}
@@ -134,9 +125,7 @@
         class="text-center py-12 bg-white backdrop-blur-sm rounded-xl border border-gray-200 shadow-sm"
       >
         <p class="text-gray-600">No teams found</p>
-        <p class="text-sm text-gray-400 mt-2">
-          Create your first team to get started
-        </p>
+        <p class="text-sm text-gray-400 mt-2">Create your first team to get started</p>
       </div>
     {:else}
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

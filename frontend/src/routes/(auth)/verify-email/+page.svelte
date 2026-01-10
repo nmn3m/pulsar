@@ -156,15 +156,11 @@
 <div class="min-h-screen flex items-center justify-center px-4 py-12">
   <div class="max-w-md w-full space-y-8">
     <div class="text-center">
-      <h1 class="text-4xl font-bold text-primary-600">
-        Pulsar
-      </h1>
+      <h1 class="text-4xl font-bold text-primary-600">Pulsar</h1>
       <p class="mt-2 text-gray-500">Verify your email</p>
     </div>
 
-    <div
-      class="bg-white backdrop-blur-sm p-8 rounded-xl border border-gray-200 shadow-lg"
-    >
+    <div class="bg-white backdrop-blur-sm p-8 rounded-xl border border-gray-200 shadow-lg">
       <div class="text-center mb-8">
         <div
           class="mx-auto w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-4"
@@ -191,9 +187,7 @@
 
       <form on:submit|preventDefault={handleVerify} class="space-y-6">
         <div>
-          <label
-            class="block text-sm font-medium text-gray-700 text-center mb-4"
-          >
+          <label class="block text-sm font-medium text-gray-700 text-center mb-4">
             Enter verification code
           </label>
           <div class="flex justify-center gap-2" on:paste={handlePaste}>
@@ -260,12 +254,7 @@
       </div>
 
       <div class="mt-4 text-center">
-        <a
-          href="/login"
-          class="text-sm text-gray-500 hover:text-gray-700"
-        >
-          Back to login
-        </a>
+        <a href="/login" class="text-sm text-gray-500 hover:text-gray-700"> Back to login </a>
       </div>
     </div>
   </div>

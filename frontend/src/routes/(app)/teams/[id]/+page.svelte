@@ -314,7 +314,9 @@
     <!-- Team Members Section -->
     <div class="bg-white p-6 rounded-lg shadow">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-900">Team Members ({team.members?.length || 0})</h3>
+        <h3 class="text-lg font-semibold text-gray-900">
+          Team Members ({team.members?.length || 0})
+        </h3>
         <Button
           variant="primary"
           size="sm"
@@ -333,14 +335,18 @@
           <div class="flex gap-2 mb-4">
             <button
               type="button"
-              class="px-3 py-1.5 text-sm rounded-lg transition-colors {addMemberMode === 'email' ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-700'}"
+              class="px-3 py-1.5 text-sm rounded-lg transition-colors {addMemberMode === 'email'
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-200 text-gray-700'}"
               on:click={() => (addMemberMode = 'email')}
             >
               Invite by Email
             </button>
             <button
               type="button"
-              class="px-3 py-1.5 text-sm rounded-lg transition-colors {addMemberMode === 'select' ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-700'}"
+              class="px-3 py-1.5 text-sm rounded-lg transition-colors {addMemberMode === 'select'
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-200 text-gray-700'}"
               on:click={() => (addMemberMode = 'select')}
             >
               Select Existing User
@@ -362,7 +368,8 @@
                   required
                 />
                 <p class="mt-1 text-xs text-gray-500">
-                  If the user exists, they'll be added directly. Otherwise, an invitation email will be sent.
+                  If the user exists, they'll be added directly. Otherwise, an invitation email will
+                  be sent.
                 </p>
               </div>
             {:else}
@@ -407,14 +414,20 @@
             {/if}
 
             {#if addMemberSuccess}
-              <div class="bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded text-sm">
+              <div
+                class="bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded text-sm"
+              >
                 {addMemberSuccess}
               </div>
             {/if}
 
             <div class="flex gap-2">
               <Button type="submit" variant="primary" size="sm" disabled={isAddingMember}>
-                {isAddingMember ? 'Adding...' : addMemberMode === 'email' ? 'Send Invitation' : 'Add Member'}
+                {isAddingMember
+                  ? 'Adding...'
+                  : addMemberMode === 'email'
+                    ? 'Send Invitation'
+                    : 'Add Member'}
               </Button>
               <Button
                 type="button"
@@ -477,7 +490,9 @@
         </h3>
         <div class="space-y-3">
           {#each pendingInvitations as invitation (invitation.id)}
-            <div class="flex items-center justify-between p-4 border border-yellow-200 bg-yellow-50 rounded-lg">
+            <div
+              class="flex items-center justify-between p-4 border border-yellow-200 bg-yellow-50 rounded-lg"
+            >
               <div class="flex-1">
                 <div class="font-medium text-gray-900">{invitation.email}</div>
                 <div class="text-sm text-gray-600">

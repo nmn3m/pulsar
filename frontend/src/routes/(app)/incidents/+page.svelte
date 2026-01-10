@@ -130,9 +130,7 @@
   <div class="flex justify-between items-center">
     <div>
       <h2 class="text-3xl font-bold text-gray-900">Incidents</h2>
-      <p class="mt-2 text-gray-500">
-        Manage and track incidents across your organization
-      </p>
+      <p class="mt-2 text-gray-500">Manage and track incidents across your organization</p>
     </div>
     <Button variant="primary" on:click={() => (showCreateForm = !showCreateForm)}>
       {showCreateForm ? 'Cancel' : 'Create Incident'}
@@ -141,18 +139,12 @@
 
   <!-- Create Incident Form -->
   {#if showCreateForm}
-    <div
-      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm"
-    >
-      <h3 class="text-lg font-semibold mb-4 text-gray-900">
-        Create New Incident
-      </h3>
+    <div class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900">Create New Incident</h3>
 
       <form on:submit|preventDefault={handleCreate} class="space-y-4">
         <div>
-          <label for="title" class="block text-sm font-medium text-gray-600 mb-1"
-            >Title *</label
-          >
+          <label for="title" class="block text-sm font-medium text-gray-600 mb-1">Title *</label>
           <input
             id="title"
             type="text"
@@ -163,9 +155,7 @@
         </div>
 
         <div>
-          <label
-            for="description"
-            class="block text-sm font-medium text-gray-600 mb-1"
+          <label for="description" class="block text-sm font-medium text-gray-600 mb-1"
             >Description</label
           >
           <textarea
@@ -179,9 +169,7 @@
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label
-              for="severity"
-              class="block text-sm font-medium text-gray-600 mb-1"
+            <label for="severity" class="block text-sm font-medium text-gray-600 mb-1"
               >Severity *</label
             >
             <select
@@ -197,9 +185,7 @@
           </div>
 
           <div>
-            <label
-              for="priority"
-              class="block text-sm font-medium text-gray-600 mb-1"
+            <label for="priority" class="block text-sm font-medium text-gray-600 mb-1"
               >Priority *</label
             >
             <select
@@ -229,14 +215,11 @@
   {/if}
 
   <!-- Filters -->
-  <div
-    class="bg-white backdrop-blur-sm p-4 rounded-xl border border-gray-200 shadow-sm"
-  >
+  <div class="bg-white backdrop-blur-sm p-4 rounded-xl border border-gray-200 shadow-sm">
     <div class="space-y-4">
       <!-- Status Filter -->
       <div>
-        <label class="block text-sm font-medium text-gray-600 mb-2">Status</label
-        >
+        <label class="block text-sm font-medium text-gray-600 mb-2">Status</label>
         <div class="flex flex-wrap gap-2">
           {#each ['investigating', 'identified', 'monitoring', 'resolved'] as status}
             <button
@@ -256,9 +239,7 @@
 
       <!-- Severity Filter -->
       <div>
-        <label class="block text-sm font-medium text-gray-600 mb-2"
-          >Severity</label
-        >
+        <label class="block text-sm font-medium text-gray-600 mb-2">Severity</label>
         <div class="flex flex-wrap gap-2">
           {#each ['critical', 'high', 'medium', 'low'] as sev}
             <button
@@ -278,9 +259,7 @@
 
       <!-- Search -->
       <div>
-        <label for="search" class="block text-sm font-medium text-gray-600 mb-2"
-          >Search</label
-        >
+        <label for="search" class="block text-sm font-medium text-gray-600 mb-2">Search</label>
         <div class="flex gap-2">
           <input
             id="search"
@@ -297,9 +276,7 @@
 
   <!-- Error Display -->
   {#if error}
-    <div
-      class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-    >
+    <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
       {error}
     </div>
   {/if}
@@ -318,17 +295,13 @@
         class="text-center py-12 bg-white backdrop-blur-sm rounded-xl border border-gray-200 shadow-sm"
       >
         <p class="text-gray-600">No incidents found</p>
-        <p class="text-sm text-gray-400 mt-2">
-          Create your first incident to get started
-        </p>
+        <p class="text-sm text-gray-400 mt-2">Create your first incident to get started</p>
       </div>
     {:else}
       <div
         class="bg-white backdrop-blur-sm rounded-xl border border-gray-200 overflow-hidden shadow-sm"
       >
-        <div
-          class="px-6 py-3 bg-gray-50 border-b border-gray-200"
-        >
+        <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
           <p class="text-sm text-gray-600">
             Showing {incidents.length} of {total} incident{total !== 1 ? 's' : ''}
           </p>

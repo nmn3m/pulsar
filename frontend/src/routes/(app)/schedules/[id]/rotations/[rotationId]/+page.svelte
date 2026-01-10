@@ -137,9 +137,7 @@
       <p class="mt-2 text-gray-600">Loading rotation...</p>
     </div>
   {:else if error}
-    <div
-      class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg"
-    >
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
       {error}
     </div>
   {:else if rotation}
@@ -195,10 +193,7 @@
           <h4 class="text-sm font-semibold mb-3 text-gray-900">Add Participant</h4>
           <form on:submit|preventDefault={handleAddParticipant} class="space-y-3">
             <div>
-              <label
-                for="user-select"
-                class="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label for="user-select" class="block text-sm font-medium text-gray-700 mb-1">
                 Select User
               </label>
               <select
@@ -217,17 +212,13 @@
             </div>
 
             {#if addError}
-              <div
-                class="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm"
-              >
+              <div class="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
                 {addError}
               </div>
             {/if}
 
             {#if availableUsers.length === 0}
-              <p class="text-sm text-gray-500">
-                All users are already in this rotation.
-              </p>
+              <p class="text-sm text-gray-500">All users are already in this rotation.</p>
             {/if}
 
             <div class="flex gap-2">
@@ -255,9 +246,7 @@
       {#if participants.length > 0}
         <div class="space-y-2">
           {#each participants as participant, index (participant.user_id)}
-            <div
-              class="flex items-center justify-between p-3 border border-gray-200 rounded-lg"
-            >
+            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
               <div class="flex items-center gap-3">
                 <span
                   class="w-6 h-6 flex items-center justify-center bg-primary-100 text-primary-700 text-sm font-medium rounded-full"
@@ -287,9 +276,7 @@
             </div>
           {/each}
         </div>
-        <p class="text-sm text-gray-500 mt-4">
-          Participants rotate in the order shown above.
-        </p>
+        <p class="text-sm text-gray-500 mt-4">Participants rotate in the order shown above.</p>
       {:else}
         <div class="text-center py-8 text-gray-500">
           <p>No participants in this rotation</p>

@@ -73,12 +73,8 @@
   </div>
 
   {#if showCreateForm}
-    <div
-      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm"
-    >
-      <h3 class="text-lg font-semibold mb-4 text-gray-900">
-        Create Escalation Policy
-      </h3>
+    <div class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900">Create Escalation Policy</h3>
       <form on:submit|preventDefault={handleCreatePolicy} class="space-y-4">
         <Input
           id="name"
@@ -89,10 +85,7 @@
         />
 
         <div>
-          <label
-            for="description"
-            class="block text-sm font-medium text-gray-600 mb-1"
-          >
+          <label for="description" class="block text-sm font-medium text-gray-600 mb-1">
             Description
           </label>
           <textarea
@@ -128,9 +121,7 @@
         {/if}
 
         {#if createError}
-          <div
-            class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-          >
+          <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
             {createError}
           </div>
         {/if}
@@ -155,9 +146,7 @@
       <p class="mt-2 text-gray-500">Loading escalation policies...</p>
     </div>
   {:else if $escalationPoliciesStore.error}
-    <div
-      class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-    >
+    <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
       {$escalationPoliciesStore.error}
     </div>
   {:else if $escalationPoliciesStore.policies.length === 0}
@@ -165,9 +154,7 @@
       class="text-center py-12 bg-white backdrop-blur-sm rounded-xl border border-gray-200 shadow-sm"
     >
       <p class="text-gray-600">No escalation policies found</p>
-      <p class="text-sm text-gray-400 mt-2">
-        Create your first policy to get started
-      </p>
+      <p class="text-sm text-gray-400 mt-2">Create your first policy to get started</p>
     </div>
   {:else}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -187,9 +174,7 @@
           <div class="space-y-2 text-sm text-gray-500">
             {#if policy.repeat_enabled}
               <div class="flex items-center gap-2">
-                <span
-                  class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs"
-                >
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
                   Repeat: {policy.repeat_count ? `${policy.repeat_count}x` : 'Infinite'}
                 </span>
               </div>

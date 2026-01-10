@@ -147,16 +147,11 @@
   </div>
 
   {#if showCreateForm}
-    <div
-      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm"
-    >
+    <div class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm">
       <h3 class="text-lg font-semibold mb-4 text-gray-900">Create New Alert</h3>
       <form on:submit|preventDefault={handleCreateAlert} class="space-y-4">
         <div>
-          <label
-            for="message"
-            class="block text-sm font-medium text-gray-600 mb-1"
-          >
+          <label for="message" class="block text-sm font-medium text-gray-600 mb-1">
             Message *
           </label>
           <input
@@ -170,10 +165,7 @@
         </div>
 
         <div>
-          <label
-            for="description"
-            class="block text-sm font-medium text-gray-600 mb-1"
-          >
+          <label for="description" class="block text-sm font-medium text-gray-600 mb-1">
             Description
           </label>
           <textarea
@@ -186,10 +178,7 @@
         </div>
 
         <div>
-          <label
-            for="priority"
-            class="block text-sm font-medium text-gray-600 mb-1"
-          >
+          <label for="priority" class="block text-sm font-medium text-gray-600 mb-1">
             Priority *
           </label>
           <select
@@ -219,9 +208,7 @@
         </div>
 
         {#if createError}
-          <div
-            class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-          >
+          <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
             {createError}
           </div>
         {/if}
@@ -239,13 +226,10 @@
   {/if}
 
   <!-- Filters -->
-  <div
-    class="bg-white backdrop-blur-sm p-4 rounded-xl border border-gray-200 shadow-sm"
-  >
+  <div class="bg-white backdrop-blur-sm p-4 rounded-xl border border-gray-200 shadow-sm">
     <div class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-gray-600 mb-2">Status</label
-        >
+        <label class="block text-sm font-medium text-gray-600 mb-2">Status</label>
         <div class="flex gap-2 flex-wrap">
           {#each ['open', 'acknowledged', 'closed', 'snoozed'] as status}
             <button
@@ -264,9 +248,7 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-600 mb-2"
-          >Priority</label
-        >
+        <label class="block text-sm font-medium text-gray-600 mb-2">Priority</label>
         <div class="flex gap-2 flex-wrap">
           {#each ['P1', 'P2', 'P3', 'P4', 'P5'] as prio}
             <button
@@ -285,9 +267,7 @@
       </div>
 
       <div>
-        <label for="search" class="block text-sm font-medium text-gray-600 mb-2"
-          >Search</label
-        >
+        <label for="search" class="block text-sm font-medium text-gray-600 mb-2">Search</label>
         <div class="flex gap-2">
           <input
             id="search"
@@ -312,9 +292,7 @@
         <p class="mt-2 text-gray-500">Loading alerts...</p>
       </div>
     {:else if $alertsStore.error}
-      <div
-        class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-      >
+      <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
         {$alertsStore.error}
       </div>
     {:else if $alertsStore.alerts.length === 0}
@@ -322,9 +300,7 @@
         class="text-center py-12 bg-white backdrop-blur-sm rounded-xl border border-gray-200 shadow-sm"
       >
         <p class="text-gray-600">No alerts found</p>
-        <p class="text-sm text-gray-400 mt-2">
-          Create your first alert to get started
-        </p>
+        <p class="text-sm text-gray-400 mt-2">Create your first alert to get started</p>
       </div>
     {:else}
       {#each $alertsStore.alerts as alert (alert.id)}

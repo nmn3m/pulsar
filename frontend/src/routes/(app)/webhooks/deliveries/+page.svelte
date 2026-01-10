@@ -89,17 +89,13 @@
   <div class="flex justify-between items-center">
     <div>
       <h2 class="text-3xl font-bold text-gray-900">Webhook Deliveries</h2>
-      <p class="mt-2 text-gray-500">
-        Monitor webhook delivery status and troubleshoot issues
-      </p>
+      <p class="mt-2 text-gray-500">Monitor webhook delivery status and troubleshoot issues</p>
     </div>
     <Button variant="secondary" on:click={loadDeliveries}>Refresh</Button>
   </div>
 
   {#if error}
-    <div
-      class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-    >
+    <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
       {error}
     </div>
   {/if}
@@ -139,13 +135,9 @@
                   >
                     {delivery.status.toUpperCase()}
                   </span>
-                  <span class="text-sm font-medium text-gray-900"
-                    >{delivery.event_type}</span
-                  >
+                  <span class="text-sm font-medium text-gray-900">{delivery.event_type}</span>
                   {#if delivery.response_status_code}
-                    <span class="text-xs text-gray-500"
-                      >HTTP {delivery.response_status_code}</span
-                    >
+                    <span class="text-xs text-gray-500">HTTP {delivery.response_status_code}</span>
                   {/if}
                 </div>
 
@@ -174,9 +166,7 @@
           </button>
 
           {#if expandedDeliveryId === delivery.id}
-            <div
-              class="border-t border-gray-200 px-6 py-4 bg-gray-50"
-            >
+            <div class="border-t border-gray-200 px-6 py-4 bg-gray-50">
               <div class="space-y-4">
                 <!-- Payload -->
                 <div>
@@ -192,9 +182,7 @@
                 <!-- Response -->
                 {#if delivery.response_body}
                   <div>
-                    <h4 class="text-sm font-medium text-gray-700 mb-2">
-                      Response Body
-                    </h4>
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Response Body</h4>
                     <pre
                       class="bg-gray-100 p-3 rounded-lg border border-gray-200 text-xs overflow-x-auto max-h-40 text-gray-700">{delivery.response_body}</pre>
                   </div>
@@ -203,9 +191,7 @@
                 <!-- Error -->
                 {#if delivery.error_message}
                   <div>
-                    <h4 class="text-sm font-medium text-red-600 mb-2">
-                      Error Message
-                    </h4>
+                    <h4 class="text-sm font-medium text-red-600 mb-2">Error Message</h4>
                     <div
                       class="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-sm"
                     >
@@ -218,9 +204,7 @@
                 <div class="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span class="font-medium text-gray-500">Delivery ID:</span>
-                    <span class="text-primary-600 font-mono text-xs ml-2"
-                      >{delivery.id}</span
-                    >
+                    <span class="text-primary-600 font-mono text-xs ml-2">{delivery.id}</span>
                   </div>
                   <div>
                     <span class="font-medium text-gray-500">Endpoint ID:</span>

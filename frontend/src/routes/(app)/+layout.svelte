@@ -51,21 +51,17 @@
 {:else if $authStore.isAuthenticated}
   <div class="min-h-screen">
     <!-- Header -->
-    <header
-      class="bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-lg relative z-40"
-    >
+    <header class="bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-lg relative z-40">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16 overflow-visible">
           <div class="flex items-center">
-            <h1
-              class="text-2xl font-bold text-primary-600"
-            >
-              Pulsar
-            </h1>
+            <h1 class="text-2xl font-bold text-primary-600">Pulsar</h1>
             <nav class="ml-10 flex space-x-1 overflow-visible">
               <a
                 href="/dashboard"
-                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith('/dashboard')
+                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith(
+                  '/dashboard'
+                )
                   ? 'bg-primary-100 text-primary-700 shadow-md'
                   : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}"
               >
@@ -73,7 +69,9 @@
               </a>
               <a
                 href="/alerts"
-                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith('/alerts')
+                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith(
+                  '/alerts'
+                )
                   ? 'bg-red-100 text-red-700 shadow-md'
                   : 'text-gray-600 hover:text-error hover:bg-gray-100'}"
               >
@@ -81,7 +79,9 @@
               </a>
               <a
                 href="/incidents"
-                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith('/incidents')
+                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith(
+                  '/incidents'
+                )
                   ? 'bg-red-100 text-red-700 shadow-md'
                   : 'text-gray-600 hover:text-error hover:bg-gray-100'}"
               >
@@ -89,7 +89,9 @@
               </a>
               <a
                 href="/teams"
-                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith('/teams')
+                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith(
+                  '/teams'
+                )
                   ? 'bg-primary-100 text-primary-700 shadow-md'
                   : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}"
               >
@@ -97,7 +99,9 @@
               </a>
               <a
                 href="/schedules"
-                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith('/schedules')
+                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith(
+                  '/schedules'
+                )
                   ? 'bg-primary-100 text-primary-700 shadow-md'
                   : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}"
               >
@@ -105,7 +109,9 @@
               </a>
               <a
                 href="/escalation-policies"
-                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith('/escalation-policies')
+                class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 {$page.url.pathname.startsWith(
+                  '/escalation-policies'
+                )
                   ? 'bg-primary-100 text-primary-700 shadow-md'
                   : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}"
               >
@@ -117,21 +123,36 @@
                 <button
                   type="button"
                   on:click|stopPropagation={() => (showSettingsMenu = !showSettingsMenu)}
-                  class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 {$page.url.pathname.startsWith('/webhooks') || $page.url.pathname.startsWith('/notifications') || $page.url.pathname.startsWith('/settings')
+                  class="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 {$page.url.pathname.startsWith(
+                    '/webhooks'
+                  ) ||
+                  $page.url.pathname.startsWith('/notifications') ||
+                  $page.url.pathname.startsWith('/settings')
                     ? 'bg-primary-100 text-primary-700 shadow-md'
                     : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'}"
                 >
                   Settings
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </button>
 
                 {#if showSettingsMenu}
-                  <div class="absolute top-full right-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[9999]">
+                  <div
+                    class="absolute top-full right-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[9999]"
+                  >
                     <a
                       href="/settings/routing-rules"
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith('/settings/routing-rules') ? 'bg-gray-50' : ''}"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith(
+                        '/settings/routing-rules'
+                      )
+                        ? 'bg-gray-50'
+                        : ''}"
                       on:click={() => (showSettingsMenu = false)}
                     >
                       <div class="font-medium">Routing Rules</div>
@@ -139,7 +160,11 @@
                     </a>
                     <a
                       href="/webhooks/endpoints"
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith('/webhooks') ? 'bg-gray-50' : ''}"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith(
+                        '/webhooks'
+                      )
+                        ? 'bg-gray-50'
+                        : ''}"
                       on:click={() => (showSettingsMenu = false)}
                     >
                       <div class="font-medium">Webhooks</div>
@@ -147,7 +172,11 @@
                     </a>
                     <a
                       href="/notifications/channels"
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith('/notifications') ? 'bg-gray-50' : ''}"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith(
+                        '/notifications'
+                      )
+                        ? 'bg-gray-50'
+                        : ''}"
                       on:click={() => (showSettingsMenu = false)}
                     >
                       <div class="font-medium">Notifications</div>
@@ -155,7 +184,11 @@
                     </a>
                     <a
                       href="/settings/api-keys"
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith('/settings/api-keys') ? 'bg-gray-50' : ''}"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith(
+                        '/settings/api-keys'
+                      )
+                        ? 'bg-gray-50'
+                        : ''}"
                       on:click={() => (showSettingsMenu = false)}
                     >
                       <div class="font-medium">API Keys</div>
@@ -163,7 +196,11 @@
                     </a>
                     <a
                       href="/settings/dnd"
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith('/settings/dnd') ? 'bg-gray-50' : ''}"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith(
+                        '/settings/dnd'
+                      )
+                        ? 'bg-gray-50'
+                        : ''}"
                       on:click={() => (showSettingsMenu = false)}
                     >
                       <div class="font-medium">Do Not Disturb</div>

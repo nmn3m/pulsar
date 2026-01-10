@@ -153,9 +153,7 @@
   <div class="flex justify-between items-center">
     <div>
       <h2 class="text-3xl font-bold text-gray-900">Webhook Endpoints</h2>
-      <p class="mt-2 text-gray-500">
-        Send events to external services via HTTP webhooks
-      </p>
+      <p class="mt-2 text-gray-500">Send events to external services via HTTP webhooks</p>
     </div>
     <Button variant="primary" on:click={() => (showCreateForm = !showCreateForm)}>
       {showCreateForm ? 'Cancel' : 'Create Endpoint'}
@@ -163,29 +161,18 @@
   </div>
 
   {#if error}
-    <div
-      class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-    >
+    <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
       {error}
     </div>
   {/if}
 
   {#if showCreateForm}
-    <div
-      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm"
-    >
-      <h3 class="text-lg font-semibold mb-4 text-gray-900">
-        Create Webhook Endpoint
-      </h3>
+    <div class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900">Create Webhook Endpoint</h3>
       <form on:submit|preventDefault={handleCreate} class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label
-              for="name"
-              class="block text-sm font-medium text-gray-600 mb-1"
-            >
-              Name *
-            </label>
+            <label for="name" class="block text-sm font-medium text-gray-600 mb-1"> Name * </label>
             <input
               id="name"
               type="text"
@@ -197,12 +184,7 @@
           </div>
 
           <div>
-            <label
-              for="url"
-              class="block text-sm font-medium text-gray-600 mb-1"
-            >
-              URL *
-            </label>
+            <label for="url" class="block text-sm font-medium text-gray-600 mb-1"> URL * </label>
             <input
               id="url"
               type="url"
@@ -226,9 +208,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-2">
-            Event Triggers
-          </label>
+          <label class="block text-sm font-medium text-gray-600 mb-2"> Event Triggers </label>
           <div class="grid grid-cols-2 gap-2">
             <label class="flex items-center space-x-2">
               <input
@@ -298,9 +278,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-2">
-            Custom Headers
-          </label>
+          <label class="block text-sm font-medium text-gray-600 mb-2"> Custom Headers </label>
           <div class="flex gap-2 mb-2">
             <input
               type="text"
@@ -341,10 +319,7 @@
 
         <div class="grid grid-cols-3 gap-4">
           <div>
-            <label
-              for="timeout"
-              class="block text-sm font-medium text-gray-600 mb-1"
-            >
+            <label for="timeout" class="block text-sm font-medium text-gray-600 mb-1">
               Timeout (seconds)
             </label>
             <input
@@ -358,10 +333,7 @@
           </div>
 
           <div>
-            <label
-              for="retries"
-              class="block text-sm font-medium text-gray-600 mb-1"
-            >
+            <label for="retries" class="block text-sm font-medium text-gray-600 mb-1">
               Max Retries
             </label>
             <input
@@ -375,10 +347,7 @@
           </div>
 
           <div>
-            <label
-              for="delay"
-              class="block text-sm font-medium text-gray-600 mb-1"
-            >
+            <label for="delay" class="block text-sm font-medium text-gray-600 mb-1">
               Retry Delay (seconds)
             </label>
             <input
@@ -393,9 +362,7 @@
         </div>
 
         {#if createError}
-          <div
-            class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-          >
+          <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
             {createError}
           </div>
         {/if}

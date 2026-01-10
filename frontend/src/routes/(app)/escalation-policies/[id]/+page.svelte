@@ -3,7 +3,11 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { api } from '$lib/api/client';
-  import type { EscalationPolicyWithRules, EscalationTargetType, TargetNotificationConfig } from '$lib/types/escalation';
+  import type {
+    EscalationPolicyWithRules,
+    EscalationTargetType,
+    TargetNotificationConfig,
+  } from '$lib/types/escalation';
   import type { User } from '$lib/types/user';
   import type { Team } from '$lib/types/team';
   import type { Schedule } from '$lib/types/schedule';
@@ -175,7 +179,7 @@
 
   function toggleChannel(channelType: string) {
     if (addTargetChannels.includes(channelType)) {
-      addTargetChannels = addTargetChannels.filter(c => c !== channelType);
+      addTargetChannels = addTargetChannels.filter((c) => c !== channelType);
     } else {
       addTargetChannels = [...addTargetChannels, channelType];
     }
@@ -324,24 +328,20 @@
     <div class="bg-white p-6 rounded-lg shadow">
       <div class="flex justify-between items-start mb-4">
         <h3 class="text-lg font-semibold">Policy Settings</h3>
-        <Button variant="secondary" size="sm" on:click={openEditPolicyForm}>
-          Edit Policy
-        </Button>
+        <Button variant="secondary" size="sm" on:click={openEditPolicyForm}>Edit Policy</Button>
       </div>
 
       {#if showEditPolicyForm}
         <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <h4 class="text-sm font-semibold mb-3">Edit Policy</h4>
           <form on:submit|preventDefault={handleUpdatePolicy} class="space-y-3">
-            <Input
-              id="edit-policy-name"
-              label="Policy Name"
-              bind:value={editPolicyName}
-              required
-            />
+            <Input id="edit-policy-name" label="Policy Name" bind:value={editPolicyName} required />
 
             <div>
-              <label for="edit-policy-description" class="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                for="edit-policy-description"
+                class="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Description
               </label>
               <textarea
@@ -648,7 +648,11 @@
         <!-- Target Selection -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
-            Select {addTargetType === 'user' ? 'User' : addTargetType === 'team' ? 'Team' : 'Schedule'}
+            Select {addTargetType === 'user'
+              ? 'User'
+              : addTargetType === 'team'
+                ? 'Team'
+                : 'Schedule'}
           </label>
           <select
             bind:value={addTargetId}
@@ -676,9 +680,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">
             Notification Channels (optional override)
           </label>
-          <p class="text-xs text-gray-500 mb-2">
-            Leave unchecked to use all available channels
-          </p>
+          <p class="text-xs text-gray-500 mb-2">Leave unchecked to use all available channels</p>
           <div class="space-y-2">
             {#each ['email', 'slack', 'sms', 'webhook', 'msteams'] as channelType}
               <label class="flex items-center gap-2">
@@ -709,9 +711,7 @@
 
       <!-- Modal Actions -->
       <div class="flex justify-end gap-2 mt-6">
-        <Button variant="secondary" on:click={closeAddTargetModal}>
-          Cancel
-        </Button>
+        <Button variant="secondary" on:click={closeAddTargetModal}>Cancel</Button>
         <Button
           variant="primary"
           on:click={handleAddTargetWithChannels}

@@ -89,9 +89,7 @@
   <div class="flex justify-between items-center">
     <div>
       <h2 class="text-3xl font-bold text-gray-900">Dashboard</h2>
-      <p class="mt-2 text-gray-500">
-        Overview of your incident management metrics
-      </p>
+      <p class="mt-2 text-gray-500">Overview of your incident management metrics</p>
     </div>
     <div class="flex items-center gap-2">
       <select
@@ -124,9 +122,7 @@
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
     </div>
   {:else if error}
-    <div
-      class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700"
-    >
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
       {error}
     </div>
   {:else if metrics}
@@ -239,12 +235,8 @@
     <!-- Alerts by Priority and Source -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- By Priority -->
-      <div
-        class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm"
-      >
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">
-          Alerts by Priority
-        </h3>
+      <div class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Alerts by Priority</h3>
         {#if Object.keys(metrics.alerts.by_priority).length > 0}
           <div class="space-y-3">
             {#each Object.entries(metrics.alerts.by_priority).sort( (a, b) => a[0].localeCompare(b[0]) ) as [priority, count]}
@@ -269,9 +261,7 @@
                       style="width: {Math.min((count / metrics.alerts.total) * 100, 100)}%"
                     ></div>
                   </div>
-                  <span class="text-sm text-gray-600 w-8 text-right"
-                    >{count}</span
-                  >
+                  <span class="text-sm text-gray-600 w-8 text-right">{count}</span>
                 </div>
               </div>
             {/each}
@@ -282,22 +272,15 @@
       </div>
 
       <!-- By Source -->
-      <div
-        class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm"
-      >
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">
-          Alerts by Source
-        </h3>
+      <div class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Alerts by Source</h3>
         {#if Object.keys(metrics.alerts.by_source).length > 0}
           <div class="space-y-3">
             {#each Object.entries(metrics.alerts.by_source)
               .sort((a, b) => b[1] - a[1])
               .slice(0, 5) as [source, count]}
               <div class="flex items-center justify-between">
-                <span
-                  class="text-sm text-gray-700 truncate max-w-[150px]"
-                  title={source}
-                >
+                <span class="text-sm text-gray-700 truncate max-w-[150px]" title={source}>
                   {source}
                 </span>
                 <div class="flex items-center gap-2">
@@ -307,9 +290,7 @@
                       style="width: {Math.min((count / metrics.alerts.total) * 100, 100)}%"
                     ></div>
                   </div>
-                  <span class="text-sm text-gray-600 w-8 text-right"
-                    >{count}</span
-                  >
+                  <span class="text-sm text-gray-600 w-8 text-right">{count}</span>
                 </div>
               </div>
             {/each}
@@ -321,9 +302,7 @@
     </div>
 
     <!-- Incident Status Breakdown -->
-    <div
-      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm"
-    >
+    <div class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm">
       <h3 class="text-lg font-semibold text-gray-900 mb-4">Incident Status</h3>
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         {#each [{ label: 'Open', value: metrics.incidents.open, color: 'red' }, { label: 'Investigating', value: metrics.incidents.investigating, color: 'orange' }, { label: 'Identified', value: metrics.incidents.identified, color: 'blue' }, { label: 'Monitoring', value: metrics.incidents.monitoring, color: 'purple' }, { label: 'Resolved', value: metrics.incidents.resolved, color: 'green' }, { label: 'Closed', value: metrics.incidents.closed, color: 'gray' }] as stat}
@@ -339,54 +318,28 @@
 
     <!-- Team Performance -->
     {#if teamMetrics.length > 0}
-      <div
-        class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm"
-      >
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">
-          Team Performance
-        </h3>
+      <div class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Team Performance</h3>
         <div class="overflow-x-auto">
           <table class="min-w-full">
             <thead>
               <tr class="border-b border-gray-200">
-                <th class="text-left py-3 px-4 text-sm font-medium text-gray-500"
-                  >Team</th
-                >
-                <th
-                  class="text-right py-3 px-4 text-sm font-medium text-gray-500"
-                  >Total</th
-                >
-                <th
-                  class="text-right py-3 px-4 text-sm font-medium text-gray-500"
-                  >Acknowledged</th
-                >
-                <th
-                  class="text-right py-3 px-4 text-sm font-medium text-gray-500"
-                  >Closed</th
-                >
-                <th
-                  class="text-right py-3 px-4 text-sm font-medium text-gray-500"
-                  >Avg Response</th
-                >
+                <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Team</th>
+                <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">Total</th>
+                <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">Acknowledged</th>
+                <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">Closed</th>
+                <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">Avg Response</th>
               </tr>
             </thead>
             <tbody>
               {#each teamMetrics as team}
-                <tr
-                  class="border-b border-gray-100 hover:bg-gray-50"
-                >
-                  <td class="py-3 px-4 text-sm text-gray-900"
-                    >{team.team_name}</td
-                  >
-                  <td class="py-3 px-4 text-sm text-gray-600 text-right"
-                    >{team.total_alerts}</td
-                  >
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                  <td class="py-3 px-4 text-sm text-gray-900">{team.team_name}</td>
+                  <td class="py-3 px-4 text-sm text-gray-600 text-right">{team.total_alerts}</td>
                   <td class="py-3 px-4 text-sm text-gray-600 text-right"
                     >{team.acknowledged_alerts}</td
                   >
-                  <td class="py-3 px-4 text-sm text-gray-600 text-right"
-                    >{team.closed_alerts}</td
-                  >
+                  <td class="py-3 px-4 text-sm text-gray-600 text-right">{team.closed_alerts}</td>
                   <td class="py-3 px-4 text-sm text-gray-600 text-right">
                     {formatDuration(team.avg_response_time_seconds)}
                   </td>
@@ -399,26 +352,18 @@
     {/if}
 
     <!-- User Info Card -->
-    <div
-      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm"
-    >
+    <div class="bg-white backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm">
       <h3 class="text-lg font-semibold text-gray-900">Your Information</h3>
       <dl class="mt-4 space-y-3">
-        <div
-          class="flex justify-between items-center py-2 border-b border-gray-100"
-        >
+        <div class="flex justify-between items-center py-2 border-b border-gray-100">
           <dt class="text-sm font-medium text-gray-400">Email:</dt>
           <dd class="text-sm text-primary-600">{$authStore.user?.email}</dd>
         </div>
-        <div
-          class="flex justify-between items-center py-2 border-b border-gray-100"
-        >
+        <div class="flex justify-between items-center py-2 border-b border-gray-100">
           <dt class="text-sm font-medium text-gray-400">Username:</dt>
           <dd class="text-sm text-gray-700">{$authStore.user?.username}</dd>
         </div>
-        <div
-          class="flex justify-between items-center py-2 border-b border-gray-100"
-        >
+        <div class="flex justify-between items-center py-2 border-b border-gray-100">
           <dt class="text-sm font-medium text-gray-400">Organization:</dt>
           <dd class="text-sm text-gray-700">{$authStore.organization?.name}</dd>
         </div>

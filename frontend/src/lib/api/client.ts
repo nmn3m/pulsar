@@ -159,7 +159,11 @@ class APIClient {
 
   private isRefreshing = false;
 
-  private async request<T>(endpoint: string, options: RequestInit = {}, isRetry = false): Promise<T> {
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {},
+    isRetry = false
+  ): Promise<T> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
@@ -180,7 +184,11 @@ class APIClient {
       if (response.status === 401 && !isRetry && !this.isRefreshing) {
         const refreshToken = browser ? localStorage.getItem('refresh_token') : null;
 
-        if (refreshToken && !endpoint.includes('/auth/refresh') && !endpoint.includes('/auth/login')) {
+        if (
+          refreshToken &&
+          !endpoint.includes('/auth/refresh') &&
+          !endpoint.includes('/auth/login')
+        ) {
           try {
             this.isRefreshing = true;
 

@@ -130,9 +130,7 @@
   <div class="flex justify-between items-center">
     <div>
       <h2 class="text-3xl font-bold text-gray-900">API Keys</h2>
-      <p class="mt-2 text-gray-500">
-        Manage API keys for programmatic access to Pulsar
-      </p>
+      <p class="mt-2 text-gray-500">Manage API keys for programmatic access to Pulsar</p>
     </div>
     <Button
       variant="primary"
@@ -165,12 +163,19 @@
           class="text-green-600 hover:text-green-800"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
       <div class="mt-4 flex items-center gap-2">
-        <code class="flex-1 bg-white px-4 py-2 rounded border border-green-300 text-sm font-mono text-gray-900 break-all">
+        <code
+          class="flex-1 bg-white px-4 py-2 rounded border border-green-300 text-sm font-mono text-gray-900 break-all"
+        >
           {$apiKeysStore.newlyCreatedKey.key}
         </code>
         <Button
@@ -189,13 +194,7 @@
     <div class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm">
       <h3 class="text-lg font-semibold mb-4 text-gray-900">Create New API Key</h3>
       <form on:submit|preventDefault={handleCreateKey} class="space-y-4">
-        <Input
-          id="name"
-          label="Key Name"
-          bind:value={name}
-          placeholder="My API Key"
-          required
-        />
+        <Input id="name" label="Key Name" bind:value={name} placeholder="My API Key" required />
 
         <div>
           <label class="block text-sm font-medium text-gray-600 mb-2">
@@ -206,7 +205,9 @@
               <button
                 type="button"
                 on:click={() => toggleScope(scope)}
-                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 {selectedScopes.includes(scope)
+                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 {selectedScopes.includes(
+                  scope
+                )
                   ? 'bg-primary-600 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-300'}"
               >
@@ -267,7 +268,9 @@
   <!-- API Keys List -->
   {#if $apiKeysStore.isLoading}
     <div class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+      <div
+        class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"
+      ></div>
       <p class="mt-2 text-gray-500">Loading API keys...</p>
     </div>
   {:else if $apiKeysStore.error}
@@ -275,12 +278,16 @@
       {$apiKeysStore.error}
     </div>
   {:else if $apiKeysStore.apiKeys.length === 0}
-    <div class="text-center py-12 bg-white backdrop-blur-sm rounded-xl border border-gray-200 shadow-sm">
+    <div
+      class="text-center py-12 bg-white backdrop-blur-sm rounded-xl border border-gray-200 shadow-sm"
+    >
       <p class="text-gray-600">No API keys found</p>
       <p class="text-sm text-gray-400 mt-2">Create your first API key to get started</p>
     </div>
   {:else}
-    <div class="bg-white backdrop-blur-sm rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+    <div
+      class="bg-white backdrop-blur-sm rounded-xl border border-gray-200 overflow-hidden shadow-sm"
+    >
       <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
         <p class="text-sm text-gray-600">
           {$apiKeysStore.apiKeys.length} API key{$apiKeysStore.apiKeys.length !== 1 ? 's' : ''}
@@ -298,11 +305,15 @@
                       Revoked
                     </span>
                   {:else if isExpired(key.expires_at)}
-                    <span class="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-700">
+                    <span
+                      class="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-700"
+                    >
                       Expired
                     </span>
                   {:else}
-                    <span class="px-2 py-0.5 text-xs font-medium rounded bg-green-100 text-green-700">
+                    <span
+                      class="px-2 py-0.5 text-xs font-medium rounded bg-green-100 text-green-700"
+                    >
                       Active
                     </span>
                   {/if}
@@ -315,7 +326,8 @@
                   <span>Created {formatDate(key.created_at)}</span>
                   {#if key.expires_at}
                     <span>
-                      {isExpired(key.expires_at) ? 'Expired' : 'Expires'} {formatDate(key.expires_at)}
+                      {isExpired(key.expires_at) ? 'Expired' : 'Expires'}
+                      {formatDate(key.expires_at)}
                     </span>
                   {:else}
                     <span>Never expires</span>
@@ -365,8 +377,11 @@
   <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl">
     <h4 class="text-sm font-semibold text-blue-800 mb-2">Using API Keys</h4>
     <p class="text-sm text-blue-700">
-      Include your API key in requests using the <code class="bg-blue-100 px-1 rounded">X-API-Key</code> header:
+      Include your API key in requests using the <code class="bg-blue-100 px-1 rounded"
+        >X-API-Key</code
+      > header:
     </p>
-    <pre class="mt-2 bg-blue-100 p-3 rounded text-xs font-mono text-blue-900 overflow-x-auto">curl -H "X-API-Key: your-api-key" https://api.pulsar.example.com/api/v1/alerts</pre>
+    <pre
+      class="mt-2 bg-blue-100 p-3 rounded text-xs font-mono text-blue-900 overflow-x-auto">curl -H "X-API-Key: your-api-key" https://api.pulsar.example.com/api/v1/alerts</pre>
   </div>
 </div>

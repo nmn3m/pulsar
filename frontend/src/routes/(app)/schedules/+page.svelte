@@ -68,12 +68,8 @@
   </div>
 
   {#if showCreateForm}
-    <div
-      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm"
-    >
-      <h3 class="text-lg font-semibold mb-4 text-gray-900">
-        Create New Schedule
-      </h3>
+    <div class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900">Create New Schedule</h3>
       <form on:submit|preventDefault={handleCreateSchedule} class="space-y-4">
         <Input
           id="name"
@@ -84,10 +80,7 @@
         />
 
         <div>
-          <label
-            for="description"
-            class="block text-sm font-medium text-gray-600 mb-1"
-          >
+          <label for="description" class="block text-sm font-medium text-gray-600 mb-1">
             Description
           </label>
           <textarea
@@ -108,9 +101,7 @@
         />
 
         {#if createError}
-          <div
-            class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-          >
+          <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
             {createError}
           </div>
         {/if}
@@ -135,9 +126,7 @@
       <p class="mt-2 text-gray-500">Loading schedules...</p>
     </div>
   {:else if $schedulesStore.error}
-    <div
-      class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-    >
+    <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
       {$schedulesStore.error}
     </div>
   {:else if $schedulesStore.schedules.length === 0}
@@ -145,9 +134,7 @@
       class="text-center py-12 bg-white backdrop-blur-sm rounded-xl border border-gray-200 shadow-sm"
     >
       <p class="text-gray-600">No schedules found</p>
-      <p class="text-sm text-gray-400 mt-2">
-        Create your first schedule to get started
-      </p>
+      <p class="text-sm text-gray-400 mt-2">Create your first schedule to get started</p>
     </div>
   {:else}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

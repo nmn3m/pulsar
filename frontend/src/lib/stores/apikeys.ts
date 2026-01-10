@@ -1,6 +1,11 @@
 import { writable } from 'svelte/store';
 import { api } from '$lib/api/client';
-import type { APIKey, APIKeyResponse, CreateAPIKeyRequest, UpdateAPIKeyRequest } from '$lib/types/apikey';
+import type {
+  APIKey,
+  APIKeyResponse,
+  CreateAPIKeyRequest,
+  UpdateAPIKeyRequest,
+} from '$lib/types/apikey';
 
 interface APIKeysState {
   apiKeys: APIKey[];
@@ -78,9 +83,7 @@ function createAPIKeysStore() {
         await api.revokeAPIKey(id);
         update((state) => ({
           ...state,
-          apiKeys: state.apiKeys.map((k) =>
-            k.id === id ? { ...k, is_active: false } : k
-          ),
+          apiKeys: state.apiKeys.map((k) => (k.id === id ? { ...k, is_active: false } : k)),
         }));
       } catch (error) {
         throw error;

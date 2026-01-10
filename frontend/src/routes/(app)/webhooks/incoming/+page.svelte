@@ -102,9 +102,7 @@
   <div class="flex justify-between items-center">
     <div>
       <h2 class="text-3xl font-bold text-gray-900">Incoming Webhooks</h2>
-      <p class="mt-2 text-gray-500">
-        Receive alerts from external monitoring tools
-      </p>
+      <p class="mt-2 text-gray-500">Receive alerts from external monitoring tools</p>
     </div>
     <Button variant="primary" on:click={() => (showCreateForm = !showCreateForm)}>
       {showCreateForm ? 'Cancel' : 'Create Token'}
@@ -112,25 +110,17 @@
   </div>
 
   {#if error}
-    <div
-      class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-    >
+    <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
       {error}
     </div>
   {/if}
 
   {#if showCreateForm}
-    <div
-      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm"
-    >
-      <h3 class="text-lg font-semibold mb-4 text-gray-900">
-        Create Incoming Webhook Token
-      </h3>
+    <div class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900">Create Incoming Webhook Token</h3>
       <form on:submit|preventDefault={handleCreate} class="space-y-4">
         <div>
-          <label for="name" class="block text-sm font-medium text-gray-600 mb-1">
-            Name *
-          </label>
+          <label for="name" class="block text-sm font-medium text-gray-600 mb-1"> Name * </label>
           <input
             id="name"
             type="text"
@@ -142,10 +132,7 @@
         </div>
 
         <div>
-          <label
-            for="integration-type"
-            class="block text-sm font-medium text-gray-600 mb-1"
-          >
+          <label for="integration-type" class="block text-sm font-medium text-gray-600 mb-1">
             Integration Type *
           </label>
           <select
@@ -161,10 +148,7 @@
         </div>
 
         <div>
-          <label
-            for="priority"
-            class="block text-sm font-medium text-gray-600 mb-1"
-          >
+          <label for="priority" class="block text-sm font-medium text-gray-600 mb-1">
             Default Priority
           </label>
           <select
@@ -194,9 +178,7 @@
         </div>
 
         {#if createError}
-          <div
-            class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-          >
+          <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
             {createError}
           </div>
         {/if}
@@ -288,9 +270,7 @@
           </div>
 
           <div class="border-t border-gray-200 pt-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Webhook URL
-            </label>
+            <label class="block text-sm font-medium text-gray-700 mb-2"> Webhook URL </label>
             <div class="flex gap-2">
               <input
                 type="text"
@@ -314,12 +294,8 @@
           </div>
 
           {#if token.integration_type === 'prometheus'}
-            <div
-              class="mt-4 p-3 bg-gray-100 rounded-lg border border-gray-200 text-xs"
-            >
-              <p class="font-medium mb-1 text-gray-700">
-                Prometheus Alertmanager Configuration:
-              </p>
+            <div class="mt-4 p-3 bg-gray-100 rounded-lg border border-gray-200 text-xs">
+              <p class="font-medium mb-1 text-gray-700">Prometheus Alertmanager Configuration:</p>
               <pre class="overflow-x-auto text-primary-600"><code
                   >receivers:
   - name: 'pulsar'
@@ -329,12 +305,8 @@
                 ></pre>
             </div>
           {:else if token.integration_type === 'grafana'}
-            <div
-              class="mt-4 p-3 bg-gray-100 rounded-lg border border-gray-200 text-xs"
-            >
-              <p class="font-medium mb-1 text-gray-700">
-                Grafana Webhook Configuration:
-              </p>
+            <div class="mt-4 p-3 bg-gray-100 rounded-lg border border-gray-200 text-xs">
+              <p class="font-medium mb-1 text-gray-700">Grafana Webhook Configuration:</p>
               <p class="text-gray-500">
                 Add this URL as a webhook notification channel in Grafana.
               </p>

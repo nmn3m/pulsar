@@ -76,8 +76,7 @@ export default {
         },
       },
       backgroundImage: {
-        'base-gradient':
-          'linear-gradient(135deg, #eff1f5 0%, #e6e9ef 100%)',
+        'base-gradient': 'linear-gradient(135deg, #eff1f5 0%, #e6e9ef 100%)',
         'glow-primary':
           'radial-gradient(ellipse at center, rgba(30, 102, 245, 0.1) 0%, transparent 70%)',
       },

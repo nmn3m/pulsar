@@ -185,20 +185,13 @@
   </div>
 
   {#if showCreateForm}
-    <div
-      class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm"
-    >
-      <h3 class="text-lg font-semibold mb-4 text-gray-900">
-        Create Notification Channel
-      </h3>
+    <div class="bg-white backdrop-blur-sm p-6 rounded-xl border border-primary-200 shadow-sm">
+      <h3 class="text-lg font-semibold mb-4 text-gray-900">Create Notification Channel</h3>
       <form on:submit|preventDefault={handleCreateChannel} class="space-y-4">
         <Input id="name" label="Channel Name" bind:value={name} required />
 
         <div>
-          <label
-            for="channel-type"
-            class="block text-sm font-medium text-gray-600 mb-1"
-          >
+          <label for="channel-type" class="block text-sm font-medium text-gray-600 mb-1">
             Channel Type
           </label>
           <select
@@ -227,12 +220,8 @@
 
         <!-- Email Configuration -->
         {#if channelType === 'email'}
-          <div
-            class="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
-          >
-            <h4 class="text-sm font-semibold text-gray-900">
-              Email Configuration
-            </h4>
+          <div class="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h4 class="text-sm font-semibold text-gray-900">Email Configuration</h4>
             <Input
               id="smtp-host"
               label="SMTP Host"
@@ -280,21 +269,15 @@
                 bind:checked={emailConfig.use_tls}
                 class="rounded bg-white border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <label for="use-tls" class="text-sm font-medium text-gray-600"
-                >Use TLS</label
-              >
+              <label for="use-tls" class="text-sm font-medium text-gray-600">Use TLS</label>
             </div>
           </div>
         {/if}
 
         <!-- Slack Configuration -->
         {#if channelType === 'slack'}
-          <div
-            class="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
-          >
-            <h4 class="text-sm font-semibold text-gray-900">
-              Slack Configuration
-            </h4>
+          <div class="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h4 class="text-sm font-semibold text-gray-900">Slack Configuration</h4>
             <Input
               id="webhook-url"
               label="Webhook URL"
@@ -325,12 +308,8 @@
 
         <!-- Teams Configuration -->
         {#if channelType === 'teams'}
-          <div
-            class="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
-          >
-            <h4 class="text-sm font-semibold text-gray-900">
-              Microsoft Teams Configuration
-            </h4>
+          <div class="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h4 class="text-sm font-semibold text-gray-900">Microsoft Teams Configuration</h4>
             <Input
               id="teams-webhook-url"
               label="Webhook URL"
@@ -349,12 +328,8 @@
 
         <!-- Webhook Configuration -->
         {#if channelType === 'webhook'}
-          <div
-            class="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200"
-          >
-            <h4 class="text-sm font-semibold text-gray-900">
-              Webhook Configuration
-            </h4>
+          <div class="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h4 class="text-sm font-semibold text-gray-900">Webhook Configuration</h4>
             <Input
               id="webhook-url-custom"
               label="Webhook URL"
@@ -363,10 +338,7 @@
               required
             />
             <div>
-              <label
-                for="method"
-                class="block text-sm font-medium text-gray-600 mb-1"
-              >
+              <label for="method" class="block text-sm font-medium text-gray-600 mb-1">
                 HTTP Method
               </label>
               <select
@@ -391,9 +363,7 @@
         {/if}
 
         {#if createError}
-          <div
-            class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-          >
+          <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
             {createError}
           </div>
         {/if}
@@ -425,9 +395,7 @@
       <p class="mt-2 text-gray-500">Loading notification channels...</p>
     </div>
   {:else if $notificationChannelsStore.error}
-    <div
-      class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg"
-    >
+    <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
       {$notificationChannelsStore.error}
     </div>
   {:else if $notificationChannelsStore.channels.length === 0}
@@ -435,9 +403,7 @@
       class="text-center py-12 bg-white backdrop-blur-sm rounded-xl border border-gray-200 shadow-sm"
     >
       <p class="text-gray-600">No notification channels configured</p>
-      <p class="text-sm text-gray-400 mt-2">
-        Create your first channel to get started
-      </p>
+      <p class="text-sm text-gray-400 mt-2">Create your first channel to get started</p>
     </div>
   {:else}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

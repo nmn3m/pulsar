@@ -142,7 +142,7 @@
 
       // Show success briefly
       successMessage = 'Channel saved successfully!';
-      setTimeout(() => successMessage = '', 3000);
+      setTimeout(() => (successMessage = ''), 3000);
     } catch (err) {
       saveError = err instanceof Error ? err.message : 'Failed to save notification channel';
     } finally {
@@ -214,7 +214,9 @@
 
   {#if isLoading}
     <div class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      <div
+        class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"
+      ></div>
       <p class="mt-2 text-gray-600">Loading channel configuration...</p>
     </div>
   {:else if error}
@@ -405,7 +407,11 @@
           <Button type="submit" variant="primary" disabled={saving}>
             {saving ? 'Saving...' : 'Save Changes'}
           </Button>
-          <Button type="button" variant="secondary" on:click={() => goto('/notifications/channels')}>
+          <Button
+            type="button"
+            variant="secondary"
+            on:click={() => goto('/notifications/channels')}
+          >
             Cancel
           </Button>
         </div>

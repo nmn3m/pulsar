@@ -1,6 +1,15 @@
 export interface RoutingCondition {
   field: string; // source, priority, tags, message, or custom field
-  operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'regex' | 'gte' | 'lte' | 'starts_with' | 'ends_with';
+  operator:
+    | 'equals'
+    | 'not_equals'
+    | 'contains'
+    | 'not_contains'
+    | 'regex'
+    | 'gte'
+    | 'lte'
+    | 'starts_with'
+    | 'ends_with';
   value: string;
 }
 
@@ -57,7 +66,7 @@ export const ROUTING_FIELDS = [
   { value: 'source', label: 'Source' },
   { value: 'priority', label: 'Priority' },
   { value: 'message', label: 'Message' },
-  { value: 'tags', label: 'Tags' }
+  { value: 'tags', label: 'Tags' },
 ] as const;
 
 export const ROUTING_OPERATORS = [
@@ -67,7 +76,7 @@ export const ROUTING_OPERATORS = [
   { value: 'not_contains', label: 'Does Not Contain' },
   { value: 'regex', label: 'Matches Regex' },
   { value: 'starts_with', label: 'Starts With' },
-  { value: 'ends_with', label: 'Ends With' }
+  { value: 'ends_with', label: 'Ends With' },
 ] as const;
 
 export const PRIORITY_OPTIONS = [
@@ -75,5 +84,5 @@ export const PRIORITY_OPTIONS = [
   { value: 'P2', label: 'P2 - High' },
   { value: 'P3', label: 'P3 - Medium' },
   { value: 'P4', label: 'P4 - Low' },
-  { value: 'P5', label: 'P5 - Info' }
+  { value: 'P5', label: 'P5 - Info' },
 ] as const;
