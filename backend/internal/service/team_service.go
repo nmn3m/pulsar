@@ -53,8 +53,8 @@ type UpdateTeamRequest struct {
 }
 
 type AddTeamMemberRequest struct {
-	UserID *uuid.UUID `json:"user_id"`          // Optional: if provided, add existing user
-	Email  string     `json:"email"`            // Optional: if provided without user_id, find or invite
+	UserID *uuid.UUID `json:"user_id"` // Optional: if provided, add existing user
+	Email  string     `json:"email"`   // Optional: if provided without user_id, find or invite
 	Role   string     `json:"role"`
 }
 
@@ -64,10 +64,10 @@ type InviteMemberRequest struct {
 }
 
 type InvitationResponse struct {
-	UserAdded   bool                    `json:"user_added"`   // True if user was directly added
-	Invited     bool                    `json:"invited"`      // True if invitation was sent
-	Invitation  *domain.TeamInvitation  `json:"invitation,omitempty"`
-	Message     string                  `json:"message"`
+	UserAdded  bool                   `json:"user_added"` // True if user was directly added
+	Invited    bool                   `json:"invited"`    // True if invitation was sent
+	Invitation *domain.TeamInvitation `json:"invitation,omitempty"`
+	Message    string                 `json:"message"`
 }
 
 type UpdateTeamMemberRoleRequest struct {
