@@ -295,7 +295,7 @@ func TestTeams_ListMembers_Success(t *testing.T) {
 
 	// Add member
 	testServer.TeamService.AddMember(ctx, team.ID, &service.AddTeamMemberRequest{
-		UserID: user.User.ID,
+		UserID: &user.User.ID,
 		Role:   "member",
 	})
 
@@ -353,7 +353,7 @@ func TestTeams_RemoveMember_Success(t *testing.T) {
 
 	// Add member first
 	testServer.TeamService.AddMember(ctx, team.ID, &service.AddTeamMemberRequest{
-		UserID: user.User.ID,
+		UserID: &user.User.ID,
 		Role:   "member",
 	})
 
@@ -377,7 +377,7 @@ func TestTeams_UpdateMemberRole_Success(t *testing.T) {
 
 	// Add member first
 	testServer.TeamService.AddMember(ctx, team.ID, &service.AddTeamMemberRequest{
-		UserID: user.User.ID,
+		UserID: &user.User.ID,
 		Role:   "member",
 	})
 
