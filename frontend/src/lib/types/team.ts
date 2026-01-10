@@ -45,3 +45,36 @@ export interface AddTeamMemberRequest {
 export interface UpdateTeamMemberRoleRequest {
   role: TeamRole;
 }
+
+export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'expired';
+
+export interface TeamInvitation {
+  id: string;
+  team_id: string;
+  organization_id: string;
+  email: string;
+  role: TeamRole;
+  status: InvitationStatus;
+  invited_by_id: string;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TeamInvitationWithDetails extends TeamInvitation {
+  team_name: string;
+  invited_by: string;
+  inviter_name?: string;
+}
+
+export interface InviteMemberRequest {
+  email: string;
+  role?: TeamRole;
+}
+
+export interface InvitationResponse {
+  user_added: boolean;
+  invited: boolean;
+  invitation?: TeamInvitation;
+  message: string;
+}

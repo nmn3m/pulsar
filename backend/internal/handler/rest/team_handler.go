@@ -317,3 +317,134 @@ func (h *TeamHandler) ListMembers(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"members": members})
 }
+
+// InviteMember godoc
+// @Summary      Invite a member to a team
+// @Description  Invite a user by email. If user exists, adds them directly. If not, sends an invitation email.
+// @Tags         Teams
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path string true "Team ID" format(uuid)
+// @Param        request body service.InviteMemberRequest true "Invite member request"
+// @Success      200 {object} service.InvitationResponse
+// @Failure      400 {object} map[string]string
+// @Router       /teams/{id}/invite [post]
+func (h *TeamHandler) InviteMember(c *gin.Context) {
+	orgID, ok := middleware.GetOrganizationID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	teamIDStr := c.Param("id")
+	teamID, err := uuid.Parse(teamIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid team ID"})
+		return
+	}
+
+	var req service.InviteMemberRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result, err := h.teamService.AddMemberOrInvite(c.Request.Context(), teamID, orgID, userID, &req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+// ListInvitations godoc
+// @Summary      List team invitations
+// @Description  List all pending invitations for a team
+// @Tags         Teams
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path string true "Team ID" format(uuid)
+// @Success      200 {object} map[string][]domain.TeamInvitation
+// @Failure      400 {object} map[string]string
+// @Router       /teams/{id}/invitations [get]
+func (h *TeamHandler) ListInvitations(c *gin.Context) {
+	teamIDStr := c.Param("id")
+	teamID, err := uuid.Parse(teamIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid team ID"})
+		return
+	}
+
+	invitations, err := h.teamService.ListTeamInvitations(c.Request.Context(), teamID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"invitations": invitations})
+}
+
+// CancelInvitation godoc
+// @Summary      Cancel a team invitation
+// @Description  Cancel a pending invitation
+// @Tags         Teams
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path string true "Team ID" format(uuid)
+// @Param        invitationId path string true "Invitation ID" format(uuid)
+// @Success      200 {object} map[string]string
+// @Failure      400 {object} map[string]string
+// @Router       /teams/{id}/invitations/{invitationId} [delete]
+func (h *TeamHandler) CancelInvitation(c *gin.Context) {
+	invitationIDStr := c.Param("invitationId")
+	invitationID, err := uuid.Parse(invitationIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid invitation ID"})
+		return
+	}
+
+	if err := h.teamService.CancelInvitation(c.Request.Context(), invitationID); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "invitation cancelled"})
+}
+
+// ResendInvitation godoc
+// @Summary      Resend a team invitation
+// @Description  Resend the invitation email
+// @Tags         Teams
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id path string true "Team ID" format(uuid)
+// @Param        invitationId path string true "Invitation ID" format(uuid)
+// @Success      200 {object} map[string]string
+// @Failure      400 {object} map[string]string
+// @Router       /teams/{id}/invitations/{invitationId}/resend [post]
+func (h *TeamHandler) ResendInvitation(c *gin.Context) {
+	invitationIDStr := c.Param("invitationId")
+	invitationID, err := uuid.Parse(invitationIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid invitation ID"})
+		return
+	}
+
+	if err := h.teamService.ResendInvitation(c.Request.Context(), invitationID); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "invitation resent"})
+}

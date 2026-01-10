@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net/smtp"
@@ -172,6 +173,49 @@ func (s *EmailService) sendWithSTARTTLS(addr string, auth smtp.Auth, from string
 	}
 
 	return client.Quit()
+}
+
+// SendTeamInvitation sends a team invitation email
+func (s *EmailService) SendTeamInvitation(ctx context.Context, toEmail, teamName, inviterName, inviteToken string) error {
+	subject := fmt.Sprintf("You've been invited to join %s - Pulsar", teamName)
+
+	// TODO: Make this URL configurable
+	inviteURL := fmt.Sprintf("http://localhost:5173/invitations/accept?token=%s", inviteToken)
+
+	body := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px;">
+    <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #6366f1 0%%, #8b5cf6 100%%); padding: 30px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Pulsar</h1>
+        </div>
+        <div style="padding: 40px 30px; text-align: center;">
+            <h2 style="color: #1f2937; margin: 0 0 10px 0; font-size: 22px;">You're invited!</h2>
+            <p style="color: #6b7280; margin: 0 0 30px 0; font-size: 15px;">
+                <strong>%s</strong> has invited you to join the team <strong>%s</strong> on Pulsar.
+            </p>
+            <a href="%s" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%%, #8b5cf6 100%%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                Accept Invitation
+            </a>
+            <p style="color: #9ca3af; font-size: 13px; margin: 30px 0 0 0;">This invitation expires in 7 days.</p>
+        </div>
+        <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <p style="color: #9ca3af; font-size: 12px; margin: 0;">If you didn't expect this invitation, you can safely ignore this email.</p>
+        </div>
+    </div>
+</body>
+</html>`, inviterName, teamName, inviteURL)
+
+	return s.Send(&EmailMessage{
+		To:      []string{toEmail},
+		Subject: subject,
+		Body:    body,
+		IsHTML:  true,
+	})
 }
 
 // SendOTPEmail sends an OTP verification email

@@ -94,6 +94,7 @@ func main() {
 	emailVerificationRepo := postgres.NewEmailVerificationRepository(db)
 	routingRepo := postgres.NewRoutingRuleRepository(db)
 	dndRepo := postgres.NewDNDSettingsRepository(db)
+	invitationRepo := postgres.NewTeamInvitationRepo(db)
 
 	// Initialize email service (for OTP verification)
 	var emailService *service.EmailService
@@ -112,6 +113,10 @@ func main() {
 	// Initialize services
 	authService := service.NewAuthService(userRepo, orgRepo, cfg, emailVerificationService)
 	teamService := service.NewTeamService(teamRepo, userRepo)
+	teamService.SetInvitationRepo(invitationRepo)
+	if emailService != nil {
+		teamService.SetEmailService(emailService)
+	}
 	userService := service.NewUserService(orgRepo)
 	scheduleService := service.NewScheduleService(scheduleRepo, userRepo)
 	notificationService := service.NewNotificationService(notificationRepo)
@@ -237,6 +242,10 @@ func main() {
 				teams.GET("/:id/members", teamHandler.ListMembers)
 				teams.DELETE("/:id/members/:userId", teamHandler.RemoveMember)
 				teams.PATCH("/:id/members/:userId", teamHandler.UpdateMemberRole)
+				teams.POST("/:id/invite", teamHandler.InviteMember)
+				teams.GET("/:id/invitations", teamHandler.ListInvitations)
+				teams.DELETE("/:id/invitations/:invitationId", teamHandler.CancelInvitation)
+				teams.POST("/:id/invitations/:invitationId/resend", teamHandler.ResendInvitation)
 			}
 
 			// Schedule routes

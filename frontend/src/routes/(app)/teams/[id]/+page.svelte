@@ -3,14 +3,15 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { api } from '$lib/api/client';
-  import type { TeamWithMembers, TeamRole } from '$lib/types/team';
+  import type { TeamWithMembers, TeamRole, TeamInvitation } from '$lib/types/team';
   import type { User } from '$lib/types/user';
   import Button from '$lib/components/ui/Button.svelte';
   import Input from '$lib/components/ui/Input.svelte';
 
-  let teamId = $page.params.id;
+  let teamId = $page.params.id!;
   let team: TeamWithMembers | null = null;
   let organizationUsers: User[] = [];
+  let invitations: TeamInvitation[] = [];
   let isLoading = true;
   let error = '';
 
@@ -23,14 +24,18 @@
 
   // Add member form
   let showAddMemberForm = false;
+  let addMemberMode: 'select' | 'email' = 'email';
   let selectedUserId = '';
+  let inviteEmail = '';
   let selectedUserRole: TeamRole = 'member';
   let addMemberError = '';
+  let addMemberSuccess = '';
   let isAddingMember = false;
 
   onMount(async () => {
     await loadTeam();
     await loadOrganizationUsers();
+    await loadInvitations();
   });
 
   async function loadTeam() {
@@ -53,6 +58,15 @@
       organizationUsers = response.users;
     } catch (err) {
       console.error('Failed to load organization users:', err);
+    }
+  }
+
+  async function loadInvitations() {
+    try {
+      const response = await api.listTeamInvitations(teamId);
+      invitations = response.invitations || [];
+    } catch (err) {
+      console.error('Failed to load invitations:', err);
     }
   }
 
@@ -93,21 +107,43 @@
   }
 
   async function handleAddMember() {
-    if (!team || !selectedUserId) return;
+    if (!team) return;
 
     addMemberError = '';
+    addMemberSuccess = '';
     isAddingMember = true;
 
     try {
-      await api.addTeamMember(team.id, {
-        user_id: selectedUserId,
-        role: selectedUserRole,
-      });
+      if (addMemberMode === 'select' && selectedUserId) {
+        await api.addTeamMember(team.id, {
+          user_id: selectedUserId,
+          role: selectedUserRole,
+        });
+        addMemberSuccess = 'Member added successfully';
+      } else if (addMemberMode === 'email' && inviteEmail) {
+        const result = await api.inviteTeamMember(team.id, {
+          email: inviteEmail,
+          role: selectedUserRole,
+        });
+        addMemberSuccess = result.message;
+        if (result.invited) {
+          await loadInvitations();
+        }
+      } else {
+        addMemberError = 'Please select a user or enter an email';
+        return;
+      }
 
       await loadTeam();
       selectedUserId = '';
+      inviteEmail = '';
       selectedUserRole = 'member';
-      showAddMemberForm = false;
+
+      // Keep form open briefly to show success message
+      setTimeout(() => {
+        showAddMemberForm = false;
+        addMemberSuccess = '';
+      }, 2000);
     } catch (err) {
       addMemberError = err instanceof Error ? err.message : 'Failed to add member';
     } finally {
@@ -130,20 +166,56 @@
     }
   }
 
-  async function handleUpdateMemberRole(userId: string, role: TeamRole) {
+  async function handleUpdateMemberRole(userId: string, role: string) {
     if (!team) return;
 
     try {
-      await api.updateTeamMemberRole(team.id, userId, { role });
+      await api.updateTeamMemberRole(team.id, userId, { role: role as TeamRole });
       await loadTeam();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update member role');
+      window.alert(err instanceof Error ? err.message : 'Failed to update member role');
     }
+  }
+
+  async function handleCancelInvitation(invitationId: string) {
+    if (!team) return;
+
+    if (!confirm('Cancel this invitation?')) {
+      return;
+    }
+
+    try {
+      await api.cancelTeamInvitation(team.id, invitationId);
+      await loadInvitations();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to cancel invitation');
+    }
+  }
+
+  async function handleResendInvitation(invitationId: string) {
+    if (!team) return;
+
+    try {
+      await api.resendTeamInvitation(team.id, invitationId);
+      alert('Invitation resent successfully');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to resend invitation');
+    }
+  }
+
+  function formatDate(dateStr: string): string {
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   }
 
   $: availableUsers = organizationUsers.filter(
     (user) => !team?.members?.some((member) => member.id === user.id)
   );
+
+  $: pendingInvitations = invitations.filter((inv) => inv.status === 'pending');
 </script>
 
 <svelte:head>
@@ -198,7 +270,7 @@
     <!-- Edit Team Form -->
     {#if showEditForm}
       <div class="bg-white p-6 rounded-lg shadow">
-        <h3 class="text-lg font-semibold mb-4">Edit Team</h3>
+        <h3 class="text-lg font-semibold mb-4 text-gray-900">Edit Team</h3>
         <form on:submit|preventDefault={handleUpdateTeam} class="space-y-4">
           <Input
             id="edit-name"
@@ -216,7 +288,7 @@
               id="edit-description"
               bind:value={editDescription}
               rows="3"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-900"
               placeholder="Team description..."
             ></textarea>
           </div>
@@ -242,7 +314,7 @@
     <!-- Team Members Section -->
     <div class="bg-white p-6 rounded-lg shadow">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold">Team Members ({team.members?.length || 0})</h3>
+        <h3 class="text-lg font-semibold text-gray-900">Team Members ({team.members?.length || 0})</h3>
         <Button
           variant="primary"
           size="sm"
@@ -255,26 +327,64 @@
       <!-- Add Member Form -->
       {#if showAddMemberForm}
         <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-          <h4 class="text-sm font-semibold mb-3">Add New Member</h4>
+          <h4 class="text-sm font-semibold mb-3 text-gray-900">Add New Member</h4>
+
+          <!-- Mode Toggle -->
+          <div class="flex gap-2 mb-4">
+            <button
+              type="button"
+              class="px-3 py-1.5 text-sm rounded-lg transition-colors {addMemberMode === 'email' ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-700'}"
+              on:click={() => (addMemberMode = 'email')}
+            >
+              Invite by Email
+            </button>
+            <button
+              type="button"
+              class="px-3 py-1.5 text-sm rounded-lg transition-colors {addMemberMode === 'select' ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-700'}"
+              on:click={() => (addMemberMode = 'select')}
+            >
+              Select Existing User
+            </button>
+          </div>
+
           <form on:submit|preventDefault={handleAddMember} class="space-y-3">
-            <div>
-              <label for="user-select" class="block text-sm font-medium text-gray-700 mb-1">
-                Select User
-              </label>
-              <select
-                id="user-select"
-                bind:value={selectedUserId}
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                required
-              >
-                <option value="">Choose a user...</option>
-                {#each availableUsers as user (user.id)}
-                  <option value={user.id}>
-                    {user.full_name || user.username} ({user.email})
-                  </option>
-                {/each}
-              </select>
-            </div>
+            {#if addMemberMode === 'email'}
+              <div>
+                <label for="invite-email" class="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="invite-email"
+                  bind:value={inviteEmail}
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-900"
+                  placeholder="user@example.com"
+                  required
+                />
+                <p class="mt-1 text-xs text-gray-500">
+                  If the user exists, they'll be added directly. Otherwise, an invitation email will be sent.
+                </p>
+              </div>
+            {:else}
+              <div>
+                <label for="user-select" class="block text-sm font-medium text-gray-700 mb-1">
+                  Select User
+                </label>
+                <select
+                  id="user-select"
+                  bind:value={selectedUserId}
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-900"
+                  required
+                >
+                  <option value="">Choose a user...</option>
+                  {#each availableUsers as user (user.id)}
+                    <option value={user.id}>
+                      {user.full_name || user.username} ({user.email})
+                    </option>
+                  {/each}
+                </select>
+              </div>
+            {/if}
 
             <div>
               <label for="role-select" class="block text-sm font-medium text-gray-700 mb-1">
@@ -283,7 +393,7 @@
               <select
                 id="role-select"
                 bind:value={selectedUserRole}
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-900"
               >
                 <option value="member">Member</option>
                 <option value="lead">Lead</option>
@@ -296,9 +406,15 @@
               </div>
             {/if}
 
+            {#if addMemberSuccess}
+              <div class="bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded text-sm">
+                {addMemberSuccess}
+              </div>
+            {/if}
+
             <div class="flex gap-2">
               <Button type="submit" variant="primary" size="sm" disabled={isAddingMember}>
-                {isAddingMember ? 'Adding...' : 'Add Member'}
+                {isAddingMember ? 'Adding...' : addMemberMode === 'email' ? 'Send Invitation' : 'Add Member'}
               </Button>
               <Button
                 type="button"
@@ -329,7 +445,7 @@
                 <select
                   value={member.role || 'member'}
                   on:change={(e) => handleUpdateMemberRole(member.id, e.currentTarget.value)}
-                  class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-900"
                 >
                   <option value="member">Member</option>
                   <option value="lead">Lead</option>
@@ -352,5 +468,40 @@
         </div>
       {/if}
     </div>
+
+    <!-- Pending Invitations Section -->
+    {#if pendingInvitations.length > 0}
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h3 class="text-lg font-semibold mb-4 text-gray-900">
+          Pending Invitations ({pendingInvitations.length})
+        </h3>
+        <div class="space-y-3">
+          {#each pendingInvitations as invitation (invitation.id)}
+            <div class="flex items-center justify-between p-4 border border-yellow-200 bg-yellow-50 rounded-lg">
+              <div class="flex-1">
+                <div class="font-medium text-gray-900">{invitation.email}</div>
+                <div class="text-sm text-gray-600">
+                  Role: {invitation.role} | Expires: {formatDate(invitation.expires_at)}
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  on:click={() => handleResendInvitation(invitation.id)}
+                  class="text-primary-600 hover:text-primary-800 text-sm font-medium px-3 py-1.5"
+                >
+                  Resend
+                </button>
+                <button
+                  on:click={() => handleCancelInvitation(invitation.id)}
+                  class="text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1.5"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          {/each}
+        </div>
+      </div>
+    {/if}
   {/if}
 </div>

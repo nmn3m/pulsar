@@ -58,8 +58,8 @@ func Load() (*Config, error) {
 		JWT: JWTConfig{
 			Secret:        getEnv("JWT_SECRET", ""),
 			RefreshSecret: getEnv("JWT_REFRESH_SECRET", ""),
-			AccessTTL:     15, // 15 minutes
-			RefreshTTL:    7,  // 7 days
+			AccessTTL:     getEnvInt("JWT_ACCESS_TTL", 60),  // 60 minutes default
+			RefreshTTL:    getEnvInt("JWT_REFRESH_TTL", 7),  // 7 days
 		},
 		CORS: CORSConfig{
 			AllowedOrigins: parseAllowedOrigins(getEnv("CORS_ALLOWED_ORIGINS", "http://localhost:3000")),

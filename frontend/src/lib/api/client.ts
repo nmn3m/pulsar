@@ -40,6 +40,9 @@ import type {
   UpdateTeamRequest,
   AddTeamMemberRequest,
   UpdateTeamMemberRoleRequest,
+  TeamInvitation,
+  InviteMemberRequest,
+  InvitationResponse,
 } from '$lib/types/team';
 import type {
   Schedule,
@@ -154,10 +157,12 @@ class APIClient {
     return null;
   }
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const headers: HeadersInit = {
+  private isRefreshing = false;
+
+  private async request<T>(endpoint: string, options: RequestInit = {}, isRetry = false): Promise<T> {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string>),
     };
 
     const token = this.getAccessToken();
@@ -171,6 +176,51 @@ class APIClient {
     });
 
     if (!response.ok) {
+      // Handle 401 Unauthorized - attempt token refresh
+      if (response.status === 401 && !isRetry && !this.isRefreshing) {
+        const refreshToken = browser ? localStorage.getItem('refresh_token') : null;
+
+        if (refreshToken && !endpoint.includes('/auth/refresh') && !endpoint.includes('/auth/login')) {
+          try {
+            this.isRefreshing = true;
+
+            // Attempt to refresh the token
+            const refreshResponse = await fetch(`${this.baseURL}/api/v1/auth/refresh`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ refresh_token: refreshToken }),
+            });
+
+            if (refreshResponse.ok) {
+              const authData = await refreshResponse.json();
+              this.setAccessToken(authData.access_token);
+              if (browser) {
+                localStorage.setItem('refresh_token', authData.refresh_token);
+              }
+
+              this.isRefreshing = false;
+
+              // Retry the original request with the new token
+              return this.request<T>(endpoint, options, true);
+            } else {
+              // Refresh failed - clear tokens
+              this.setAccessToken(null);
+              if (browser) {
+                localStorage.removeItem('refresh_token');
+              }
+            }
+          } catch {
+            // Refresh request failed - clear tokens
+            this.setAccessToken(null);
+            if (browser) {
+              localStorage.removeItem('refresh_token');
+            }
+          } finally {
+            this.isRefreshing = false;
+          }
+        }
+      }
+
       const error = await response.json().catch(() => ({ error: 'An error occurred' }));
       throw new Error(error.error || response.statusText);
     }
@@ -404,6 +454,29 @@ class APIClient {
 
   async listTeamMembers(teamId: string): Promise<{ members: User[] }> {
     return this.request<{ members: User[] }>(`/api/v1/teams/${teamId}/members`);
+  }
+
+  async inviteTeamMember(teamId: string, data: InviteMemberRequest): Promise<InvitationResponse> {
+    return this.request<InvitationResponse>(`/api/v1/teams/${teamId}/invite`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async listTeamInvitations(teamId: string): Promise<{ invitations: TeamInvitation[] }> {
+    return this.request<{ invitations: TeamInvitation[] }>(`/api/v1/teams/${teamId}/invitations`);
+  }
+
+  async cancelTeamInvitation(teamId: string, invitationId: string): Promise<void> {
+    await this.request(`/api/v1/teams/${teamId}/invitations/${invitationId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async resendTeamInvitation(teamId: string, invitationId: string): Promise<void> {
+    await this.request(`/api/v1/teams/${teamId}/invitations/${invitationId}/resend`, {
+      method: 'POST',
+    });
   }
 
   // Schedule endpoints

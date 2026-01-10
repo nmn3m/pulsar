@@ -328,6 +328,12 @@ func (r *EscalationPolicyRepository) AddTarget(ctx context.Context, target *doma
 		RETURNING created_at
 	`
 
+	// Handle nil or empty notification channels - use nil for NULL in PostgreSQL
+	var notificationChannels interface{}
+	if len(target.NotificationChannels) > 0 {
+		notificationChannels = target.NotificationChannels
+	}
+
 	err := r.db.QueryRowContext(
 		ctx,
 		query,
@@ -335,7 +341,7 @@ func (r *EscalationPolicyRepository) AddTarget(ctx context.Context, target *doma
 		target.RuleID,
 		target.TargetType.String(),
 		target.TargetID,
-		target.NotificationChannels,
+		notificationChannels,
 	).Scan(&target.CreatedAt)
 
 	if err != nil {
@@ -367,7 +373,7 @@ func (r *EscalationPolicyRepository) RemoveTarget(ctx context.Context, id uuid.U
 
 func (r *EscalationPolicyRepository) ListTargets(ctx context.Context, ruleID uuid.UUID) ([]*domain.EscalationTarget, error) {
 	query := `
-		SELECT id, rule_id, target_type, target_id, notification_channels, created_at
+		SELECT id, rule_id, target_type, target_id, COALESCE(notification_channels, 'null'::jsonb), created_at
 		FROM escalation_targets
 		WHERE rule_id = $1
 		ORDER BY created_at ASC
@@ -397,6 +403,10 @@ func (r *EscalationPolicyRepository) ListTargets(ctx context.Context, ruleID uui
 		}
 
 		target.TargetType = domain.EscalationTargetType(targetType)
+		// Clear notification channels if it's just "null"
+		if string(target.NotificationChannels) == "null" {
+			target.NotificationChannels = nil
+		}
 		targets = append(targets, &target)
 	}
 
