@@ -78,7 +78,7 @@ func (p *TeamsProvider) Send(recipient, subject, message string) error {
 	// Check the response
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("Teams API returned status %d: %s", resp.StatusCode, string(body))
+		return fmt.Errorf("teams API returned status %d: %s", resp.StatusCode, string(body))
 	}
 
 	return nil

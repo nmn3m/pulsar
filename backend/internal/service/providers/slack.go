@@ -80,7 +80,7 @@ func (p *SlackProvider) Send(recipient, subject, message string) error {
 	// Check the response
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("Slack API returned status %d: %s", resp.StatusCode, string(body))
+		return fmt.Errorf("slack API returned status %d: %s", resp.StatusCode, string(body))
 	}
 
 	return nil
