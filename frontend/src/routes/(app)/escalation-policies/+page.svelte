@@ -9,7 +9,7 @@
   let name = '';
   let description = '';
   let repeatEnabled = false;
-  let repeatCount: number | undefined = undefined;
+  let repeatCount = '';
   let createError = '';
   let creating = false;
 
@@ -26,14 +26,14 @@
         name,
         description: description || undefined,
         repeat_enabled: repeatEnabled,
-        repeat_count: repeatEnabled && repeatCount ? repeatCount : undefined,
+        repeat_count: repeatEnabled && repeatCount ? parseInt(repeatCount, 10) : undefined,
       });
 
       // Reset form
       name = '';
       description = '';
       repeatEnabled = false;
-      repeatCount = undefined;
+      repeatCount = '';
       showCreateForm = false;
     } catch (err) {
       createError = err instanceof Error ? err.message : 'Failed to create escalation policy';
@@ -110,14 +110,19 @@
         </div>
 
         {#if repeatEnabled}
-          <Input
-            id="repeat-count"
-            label="Maximum Repeat Count (leave empty for infinite)"
-            type="number"
-            bind:value={repeatCount}
-            min="1"
-            placeholder="Leave empty for infinite repeats"
-          />
+          <div>
+            <label for="repeat-count" class="block text-sm font-medium text-gray-600 mb-1">
+              Maximum Repeat Count (leave empty for infinite)
+            </label>
+            <input
+              id="repeat-count"
+              type="number"
+              bind:value={repeatCount}
+              min="1"
+              placeholder="Leave empty for infinite repeats"
+              class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 placeholder-gray-400"
+            />
+          </div>
         {/if}
 
         {#if createError}

@@ -9,7 +9,7 @@
   import Input from '$lib/components/ui/Input.svelte';
   import dayjs from 'dayjs';
 
-  let scheduleId = $page.params.id;
+  let scheduleId = $page.params.id!;
   let schedule: ScheduleWithRotations | null = null;
   let users: User[] = [];
   let onCallUser: OnCallUser | null = null;
@@ -20,7 +20,7 @@
   let showCreateRotationForm = false;
   let rotationName = '';
   let rotationType: RotationType = 'weekly';
-  let rotationLength = 1;
+  let rotationLength = '1';
   let startDate = '';
   let startTime = '00:00';
   let endTime = '';
@@ -71,7 +71,7 @@
       await api.createRotation(scheduleId, {
         name: rotationName,
         rotation_type: rotationType,
-        rotation_length: rotationLength,
+        rotation_length: parseInt(rotationLength, 10),
         start_date: startDate,
         start_time: startTime,
         end_time: endTime || undefined,
@@ -83,7 +83,7 @@
       // Reset form
       rotationName = '';
       rotationType = 'weekly';
-      rotationLength = 1;
+      rotationLength = '1';
       startDate = '';
       startTime = '00:00';
       endTime = '';
@@ -220,14 +220,19 @@
                 </select>
               </div>
 
-              <Input
-                id="rotation-length"
-                label="Rotation Length (days/weeks)"
-                type="number"
-                bind:value={rotationLength}
-                min="1"
-                required
-              />
+              <div>
+                <label for="rotation-length" class="block text-sm font-medium text-gray-700 mb-1">
+                  Rotation Length (days/weeks)
+                </label>
+                <input
+                  id="rotation-length"
+                  type="number"
+                  bind:value={rotationLength}
+                  min="1"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">

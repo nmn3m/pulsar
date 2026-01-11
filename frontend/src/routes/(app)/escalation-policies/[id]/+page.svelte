@@ -15,7 +15,7 @@
   import Button from '$lib/components/ui/Button.svelte';
   import Input from '$lib/components/ui/Input.svelte';
 
-  let policyId = $page.params.id;
+  let policyId = $page.params.id!;
   let policy: EscalationPolicyWithRules | null = null;
   let users: User[] = [];
   let teams: Team[] = [];
@@ -26,8 +26,8 @@
 
   // Create rule form
   let showCreateRuleForm = false;
-  let rulePosition = 1;
-  let escalationDelay = 15;
+  let rulePosition = '1';
+  let escalationDelay = '15';
   let ruleError = '';
   let creatingRule = false;
 
@@ -36,7 +36,7 @@
   let editPolicyName = '';
   let editPolicyDescription = '';
   let editRepeatEnabled = false;
-  let editRepeatCount: number | undefined = undefined;
+  let editRepeatCount: string | undefined = undefined;
   let editPolicyError = '';
   let editingPolicy = false;
 
@@ -102,8 +102,8 @@
       await loadPolicy();
 
       // Reset form
-      rulePosition = policy ? policy.rules.length + 1 : 1;
-      escalationDelay = 15;
+      rulePosition = policy ? String(policy.rules.length + 1) : '1';
+      escalationDelay = '15';
       showCreateRuleForm = false;
     } catch (err) {
       ruleError = err instanceof Error ? err.message : 'Failed to create rule';
@@ -231,7 +231,7 @@
     editPolicyName = policy.name;
     editPolicyDescription = policy.description || '';
     editRepeatEnabled = policy.repeat_enabled;
-    editRepeatCount = policy.repeat_count || undefined;
+    editRepeatCount = policy.repeat_count ? String(policy.repeat_count) : undefined;
     editPolicyError = '';
     showEditPolicyForm = true;
   }
@@ -366,14 +366,19 @@
             </div>
 
             {#if editRepeatEnabled}
-              <Input
-                id="edit-repeat-count"
-                label="Maximum Repeat Count (leave empty for infinite)"
-                type="number"
-                bind:value={editRepeatCount}
-                min="1"
-                placeholder="Leave empty for infinite"
-              />
+              <div>
+                <label for="edit-repeat-count" class="block text-sm font-medium text-gray-700 mb-1">
+                  Maximum Repeat Count (leave empty for infinite)
+                </label>
+                <input
+                  id="edit-repeat-count"
+                  type="number"
+                  bind:value={editRepeatCount}
+                  min="1"
+                  placeholder="Leave empty for infinite"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                />
+              </div>
             {/if}
 
             {#if editPolicyError}
@@ -418,7 +423,7 @@
           variant="primary"
           size="sm"
           on:click={() => {
-            rulePosition = (policy?.rules?.length || 0) + 1;
+            rulePosition = String((policy?.rules?.length || 0) + 1);
             showCreateRuleForm = !showCreateRuleForm;
           }}
         >
@@ -430,23 +435,33 @@
         <div class="mb-6 p-4 bg-gray-50 rounded-lg">
           <h4 class="text-sm font-semibold mb-3">Create Escalation Rule</h4>
           <form on:submit|preventDefault={handleCreateRule} class="space-y-3">
-            <Input
-              id="position"
-              label="Position (order)"
-              type="number"
-              bind:value={rulePosition}
-              min="1"
-              required
-            />
+            <div>
+              <label for="position" class="block text-sm font-medium text-gray-700 mb-1">
+                Position (order)
+              </label>
+              <input
+                id="position"
+                type="number"
+                bind:value={rulePosition}
+                min="1"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+              />
+            </div>
 
-            <Input
-              id="escalation-delay"
-              label="Escalation Delay (minutes)"
-              type="number"
-              bind:value={escalationDelay}
-              min="0"
-              required
-            />
+            <div>
+              <label for="escalation-delay" class="block text-sm font-medium text-gray-700 mb-1">
+                Escalation Delay (minutes)
+              </label>
+              <input
+                id="escalation-delay"
+                type="number"
+                bind:value={escalationDelay}
+                min="0"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+              />
+            </div>
 
             {#if ruleError}
               <div class="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">

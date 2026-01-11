@@ -14,7 +14,7 @@
   // Provider-specific config fields
   let emailConfig = {
     smtp_host: '',
-    smtp_port: 587,
+    smtp_port: '587',
     smtp_username: '',
     smtp_password: '',
     from_address: '',
@@ -38,7 +38,7 @@
     url: '',
     method: 'POST',
     headers: {} as Record<string, string>,
-    timeout: 30,
+    timeout: '30',
   };
 
   let createError = '';
@@ -54,7 +54,7 @@
     isEnabled = true;
     emailConfig = {
       smtp_host: '',
-      smtp_port: 587,
+      smtp_port: '587',
       smtp_username: '',
       smtp_password: '',
       from_address: '',
@@ -75,7 +75,7 @@
       url: '',
       method: 'POST',
       headers: {},
-      timeout: 30,
+      timeout: '30',
     };
     createError = '';
   }
@@ -89,7 +89,7 @@
 
       switch (channelType) {
         case 'email':
-          config = emailConfig;
+          config = { ...emailConfig, smtp_port: parseInt(emailConfig.smtp_port, 10) };
           break;
         case 'slack':
           config = slackConfig;
@@ -98,7 +98,7 @@
           config = teamsConfig;
           break;
         case 'webhook':
-          config = webhookConfig;
+          config = { ...webhookConfig, timeout: parseInt(webhookConfig.timeout, 10) };
           break;
       }
 
@@ -351,14 +351,19 @@
                 <option value="PATCH">PATCH</option>
               </select>
             </div>
-            <Input
-              id="timeout"
-              label="Timeout (seconds)"
-              type="number"
-              bind:value={webhookConfig.timeout}
-              min="1"
-              max="300"
-            />
+            <div>
+              <label for="timeout" class="block text-sm font-medium text-gray-600 mb-1">
+                Timeout (seconds)
+              </label>
+              <input
+                id="timeout"
+                type="number"
+                bind:value={webhookConfig.timeout}
+                min="1"
+                max="300"
+                class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900"
+              />
+            </div>
           </div>
         {/if}
 

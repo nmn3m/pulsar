@@ -12,8 +12,8 @@
 
   dayjs.extend(relativeTime);
 
-  let alertId = $page.params.id;
-  let alert: Alert | null = null;
+  let alertId = $page.params.id!;
+  let alertData: Alert | null = null;
   let users: User[] = [];
   let teams: Team[] = [];
   let isLoading = true;
@@ -56,7 +56,7 @@
     try {
       isLoading = true;
       error = '';
-      alert = await api.getAlert(alertId);
+      alertData = await api.getAlert(alertId);
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to load alert';
     } finally {
@@ -75,10 +75,10 @@
   }
 
   async function handleAcknowledge() {
-    if (!alert) return;
+    if (!alertData) return;
 
     try {
-      await api.acknowledgeAlert(alert.id);
+      await api.acknowledgeAlert(alertData.id);
       await loadAlert();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to acknowledge alert');
@@ -86,13 +86,13 @@
   }
 
   async function handleClose() {
-    if (!alert) return;
+    if (!alertData) return;
 
     const reason = prompt('Reason for closing (optional):');
     if (reason === null) return;
 
     try {
-      await api.closeAlert(alert.id, { reason: reason || 'Closed manually' });
+      await api.closeAlert(alertData.id, { reason: reason || 'Closed manually' });
       await loadAlert();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to close alert');
@@ -100,14 +100,14 @@
   }
 
   async function handleSnooze() {
-    if (!alert) return;
+    if (!alertData) return;
 
     isSnoozing = true;
     try {
       const until = new Date();
       until.setMinutes(until.getMinutes() + snoozeMinutes);
 
-      await api.snoozeAlert(alert.id, { until: until.toISOString() });
+      await api.snoozeAlert(alertData.id, { until: until.toISOString() });
       await loadAlert();
       showSnoozeForm = false;
     } catch (err) {
@@ -118,13 +118,13 @@
   }
 
   async function handleAssign() {
-    if (!alert) return;
+    if (!alertData) return;
 
     assignError = '';
     isAssigning = true;
 
     try {
-      await api.assignAlert(alert.id, {
+      await api.assignAlert(alertData.id, {
         user_id: assignmentType === 'user' ? selectedUserId : undefined,
         team_id: assignmentType === 'team' ? selectedTeamId : undefined,
       });
@@ -141,14 +141,14 @@
   }
 
   async function handleDelete() {
-    if (!alert) return;
+    if (!alertData) return;
 
     if (!confirm('Are you sure you want to delete this alert?')) {
       return;
     }
 
     try {
-      await api.deleteAlert(alert.id);
+      await api.deleteAlert(alertData.id);
       goto('/alerts');
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete alert');
@@ -156,13 +156,14 @@
   }
 
   function getAssignedToDisplay(): string {
-    if (!alert) return 'Unassigned';
-    if (alert.assigned_to_user_id) {
-      const user = users.find((u) => u.id === alert.assigned_to_user_id);
+    if (!alertData) return 'Unassigned';
+    const currentAlert = alertData;
+    if (currentAlert.assigned_to_user_id) {
+      const user = users.find((u) => u.id === currentAlert.assigned_to_user_id);
       return user ? `👤 ${user.full_name || user.username}` : 'Assigned to user';
     }
-    if (alert.assigned_to_team_id) {
-      const team = teams.find((t) => t.id === alert.assigned_to_team_id);
+    if (currentAlert.assigned_to_team_id) {
+      const team = teams.find((t) => t.id === currentAlert.assigned_to_team_id);
       return team ? `👥 ${team.name}` : 'Assigned to team';
     }
     return 'Unassigned';
@@ -170,7 +171,7 @@
 </script>
 
 <svelte:head>
-  <title>{alert?.message || 'Alert'} - Pulsar</title>
+  <title>{alertData?.message || 'Alert'} - Pulsar</title>
 </svelte:head>
 
 <div class="space-y-6">
@@ -199,24 +200,24 @@
     <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
       {error}
     </div>
-  {:else if alert}
+  {:else if alertData}
     <!-- Alert Info Card -->
-    <div class="bg-white p-6 rounded-lg shadow border-l-4 {priorityColors[alert.priority]}">
+    <div class="bg-white p-6 rounded-lg shadow border-l-4 {priorityColors[alertData.priority]}">
       <div class="flex items-start justify-between mb-4">
         <div class="flex items-center gap-2">
-          <span class="px-3 py-1 text-sm font-semibold rounded {priorityColors[alert.priority]}">
-            {alert.priority}
+          <span class="px-3 py-1 text-sm font-semibold rounded {priorityColors[alertData.priority]}">
+            {alertData.priority}
           </span>
-          <span class="px-3 py-1 text-sm font-semibold rounded {statusColors[alert.status]}">
-            {alert.status}
+          <span class="px-3 py-1 text-sm font-semibold rounded {statusColors[alertData.status]}">
+            {alertData.status}
           </span>
-          <span class="text-sm text-gray-500">{alert.source}</span>
+          <span class="text-sm text-gray-500">{alertData.source}</span>
         </div>
         <div class="flex gap-2">
-          {#if alert.status === 'open'}
+          {#if alertData.status === 'open'}
             <Button variant="primary" size="sm" on:click={handleAcknowledge}>Acknowledge</Button>
           {/if}
-          {#if alert.status !== 'closed'}
+          {#if alertData.status !== 'closed'}
             <Button
               variant="secondary"
               size="sm"
@@ -230,15 +231,15 @@
         </div>
       </div>
 
-      <h3 class="text-2xl font-semibold text-gray-900 mb-3">{alert.message}</h3>
+      <h3 class="text-2xl font-semibold text-gray-900 mb-3">{alertData.message}</h3>
 
-      {#if alert.description}
-        <p class="text-gray-700 mb-4">{alert.description}</p>
+      {#if alertData.description}
+        <p class="text-gray-700 mb-4">{alertData.description}</p>
       {/if}
 
-      {#if alert.tags && alert.tags.length > 0}
+      {#if alertData.tags && alertData.tags.length > 0}
         <div class="flex gap-2 flex-wrap mb-4">
-          {#each alert.tags as tag}
+          {#each alertData.tags as tag}
             <span class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded">{tag}</span>
           {/each}
         </div>
@@ -247,8 +248,8 @@
       <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
         <div>
           <div class="text-sm text-gray-600">Created</div>
-          <div class="font-medium">{dayjs(alert.created_at).format('MMM D, YYYY h:mm A')}</div>
-          <div class="text-xs text-gray-500">{dayjs(alert.created_at).fromNow()}</div>
+          <div class="font-medium">{dayjs(alertData.created_at).format('MMM D, YYYY h:mm A')}</div>
+          <div class="text-xs text-gray-500">{dayjs(alertData.created_at).fromNow()}</div>
         </div>
 
         <div>
@@ -262,30 +263,30 @@
           </button>
         </div>
 
-        {#if alert.acknowledged_at}
+        {#if alertData.acknowledged_at}
           <div>
             <div class="text-sm text-gray-600">Acknowledged</div>
             <div class="font-medium">
-              {dayjs(alert.acknowledged_at).format('MMM D, YYYY h:mm A')}
+              {dayjs(alertData.acknowledged_at).format('MMM D, YYYY h:mm A')}
             </div>
-            <div class="text-xs text-gray-500">{dayjs(alert.acknowledged_at).fromNow()}</div>
+            <div class="text-xs text-gray-500">{dayjs(alertData.acknowledged_at).fromNow()}</div>
           </div>
         {/if}
 
-        {#if alert.closed_at}
+        {#if alertData.closed_at}
           <div>
             <div class="text-sm text-gray-600">Closed</div>
-            <div class="font-medium">{dayjs(alert.closed_at).format('MMM D, YYYY h:mm A')}</div>
-            {#if alert.close_reason}
-              <div class="text-xs text-gray-500">Reason: {alert.close_reason}</div>
+            <div class="font-medium">{dayjs(alertData.closed_at).format('MMM D, YYYY h:mm A')}</div>
+            {#if alertData.close_reason}
+              <div class="text-xs text-gray-500">Reason: {alertData.close_reason}</div>
             {/if}
           </div>
         {/if}
 
-        {#if alert.snoozed_until}
+        {#if alertData.snoozed_until}
           <div>
             <div class="text-sm text-gray-600">Snoozed Until</div>
-            <div class="font-medium">{dayjs(alert.snoozed_until).format('MMM D, YYYY h:mm A')}</div>
+            <div class="font-medium">{dayjs(alertData.snoozed_until).format('MMM D, YYYY h:mm A')}</div>
           </div>
         {/if}
       </div>

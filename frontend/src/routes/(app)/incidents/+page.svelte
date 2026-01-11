@@ -9,6 +9,9 @@
     IncidentStatus,
   } from '$lib/types/incident';
 
+  const statusOptions: IncidentStatus[] = ['investigating', 'identified', 'monitoring', 'resolved'];
+  const severityOptions: IncidentSeverity[] = ['critical', 'high', 'medium', 'low'];
+
   let showCreateForm = false;
   let title = '';
   let description = '';
@@ -221,7 +224,7 @@
       <div>
         <label class="block text-sm font-medium text-gray-600 mb-2">Status</label>
         <div class="flex flex-wrap gap-2">
-          {#each ['investigating', 'identified', 'monitoring', 'resolved'] as status}
+          {#each statusOptions as status}
             <button
               type="button"
               on:click={() => toggleStatusFilter(status)}
@@ -241,7 +244,7 @@
       <div>
         <label class="block text-sm font-medium text-gray-600 mb-2">Severity</label>
         <div class="flex flex-wrap gap-2">
-          {#each ['critical', 'high', 'medium', 'low'] as sev}
+          {#each severityOptions as sev}
             <button
               type="button"
               on:click={() => toggleSeverityFilter(sev)}

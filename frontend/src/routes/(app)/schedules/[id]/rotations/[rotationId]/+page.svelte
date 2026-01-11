@@ -8,8 +8,8 @@
   import Button from '$lib/components/ui/Button.svelte';
   import dayjs from 'dayjs';
 
-  let scheduleId = $page.params.id;
-  let rotationId = $page.params.rotationId;
+  let scheduleId = $page.params.id!;
+  let rotationId = $page.params.rotationId!;
 
   let rotation: ScheduleRotation | null = null;
   let participants: ParticipantWithUser[] = [];

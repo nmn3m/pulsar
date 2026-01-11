@@ -45,7 +45,7 @@
 
   let unsubscribeWS: (() => void)[] = [];
 
-  $: incidentId = $page.params.id;
+  $: incidentId = $page.params.id!;
 
   onMount(async () => {
     await loadIncident();
@@ -115,7 +115,8 @@
 
   async function loadAvailableUsers() {
     try {
-      availableUsers = await api.listUsers();
+      const response = await api.listUsers();
+      availableUsers = response.users;
     } catch (err) {
       console.error('Failed to load users:', err);
     }

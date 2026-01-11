@@ -7,6 +7,9 @@
   import Button from '$lib/components/ui/Button.svelte';
   import type { AlertStatus, AlertPriority } from '$lib/types/alert';
 
+  const statusOptions: AlertStatus[] = ['open', 'acknowledged', 'closed', 'snoozed'];
+  const priorityOptions: AlertPriority[] = ['P1', 'P2', 'P3', 'P4', 'P5'];
+
   let showCreateForm = false;
   let selectedStatus: AlertStatus[] = [];
   let selectedPriority: AlertPriority[] = [];
@@ -231,7 +234,7 @@
       <div>
         <label class="block text-sm font-medium text-gray-600 mb-2">Status</label>
         <div class="flex gap-2 flex-wrap">
-          {#each ['open', 'acknowledged', 'closed', 'snoozed'] as status}
+          {#each statusOptions as status}
             <button
               type="button"
               class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 {selectedStatus.includes(
@@ -250,7 +253,7 @@
       <div>
         <label class="block text-sm font-medium text-gray-600 mb-2">Priority</label>
         <div class="flex gap-2 flex-wrap">
-          {#each ['P1', 'P2', 'P3', 'P4', 'P5'] as prio}
+          {#each priorityOptions as prio}
             <button
               type="button"
               class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 {selectedPriority.includes(
