@@ -37,41 +37,41 @@ BOLD  := \033[1m
 # ----------------------------------------------------------------------------
 .PHONY: help
 help:
-	@echo ""
-	@echo "$(BOLD)$(CYAN)Pulsar$(RESET) - Incident Management Platform"
-	@echo ""
-	@echo "$(BOLD)Usage:$(RESET) make $(GREEN)<target>$(RESET)"
-	@echo ""
-	@echo "$(BOLD)Development:$(RESET)"
-	@echo "  $(GREEN)up$(RESET)                Start all services"
-	@echo "  $(GREEN)down$(RESET)              Stop all services"
-	@echo "  $(GREEN)build$(RESET)             Build Docker images"
-	@echo "  $(GREEN)logs$(RESET)              View container logs"
-	@echo "  $(GREEN)restart$(RESET)           Restart all services"
-	@echo "  $(GREEN)ps$(RESET)                Show running containers"
-	@echo ""
-	@echo "$(BOLD)Database:$(RESET)"
-	@echo "  $(GREEN)migrate-up$(RESET)        Run database migrations"
-	@echo "  $(GREEN)migrate-down$(RESET)      Rollback last migration"
-	@echo "  $(GREEN)migrate-create$(RESET)    Create new migration (NAME=<name>)"
-	@echo "  $(GREEN)db-reset$(RESET)          Reset database $(RED)(destructive)$(RESET)"
-	@echo "  $(GREEN)seed$(RESET)              Seed demo data"
-	@echo ""
-	@echo "$(BOLD)Testing:$(RESET)"
-	@echo "  $(GREEN)test$(RESET)              Run unit tests"
-	@echo "  $(GREEN)test-integration$(RESET)  Run integration tests"
-	@echo "  $(GREEN)test-coverage$(RESET)     Generate coverage report"
-	@echo ""
-	@echo "$(BOLD)Code Quality:$(RESET)"
-	@echo "  $(GREEN)lint$(RESET)              Run all linters"
-	@echo "  $(GREEN)fmt$(RESET)               Format all code"
-	@echo "  $(GREEN)fmt-check$(RESET)         Check code formatting"
-	@echo "  $(GREEN)vet$(RESET)               Run go vet"
-	@echo ""
-	@echo "$(BOLD)Utilities:$(RESET)"
-	@echo "  $(GREEN)swagger$(RESET)           Generate Swagger docs"
-	@echo "  $(GREEN)clean$(RESET)             Clean up containers and volumes"
-	@echo ""
+	@printf "\n"
+	@printf "$(BOLD)$(CYAN)Pulsar$(RESET) - Incident Management Platform\n"
+	@printf "\n"
+	@printf "$(BOLD)Usage:$(RESET) make $(GREEN)<target>$(RESET)\n"
+	@printf "\n"
+	@printf "$(BOLD)Development:$(RESET)\n"
+	@printf "  $(GREEN)up$(RESET)                Start all services\n"
+	@printf "  $(GREEN)down$(RESET)              Stop all services\n"
+	@printf "  $(GREEN)build$(RESET)             Build Docker images\n"
+	@printf "  $(GREEN)logs$(RESET)              View container logs\n"
+	@printf "  $(GREEN)restart$(RESET)           Restart all services\n"
+	@printf "  $(GREEN)ps$(RESET)                Show running containers\n"
+	@printf "\n"
+	@printf "$(BOLD)Database:$(RESET)\n"
+	@printf "  $(GREEN)migrate-up$(RESET)        Run database migrations\n"
+	@printf "  $(GREEN)migrate-down$(RESET)      Rollback last migration\n"
+	@printf "  $(GREEN)migrate-create$(RESET)    Create new migration (NAME=<name>)\n"
+	@printf "  $(GREEN)db-reset$(RESET)          Reset database $(RED)(destructive)$(RESET)\n"
+	@printf "  $(GREEN)seed$(RESET)              Seed demo data\n"
+	@printf "\n"
+	@printf "$(BOLD)Testing:$(RESET)\n"
+	@printf "  $(GREEN)test$(RESET)              Run unit tests\n"
+	@printf "  $(GREEN)test-integration$(RESET)  Run integration tests\n"
+	@printf "  $(GREEN)test-coverage$(RESET)     Generate coverage report\n"
+	@printf "\n"
+	@printf "$(BOLD)Code Quality:$(RESET)\n"
+	@printf "  $(GREEN)lint$(RESET)              Run all linters\n"
+	@printf "  $(GREEN)fmt$(RESET)               Format all code\n"
+	@printf "  $(GREEN)fmt-check$(RESET)         Check code formatting\n"
+	@printf "  $(GREEN)vet$(RESET)               Run go vet\n"
+	@printf "\n"
+	@printf "$(BOLD)Utilities:$(RESET)\n"
+	@printf "  $(GREEN)swagger$(RESET)           Generate Swagger docs\n"
+	@printf "  $(GREEN)clean$(RESET)             Clean up containers and volumes\n"
+	@printf "\n"
 
 # ----------------------------------------------------------------------------
 # Development
@@ -79,29 +79,29 @@ help:
 .PHONY: up down build logs restart ps
 
 up:
-	@echo "$(CYAN)Starting services...$(RESET)"
+	@printf "$(CYAN)Starting services...$(RESET)\n"
 	@$(DOCKER_COMPOSE) up -d
-	@echo "$(YELLOW)Waiting for services to be ready...$(RESET)"
+	@printf "$(YELLOW)Waiting for services to be ready...$(RESET)\n"
 	@sleep 5
-	@echo ""
-	@echo "$(GREEN)$(BOLD)Services started successfully!$(RESET)"
-	@echo ""
-	@echo "  Frontend:  $(CYAN)http://localhost:5173$(RESET)"
-	@echo "  API:       $(CYAN)http://localhost:8081$(RESET)"
-	@echo "  Swagger:   $(CYAN)http://localhost:8081/swagger/index.html$(RESET)"
-	@echo "  Mailpit:   $(CYAN)http://localhost:8025$(RESET)"
-	@echo "  Database:  $(CYAN)localhost:5433$(RESET)"
-	@echo ""
+	@printf "\n"
+	@printf "$(GREEN)$(BOLD)Services started successfully!$(RESET)\n"
+	@printf "\n"
+	@printf "  Frontend:  $(CYAN)http://localhost:5173$(RESET)\n"
+	@printf "  API:       $(CYAN)http://localhost:8081$(RESET)\n"
+	@printf "  Swagger:   $(CYAN)http://localhost:8081/swagger/index.html$(RESET)\n"
+	@printf "  Mailpit:   $(CYAN)http://localhost:8025$(RESET)\n"
+	@printf "  Database:  $(CYAN)localhost:5433$(RESET)\n"
+	@printf "\n"
 
 down:
-	@echo "$(CYAN)Stopping services...$(RESET)"
+	@printf "$(CYAN)Stopping services...$(RESET)\n"
 	@$(DOCKER_COMPOSE) down
-	@echo "$(GREEN)Services stopped.$(RESET)"
+	@printf "$(GREEN)Services stopped.$(RESET)\n"
 
 build:
-	@echo "$(CYAN)Building Docker images...$(RESET)"
+	@printf "$(CYAN)Building Docker images...$(RESET)\n"
 	@$(DOCKER_COMPOSE) build
-	@echo "$(GREEN)Build complete.$(RESET)"
+	@printf "$(GREEN)Build complete.$(RESET)\n"
 
 logs:
 	@$(DOCKER_COMPOSE) logs -f
@@ -117,47 +117,47 @@ ps:
 .PHONY: migrate-up migrate-down migrate-create db-reset seed
 
 migrate-up:
-	@echo "$(CYAN)Running migrations...$(RESET)"
+	@printf "$(CYAN)Running migrations...$(RESET)\n"
 	@$(DOCKER_COMPOSE) exec -T backend migrate -path=/app/migrations -database "$(DB_URL)" up
-	@echo "$(GREEN)Migrations complete.$(RESET)"
+	@printf "$(GREEN)Migrations complete.$(RESET)\n"
 
 migrate-down:
-	@echo "$(YELLOW)Rolling back last migration...$(RESET)"
+	@printf "$(YELLOW)Rolling back last migration...$(RESET)\n"
 	@$(DOCKER_COMPOSE) exec -T backend migrate -path=/app/migrations -database "$(DB_URL)" down 1
-	@echo "$(GREEN)Rollback complete.$(RESET)"
+	@printf "$(GREEN)Rollback complete.$(RESET)\n"
 
 migrate-create:
 	@if [ -z "$(NAME)" ]; then \
-		echo "$(RED)Error: NAME is required$(RESET)"; \
-		echo "Usage: make migrate-create NAME=<migration_name>"; \
+		printf "$(RED)Error: NAME is required$(RESET)\n"; \
+		printf "Usage: make migrate-create NAME=<migration_name>\n"; \
 		exit 1; \
 	fi
-	@echo "$(CYAN)Creating migration: $(NAME)$(RESET)"
+	@printf "$(CYAN)Creating migration: $(NAME)$(RESET)\n"
 	@$(DOCKER_COMPOSE) exec backend migrate create -ext sql -dir /app/migrations -seq $(NAME)
 
 db-reset:
-	@echo "$(RED)$(BOLD)WARNING: This will delete all data!$(RESET)"
+	@printf "$(RED)$(BOLD)WARNING: This will delete all data!$(RESET)\n"
 	@read -p "Are you sure? [y/N] " -n 1 -r; \
 	echo; \
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		echo "$(CYAN)Resetting database...$(RESET)"; \
+		printf "$(CYAN)Resetting database...$(RESET)\n"; \
 		$(DOCKER_COMPOSE) down -v; \
 		$(DOCKER_COMPOSE) up -d postgres; \
 		sleep 5; \
 		$(MAKE) migrate-up; \
-		echo "$(GREEN)Database reset complete.$(RESET)"; \
+		printf "$(GREEN)Database reset complete.$(RESET)\n"; \
 	else \
-		echo "$(YELLOW)Cancelled.$(RESET)"; \
+		printf "$(YELLOW)Cancelled.$(RESET)\n"; \
 	fi
 
 seed:
-	@echo "$(CYAN)Seeding demo data...$(RESET)"
+	@printf "$(CYAN)Seeding demo data...$(RESET)\n"
 	@cd $(BACKEND_DIR) && \
 		DATABASE_URL="postgres://$(DB_USER):$(DB_PASS)@localhost:5433/$(DB_NAME)?sslmode=disable" \
 		JWT_SECRET="dev_jwt_secret_change_in_production_min_32_chars" \
 		JWT_REFRESH_SECRET="dev_refresh_secret_change_in_production_min_32_chars" \
 		go run ./cmd/seed/main.go
-	@echo "$(GREEN)Seeding complete.$(RESET)"
+	@printf "$(GREEN)Seeding complete.$(RESET)\n"
 
 # ----------------------------------------------------------------------------
 # Testing
@@ -165,35 +165,35 @@ seed:
 .PHONY: test test-db-up test-db-down test-integration test-integration-verbose test-coverage
 
 test:
-	@echo "$(CYAN)Running unit tests...$(RESET)"
+	@printf "$(CYAN)Running unit tests...$(RESET)\n"
 	@cd $(BACKEND_DIR) && go test -v ./...
 
 test-db-up:
-	@echo "$(CYAN)Starting test database...$(RESET)"
+	@printf "$(CYAN)Starting test database...$(RESET)\n"
 	@$(DOCKER_TEST) up -d
 	@sleep 3
-	@echo "$(GREEN)Test database ready at localhost:5434$(RESET)"
+	@printf "$(GREEN)Test database ready at localhost:5434$(RESET)\n"
 
 test-db-down:
 	@$(DOCKER_TEST) down -v
 
 test-integration: test-db-up
-	@echo "$(CYAN)Running integration tests...$(RESET)"
+	@printf "$(CYAN)Running integration tests...$(RESET)\n"
 	@cd $(BACKEND_DIR) && go test -v ./tests/integration/... -count=1 || ($(MAKE) test-db-down && exit 1)
 	@$(MAKE) test-db-down
-	@echo "$(GREEN)Integration tests passed.$(RESET)"
+	@printf "$(GREEN)Integration tests passed.$(RESET)\n"
 
 test-integration-verbose: test-db-up
-	@echo "$(CYAN)Running integration tests (verbose)...$(RESET)"
+	@printf "$(CYAN)Running integration tests (verbose)...$(RESET)\n"
 	@cd $(BACKEND_DIR) && go test -v -race ./tests/integration/... -count=1 || ($(MAKE) test-db-down && exit 1)
 	@$(MAKE) test-db-down
 
 test-coverage: test-db-up
-	@echo "$(CYAN)Running tests with coverage...$(RESET)"
+	@printf "$(CYAN)Running tests with coverage...$(RESET)\n"
 	@cd $(BACKEND_DIR) && go test -v -coverprofile=coverage.out -covermode=atomic ./tests/integration/... || ($(MAKE) test-db-down && exit 1)
 	@cd $(BACKEND_DIR) && go tool cover -html=coverage.out -o coverage.html
 	@$(MAKE) test-db-down
-	@echo "$(GREEN)Coverage report: $(BACKEND_DIR)/coverage.html$(RESET)"
+	@printf "$(GREEN)Coverage report: $(BACKEND_DIR)/coverage.html$(RESET)\n"
 
 # ----------------------------------------------------------------------------
 # Code Quality
@@ -201,48 +201,48 @@ test-coverage: test-db-up
 .PHONY: lint lint-backend lint-frontend fmt fmt-backend fmt-frontend fmt-check fmt-check-backend fmt-check-frontend vet
 
 lint: lint-backend lint-frontend
-	@echo "$(GREEN)Linting complete.$(RESET)"
+	@printf "$(GREEN)Linting complete.$(RESET)\n"
 
 lint-backend:
-	@echo "$(CYAN)Linting backend...$(RESET)"
+	@printf "$(CYAN)Linting backend...$(RESET)\n"
 	@cd $(BACKEND_DIR) && golangci-lint run ./...
 
 lint-frontend:
-	@echo "$(CYAN)Linting frontend...$(RESET)"
+	@printf "$(CYAN)Linting frontend...$(RESET)\n"
 	@cd $(FRONTEND_DIR) && npm run lint
 
 fmt: fmt-backend fmt-frontend
-	@echo "$(GREEN)Formatting complete.$(RESET)"
+	@printf "$(GREEN)Formatting complete.$(RESET)\n"
 
 fmt-backend:
-	@echo "$(CYAN)Formatting backend...$(RESET)"
+	@printf "$(CYAN)Formatting backend...$(RESET)\n"
 	@cd $(BACKEND_DIR) && gofmt -w .
 	@cd $(BACKEND_DIR) && goimports -w . 2>/dev/null || true
 
 fmt-frontend:
-	@echo "$(CYAN)Formatting frontend...$(RESET)"
+	@printf "$(CYAN)Formatting frontend...$(RESET)\n"
 	@cd $(FRONTEND_DIR) && npm run format
 
 fmt-check: fmt-check-backend fmt-check-frontend
 
 fmt-check-backend:
-	@echo "$(CYAN)Checking backend formatting...$(RESET)"
+	@printf "$(CYAN)Checking backend formatting...$(RESET)\n"
 	@cd $(BACKEND_DIR) && if [ -n "$$(gofmt -l .)" ]; then \
-		echo "$(RED)Backend: Files not formatted:$(RESET)"; \
+		printf "$(RED)Backend: Files not formatted:$(RESET)\n"; \
 		gofmt -l .; \
 		exit 1; \
 	else \
-		echo "$(GREEN)Backend: All files formatted$(RESET)"; \
+		printf "$(GREEN)Backend: All files formatted$(RESET)\n"; \
 	fi
 
 fmt-check-frontend:
-	@echo "$(CYAN)Checking frontend formatting...$(RESET)"
+	@printf "$(CYAN)Checking frontend formatting...$(RESET)\n"
 	@cd $(FRONTEND_DIR) && npm run format:check
 
 vet:
-	@echo "$(CYAN)Running go vet...$(RESET)"
+	@printf "$(CYAN)Running go vet...$(RESET)\n"
 	@cd $(BACKEND_DIR) && go vet ./...
-	@echo "$(GREEN)Vet complete.$(RESET)"
+	@printf "$(GREEN)Vet complete.$(RESET)\n"
 
 # ----------------------------------------------------------------------------
 # Utilities
@@ -250,15 +250,15 @@ vet:
 .PHONY: swagger clean
 
 swagger:
-	@echo "$(CYAN)Generating Swagger documentation...$(RESET)"
+	@printf "$(CYAN)Generating Swagger documentation...$(RESET)\n"
 	@cd $(BACKEND_DIR) && swag init -g cmd/api/main.go -o docs
-	@echo "$(GREEN)Swagger docs generated.$(RESET)"
+	@printf "$(GREEN)Swagger docs generated.$(RESET)\n"
 
 clean:
-	@echo "$(CYAN)Cleaning up...$(RESET)"
+	@printf "$(CYAN)Cleaning up...$(RESET)\n"
 	@$(DOCKER_COMPOSE) down -v 2>/dev/null || true
 	@$(DOCKER_TEST) down -v 2>/dev/null || true
 	@rm -rf $(BACKEND_DIR)/tmp
 	@rm -f $(BACKEND_DIR)/build-errors.log
 	@rm -f $(BACKEND_DIR)/coverage.out $(BACKEND_DIR)/coverage.html
-	@echo "$(GREEN)Cleanup complete.$(RESET)"
+	@printf "$(GREEN)Cleanup complete.$(RESET)\n"
