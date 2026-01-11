@@ -15,7 +15,7 @@
 
 ---
 
-*Open-source alternative to OpsGenie and PagerDuty for teams who want full control over their incident management workflow.*
+*Open-source incident management platform with alerting, on-call scheduling, and escalation policies. Built for teams who want full control over their workflow.*
 
 </div>
 
