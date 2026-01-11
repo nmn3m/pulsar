@@ -205,7 +205,9 @@
     <div class="bg-white p-6 rounded-lg shadow border-l-4 {priorityColors[alertData.priority]}">
       <div class="flex items-start justify-between mb-4">
         <div class="flex items-center gap-2">
-          <span class="px-3 py-1 text-sm font-semibold rounded {priorityColors[alertData.priority]}">
+          <span
+            class="px-3 py-1 text-sm font-semibold rounded {priorityColors[alertData.priority]}"
+          >
             {alertData.priority}
           </span>
           <span class="px-3 py-1 text-sm font-semibold rounded {statusColors[alertData.status]}">
@@ -286,7 +288,9 @@
         {#if alertData.snoozed_until}
           <div>
             <div class="text-sm text-gray-600">Snoozed Until</div>
-            <div class="font-medium">{dayjs(alertData.snoozed_until).format('MMM D, YYYY h:mm A')}</div>
+            <div class="font-medium">
+              {dayjs(alertData.snoozed_until).format('MMM D, YYYY h:mm A')}
+            </div>
           </div>
         {/if}
       </div>
