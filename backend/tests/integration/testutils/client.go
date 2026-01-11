@@ -128,20 +128,22 @@ func (c *TestClient) ReadBody(resp *http.Response) string {
 	return string(body)
 }
 
-// ExpectStatus asserts the response status code
+// ExpectStatus asserts the response status code without closing the body
+// The caller should close the body using ParseJSON, ReadBody, or resp.Body.Close()
 func (c *TestClient) ExpectStatus(resp *http.Response, expected int) {
-	defer resp.Body.Close()
 	if resp.StatusCode != expected {
 		body, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
 		c.t.Errorf("Expected status %d, got %d. Body: %s", expected, resp.StatusCode, string(body))
 	}
 }
 
 // AssertStatus asserts the response status code and fails immediately if wrong
+// Does not close the body so that subsequent calls can read from it
 func (c *TestClient) AssertStatus(resp *http.Response, expected int) {
-	defer resp.Body.Close()
 	if resp.StatusCode != expected {
 		body, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
 		c.t.Fatalf("Expected status %d, got %d. Body: %s", expected, resp.StatusCode, string(body))
 	}
 }
