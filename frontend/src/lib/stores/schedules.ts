@@ -9,7 +9,7 @@ interface SchedulesState {
 }
 
 function createSchedulesStore() {
-  const { subscribe, set, update } = writable<SchedulesState>({
+  const { subscribe, update } = writable<SchedulesState>({
     schedules: [],
     isLoading: false,
     error: null,
@@ -43,42 +43,30 @@ function createSchedulesStore() {
       timezone?: string;
       team_id?: string;
     }) {
-      try {
-        const schedule = await api.createSchedule(data);
-        update((state) => ({
-          ...state,
-          schedules: [schedule, ...state.schedules],
-        }));
-      } catch (err) {
-        throw err;
-      }
+      const schedule = await api.createSchedule(data);
+      update((state) => ({
+        ...state,
+        schedules: [schedule, ...state.schedules],
+      }));
     },
 
     async update(
       id: string,
       data: { name?: string; description?: string; timezone?: string; team_id?: string }
     ) {
-      try {
-        const schedule = await api.updateSchedule(id, data);
-        update((state) => ({
-          ...state,
-          schedules: state.schedules.map((s) => (s.id === id ? schedule : s)),
-        }));
-      } catch (err) {
-        throw err;
-      }
+      const schedule = await api.updateSchedule(id, data);
+      update((state) => ({
+        ...state,
+        schedules: state.schedules.map((s) => (s.id === id ? schedule : s)),
+      }));
     },
 
     async delete(id: string) {
-      try {
-        await api.deleteSchedule(id);
-        update((state) => ({
-          ...state,
-          schedules: state.schedules.filter((s) => s.id !== id),
-        }));
-      } catch (err) {
-        throw err;
-      }
+      await api.deleteSchedule(id);
+      update((state) => ({
+        ...state,
+        schedules: state.schedules.filter((s) => s.id !== id),
+      }));
     },
   };
 }

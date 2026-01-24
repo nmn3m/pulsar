@@ -50,7 +50,6 @@ import type {
   ScheduleRotation,
   ScheduleOverride,
   OnCallUser,
-  ParticipantWithUser,
   CreateScheduleRequest,
   UpdateScheduleRequest,
   CreateRotationRequest,
@@ -93,7 +92,6 @@ import type {
 } from '$lib/types/notification';
 import type {
   WebhookEndpoint,
-  WebhookDelivery,
   IncomingWebhookToken,
   CreateWebhookEndpointRequest,
   UpdateWebhookEndpointRequest,

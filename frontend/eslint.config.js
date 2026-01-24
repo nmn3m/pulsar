@@ -35,7 +35,10 @@ export default [
   {
     rules: {
       // Relaxed rules for development
-      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
       '@typescript-eslint/no-explicit-any': 'off',
       'no-useless-catch': 'warn',
       'svelte/valid-compile': ['error', { ignoreWarnings: true }],

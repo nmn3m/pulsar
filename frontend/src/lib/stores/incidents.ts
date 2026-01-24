@@ -2,7 +2,6 @@ import { writable } from 'svelte/store';
 import { api } from '$lib/api/client';
 import type {
   Incident,
-  IncidentWithDetails,
   CreateIncidentRequest,
   UpdateIncidentRequest,
   ListIncidentsParams,

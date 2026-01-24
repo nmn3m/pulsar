@@ -9,7 +9,7 @@ interface EscalationPoliciesState {
 }
 
 function createEscalationPoliciesStore() {
-  const { subscribe, set, update } = writable<EscalationPoliciesState>({
+  const { subscribe, update } = writable<EscalationPoliciesState>({
     policies: [],
     isLoading: false,
     error: null,
@@ -43,15 +43,11 @@ function createEscalationPoliciesStore() {
       repeat_enabled?: boolean;
       repeat_count?: number;
     }) {
-      try {
-        const policy = await api.createEscalationPolicy(data);
-        update((state) => ({
-          ...state,
-          policies: [policy, ...state.policies],
-        }));
-      } catch (err) {
-        throw err;
-      }
+      const policy = await api.createEscalationPolicy(data);
+      update((state) => ({
+        ...state,
+        policies: [policy, ...state.policies],
+      }));
     },
 
     async update(
@@ -63,27 +59,19 @@ function createEscalationPoliciesStore() {
         repeat_count?: number;
       }
     ) {
-      try {
-        const policy = await api.updateEscalationPolicy(id, data);
-        update((state) => ({
-          ...state,
-          policies: state.policies.map((p) => (p.id === id ? policy : p)),
-        }));
-      } catch (err) {
-        throw err;
-      }
+      const policy = await api.updateEscalationPolicy(id, data);
+      update((state) => ({
+        ...state,
+        policies: state.policies.map((p) => (p.id === id ? policy : p)),
+      }));
     },
 
     async delete(id: string) {
-      try {
-        await api.deleteEscalationPolicy(id);
-        update((state) => ({
-          ...state,
-          policies: state.policies.filter((p) => p.id !== id),
-        }));
-      } catch (err) {
-        throw err;
-      }
+      await api.deleteEscalationPolicy(id);
+      update((state) => ({
+        ...state,
+        policies: state.policies.filter((p) => p.id !== id),
+      }));
     },
   };
 }

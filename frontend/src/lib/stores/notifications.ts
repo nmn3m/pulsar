@@ -17,7 +17,7 @@ interface NotificationChannelsState {
 }
 
 function createNotificationChannelsStore() {
-  const { subscribe, set, update } = writable<NotificationChannelsState>({
+  const { subscribe, update } = writable<NotificationChannelsState>({
     channels: [],
     isLoading: false,
     error: null,
@@ -46,41 +46,29 @@ function createNotificationChannelsStore() {
     },
 
     async create(data: CreateNotificationChannelRequest) {
-      try {
-        const channel = await api.createNotificationChannel(data);
-        update((state) => ({
-          ...state,
-          channels: [channel, ...state.channels],
-        }));
-        return channel;
-      } catch (err) {
-        throw err;
-      }
+      const channel = await api.createNotificationChannel(data);
+      update((state) => ({
+        ...state,
+        channels: [channel, ...state.channels],
+      }));
+      return channel;
     },
 
     async update(id: string, data: UpdateNotificationChannelRequest) {
-      try {
-        const channel = await api.updateNotificationChannel(id, data);
-        update((state) => ({
-          ...state,
-          channels: state.channels.map((c) => (c.id === id ? channel : c)),
-        }));
-        return channel;
-      } catch (err) {
-        throw err;
-      }
+      const channel = await api.updateNotificationChannel(id, data);
+      update((state) => ({
+        ...state,
+        channels: state.channels.map((c) => (c.id === id ? channel : c)),
+      }));
+      return channel;
     },
 
     async delete(id: string) {
-      try {
-        await api.deleteNotificationChannel(id);
-        update((state) => ({
-          ...state,
-          channels: state.channels.filter((c) => c.id !== id),
-        }));
-      } catch (err) {
-        throw err;
-      }
+      await api.deleteNotificationChannel(id);
+      update((state) => ({
+        ...state,
+        channels: state.channels.filter((c) => c.id !== id),
+      }));
     },
   };
 }
@@ -93,7 +81,7 @@ interface UserNotificationPreferencesState {
 }
 
 function createUserNotificationPreferencesStore() {
-  const { subscribe, set, update } = writable<UserNotificationPreferencesState>({
+  const { subscribe, update } = writable<UserNotificationPreferencesState>({
     preferences: [],
     isLoading: false,
     error: null,
@@ -122,41 +110,29 @@ function createUserNotificationPreferencesStore() {
     },
 
     async create(data: CreateUserNotificationPreferenceRequest) {
-      try {
-        const preference = await api.createUserNotificationPreference(data);
-        update((state) => ({
-          ...state,
-          preferences: [preference, ...state.preferences],
-        }));
-        return preference;
-      } catch (err) {
-        throw err;
-      }
+      const preference = await api.createUserNotificationPreference(data);
+      update((state) => ({
+        ...state,
+        preferences: [preference, ...state.preferences],
+      }));
+      return preference;
     },
 
     async update(id: string, data: UpdateUserNotificationPreferenceRequest) {
-      try {
-        const preference = await api.updateUserNotificationPreference(id, data);
-        update((state) => ({
-          ...state,
-          preferences: state.preferences.map((p) => (p.id === id ? preference : p)),
-        }));
-        return preference;
-      } catch (err) {
-        throw err;
-      }
+      const preference = await api.updateUserNotificationPreference(id, data);
+      update((state) => ({
+        ...state,
+        preferences: state.preferences.map((p) => (p.id === id ? preference : p)),
+      }));
+      return preference;
     },
 
     async delete(id: string) {
-      try {
-        await api.deleteUserNotificationPreference(id);
-        update((state) => ({
-          ...state,
-          preferences: state.preferences.filter((p) => p.id !== id),
-        }));
-      } catch (err) {
-        throw err;
-      }
+      await api.deleteUserNotificationPreference(id);
+      update((state) => ({
+        ...state,
+        preferences: state.preferences.filter((p) => p.id !== id),
+      }));
     },
   };
 }

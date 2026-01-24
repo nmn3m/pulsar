@@ -52,54 +52,38 @@ function createAPIKeysStore() {
     },
 
     async create(data: CreateAPIKeyRequest): Promise<APIKeyResponse> {
-      try {
-        const key = await api.createAPIKey(data);
-        update((state) => ({
-          ...state,
-          apiKeys: [key, ...state.apiKeys],
-          newlyCreatedKey: key,
-        }));
-        return key;
-      } catch (error) {
-        throw error;
-      }
+      const key = await api.createAPIKey(data);
+      update((state) => ({
+        ...state,
+        apiKeys: [key, ...state.apiKeys],
+        newlyCreatedKey: key,
+      }));
+      return key;
     },
 
     async updateKey(id: string, data: UpdateAPIKeyRequest) {
-      try {
-        const updatedKey = await api.updateAPIKey(id, data);
-        update((state) => ({
-          ...state,
-          apiKeys: state.apiKeys.map((k) => (k.id === id ? updatedKey : k)),
-        }));
-        return updatedKey;
-      } catch (error) {
-        throw error;
-      }
+      const updatedKey = await api.updateAPIKey(id, data);
+      update((state) => ({
+        ...state,
+        apiKeys: state.apiKeys.map((k) => (k.id === id ? updatedKey : k)),
+      }));
+      return updatedKey;
     },
 
     async revoke(id: string) {
-      try {
-        await api.revokeAPIKey(id);
-        update((state) => ({
-          ...state,
-          apiKeys: state.apiKeys.map((k) => (k.id === id ? { ...k, is_active: false } : k)),
-        }));
-      } catch (error) {
-        throw error;
-      }
+      await api.revokeAPIKey(id);
+      update((state) => ({
+        ...state,
+        apiKeys: state.apiKeys.map((k) => (k.id === id ? { ...k, is_active: false } : k)),
+      }));
     },
 
     async delete(id: string) {
-      try {
-        await api.deleteAPIKey(id);
-        update((state) => ({
-          ...state,
-          apiKeys: state.apiKeys.filter((k) => k.id !== id),
-        }));
-      } catch (error) {
-        throw error;
-      }
+      await api.deleteAPIKey(id);
+      update((state) => ({
+        ...state,
+        apiKeys: state.apiKeys.filter((k) => k.id !== id),
+      }));
     },
 
     clearNewlyCreatedKey() {

@@ -48,7 +48,7 @@ function createAuthStore() {
           isAuthenticated: true,
           isLoading: false,
         }));
-      } catch (error) {
+      } catch {
         // Token might be expired, try to refresh
         try {
           const response = await api.refreshToken();
@@ -74,71 +74,55 @@ function createAuthStore() {
     },
 
     async register(data: RegisterRequest) {
-      try {
-        const response = await api.register(data);
-        if (response.requires_email_verification) {
-          update((state) => ({
-            ...state,
-            pendingVerificationEmail: data.email,
-            isLoading: false,
-          }));
-        } else {
-          set({
-            user: response.user,
-            organization: response.organization,
-            isAuthenticated: true,
-            isLoading: false,
-            pendingVerificationEmail: null,
-          });
-        }
-        return response;
-      } catch (error) {
-        throw error;
+      const response = await api.register(data);
+      if (response.requires_email_verification) {
+        update((state) => ({
+          ...state,
+          pendingVerificationEmail: data.email,
+          isLoading: false,
+        }));
+      } else {
+        set({
+          user: response.user,
+          organization: response.organization,
+          isAuthenticated: true,
+          isLoading: false,
+          pendingVerificationEmail: null,
+        });
       }
+      return response;
     },
 
     async login(data: LoginRequest) {
-      try {
-        const response = await api.login(data);
-        if (response.requires_email_verification) {
-          update((state) => ({
-            ...state,
-            pendingVerificationEmail: data.email,
-            isLoading: false,
-          }));
-        } else {
-          set({
-            user: response.user,
-            organization: response.organization,
-            isAuthenticated: true,
-            isLoading: false,
-            pendingVerificationEmail: null,
-          });
-        }
-        return response;
-      } catch (error) {
-        throw error;
+      const response = await api.login(data);
+      if (response.requires_email_verification) {
+        update((state) => ({
+          ...state,
+          pendingVerificationEmail: data.email,
+          isLoading: false,
+        }));
+      } else {
+        set({
+          user: response.user,
+          organization: response.organization,
+          isAuthenticated: true,
+          isLoading: false,
+          pendingVerificationEmail: null,
+        });
       }
+      return response;
     },
 
     async verifyEmail(data: VerifyEmailRequest) {
-      try {
-        await api.verifyEmail(data);
-        update((state) => ({
-          ...state,
-          pendingVerificationEmail: null,
-        }));
-      } catch (error) {
-        throw error;
-      }
+      await api.verifyEmail(data);
+      update((state) => ({
+        ...state,
+        pendingVerificationEmail: null,
+      }));
     },
 
     async resendOTP(data: ResendOTPRequest) {
-      try {
-        await api.resendOTP(data);
-      } catch (error) {
-        throw error;
-      }
+      await api.resendOTP(data);
     },
 
     setPendingVerificationEmail(email: string | null) {

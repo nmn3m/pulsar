@@ -25,7 +25,7 @@ export interface WSMessage {
   id: string;
   type: WSEventType;
   organization_id: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -40,7 +40,7 @@ interface WebSocketState {
 }
 
 function createWebSocketStore() {
-  const { subscribe, set, update } = writable<WebSocketState>({
+  const { subscribe, update } = writable<WebSocketState>({
     status: 'disconnected',
     error: null,
     lastMessage: null,
@@ -185,7 +185,7 @@ function createWebSocketStore() {
     };
   }
 
-  function send(message: any) {
+  function send(message: unknown) {
     if (socket?.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify(message));
     } else {

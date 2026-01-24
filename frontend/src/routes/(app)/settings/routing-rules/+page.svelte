@@ -527,7 +527,7 @@
         wins.
       </p>
 
-      {#each rules as rule, index}
+      {#each rules as rule, _index}
         <div
           class="bg-white rounded-xl border shadow-sm overflow-hidden {rule.enabled
             ? 'border-gray-200'

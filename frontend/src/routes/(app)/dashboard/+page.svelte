@@ -35,7 +35,7 @@
     return `${Math.round(seconds / 86400)}d`;
   }
 
-  function getStatusColor(status: string): string {
+  function _getStatusColor(status: string): string {
     switch (status) {
       case 'open':
         return 'text-red-500';

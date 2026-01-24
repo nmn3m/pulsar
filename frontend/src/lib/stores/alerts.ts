@@ -55,99 +55,71 @@ function createAlertsStore() {
     },
 
     async create(data: CreateAlertRequest) {
-      try {
-        const alert = await api.createAlert(data);
-        update((state) => ({
-          ...state,
-          alerts: [alert, ...state.alerts],
-          total: state.total + 1,
-        }));
-        return alert;
-      } catch (error) {
-        throw error;
-      }
+      const alert = await api.createAlert(data);
+      update((state) => ({
+        ...state,
+        alerts: [alert, ...state.alerts],
+        total: state.total + 1,
+      }));
+      return alert;
     },
 
     async update(id: string, data: UpdateAlertRequest) {
-      try {
-        const updatedAlert = await api.updateAlert(id, data);
-        update((state) => ({
-          ...state,
-          alerts: state.alerts.map((a) => (a.id === id ? updatedAlert : a)),
-        }));
-        return updatedAlert;
-      } catch (error) {
-        throw error;
-      }
+      const updatedAlert = await api.updateAlert(id, data);
+      update((state) => ({
+        ...state,
+        alerts: state.alerts.map((a) => (a.id === id ? updatedAlert : a)),
+      }));
+      return updatedAlert;
     },
 
     async delete(id: string) {
-      try {
-        await api.deleteAlert(id);
-        update((state) => ({
-          ...state,
-          alerts: state.alerts.filter((a) => a.id !== id),
-          total: state.total - 1,
-        }));
-      } catch (error) {
-        throw error;
-      }
+      await api.deleteAlert(id);
+      update((state) => ({
+        ...state,
+        alerts: state.alerts.filter((a) => a.id !== id),
+        total: state.total - 1,
+      }));
     },
 
     async acknowledge(id: string) {
-      try {
-        await api.acknowledgeAlert(id);
-        // Reload to get updated alert
-        const alert = await api.getAlert(id);
-        update((state) => ({
-          ...state,
-          alerts: state.alerts.map((a) => (a.id === id ? alert : a)),
-        }));
-      } catch (error) {
-        throw error;
-      }
+      await api.acknowledgeAlert(id);
+      // Reload to get updated alert
+      const alert = await api.getAlert(id);
+      update((state) => ({
+        ...state,
+        alerts: state.alerts.map((a) => (a.id === id ? alert : a)),
+      }));
     },
 
     async close(id: string, data: CloseAlertRequest) {
-      try {
-        await api.closeAlert(id, data);
-        // Reload to get updated alert
-        const alert = await api.getAlert(id);
-        update((state) => ({
-          ...state,
-          alerts: state.alerts.map((a) => (a.id === id ? alert : a)),
-        }));
-      } catch (error) {
-        throw error;
-      }
+      await api.closeAlert(id, data);
+      // Reload to get updated alert
+      const alert = await api.getAlert(id);
+      update((state) => ({
+        ...state,
+        alerts: state.alerts.map((a) => (a.id === id ? alert : a)),
+      }));
     },
 
     async snooze(id: string, data: SnoozeAlertRequest) {
-      try {
-        await api.snoozeAlert(id, data);
-        // Reload to get updated alert
-        const alert = await api.getAlert(id);
-        update((state) => ({
-          ...state,
-          alerts: state.alerts.map((a) => (a.id === id ? alert : a)),
-        }));
-      } catch (error) {
-        throw error;
-      }
+      await api.snoozeAlert(id, data);
+      // Reload to get updated alert
+      const alert = await api.getAlert(id);
+      update((state) => ({
+        ...state,
+        alerts: state.alerts.map((a) => (a.id === id ? alert : a)),
+      }));
     },
 
     async assign(id: string, data: AssignAlertRequest) {
-      try {
-        await api.assignAlert(id, data);
-        // Reload to get updated alert
-        const alert = await api.getAlert(id);
-        update((state) => ({
-          ...state,
-          alerts: state.alerts.map((a) => (a.id === id ? alert : a)),
-        }));
-      } catch (error) {
-        throw error;
-      }
+      await api.assignAlert(id, data);
+      // Reload to get updated alert
+      const alert = await api.getAlert(id);
+      update((state) => ({
+        ...state,
+        alerts: state.alerts.map((a) => (a.id === id ? alert : a)),
+      }));
     },
   };
 }

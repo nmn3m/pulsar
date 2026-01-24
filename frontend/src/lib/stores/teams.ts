@@ -38,41 +38,29 @@ function createTeamsStore() {
     },
 
     async create(data: CreateTeamRequest) {
-      try {
-        const team = await api.createTeam(data);
-        update((state) => ({
-          ...state,
-          teams: [team, ...state.teams],
-        }));
-        return team;
-      } catch (error) {
-        throw error;
-      }
+      const team = await api.createTeam(data);
+      update((state) => ({
+        ...state,
+        teams: [team, ...state.teams],
+      }));
+      return team;
     },
 
     async update(id: string, data: UpdateTeamRequest) {
-      try {
-        const updatedTeam = await api.updateTeam(id, data);
-        update((state) => ({
-          ...state,
-          teams: state.teams.map((t) => (t.id === id ? updatedTeam : t)),
-        }));
-        return updatedTeam;
-      } catch (error) {
-        throw error;
-      }
+      const updatedTeam = await api.updateTeam(id, data);
+      update((state) => ({
+        ...state,
+        teams: state.teams.map((t) => (t.id === id ? updatedTeam : t)),
+      }));
+      return updatedTeam;
     },
 
     async delete(id: string) {
-      try {
-        await api.deleteTeam(id);
-        update((state) => ({
-          ...state,
-          teams: state.teams.filter((t) => t.id !== id),
-        }));
-      } catch (error) {
-        throw error;
-      }
+      await api.deleteTeam(id);
+      update((state) => ({
+        ...state,
+        teams: state.teams.filter((t) => t.id !== id),
+      }));
     },
   };
 }

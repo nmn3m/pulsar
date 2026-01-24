@@ -10,9 +10,6 @@
     UpdateIncidentRequest,
     IncidentSeverity,
     IncidentStatus,
-    ResponderWithUser,
-    TimelineEventWithUser,
-    IncidentAlertWithDetails,
   } from '$lib/types/incident';
   import type { User } from '$lib/types/user';
 
@@ -38,10 +35,10 @@
   let selectedResponderRole: 'incident_commander' | 'responder' = 'responder';
   let availableUsers: User[] = [];
 
-  // Link alert state
-  let showLinkAlertForm = false;
+  // Link alert state (unused for now)
+  let _showLinkAlertForm = false;
   let selectedAlertId = '';
-  let availableAlerts: any[] = [];
+  let _availableAlerts: unknown[] = [];
 
   let unsubscribeWS: (() => void)[] = [];
 
@@ -204,13 +201,13 @@
     }
   }
 
-  async function handleLinkAlert() {
+  async function _handleLinkAlert() {
     if (!selectedAlertId) return;
 
     try {
       await api.linkAlertToIncident(incidentId, { alert_id: selectedAlertId });
       selectedAlertId = '';
-      showLinkAlertForm = false;
+      _showLinkAlertForm = false;
       await loadIncident();
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to link alert';

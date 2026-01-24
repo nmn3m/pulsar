@@ -20,7 +20,7 @@
   let users: User[] = [];
   let teams: Team[] = [];
   let schedules: Schedule[] = [];
-  let notificationChannels: NotificationChannel[] = [];
+  let _notificationChannels: NotificationChannel[] = [];
   let isLoading = true;
   let error = '';
 
@@ -83,7 +83,7 @@
       users = usersResp.users;
       teams = teamsResp.teams;
       schedules = schedulesResp.schedules;
-      notificationChannels = channelsResp.channels || [];
+      _notificationChannels = channelsResp.channels || [];
     } catch (err) {
       console.error('Failed to load resources:', err);
     }

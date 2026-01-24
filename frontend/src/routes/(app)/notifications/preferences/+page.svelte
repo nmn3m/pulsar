@@ -5,7 +5,6 @@
     userNotificationPreferencesStore,
   } from '$lib/stores/notifications';
   import Button from '$lib/components/ui/Button.svelte';
-  import Input from '$lib/components/ui/Input.svelte';
 
   let showCreateForm = false;
   let selectedChannelId = '';

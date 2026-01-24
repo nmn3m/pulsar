@@ -11,7 +11,7 @@
 
   let scheduleId = $page.params.id!;
   let schedule: ScheduleWithRotations | null = null;
-  let users: User[] = [];
+  let _users: User[] = [];
   let onCallUser: OnCallUser | null = null;
   let isLoading = true;
   let error = '';
@@ -49,7 +49,7 @@
   async function loadUsers() {
     try {
       const response = await api.listUsers();
-      users = response.users;
+      _users = response.users;
     } catch (err) {
       console.error('Failed to load users:', err);
     }
