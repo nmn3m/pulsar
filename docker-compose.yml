@@ -58,6 +58,12 @@ services:
       - SMTP_FROM=noreply@pulsar.localhost
       - SMTP_FROM_NAME=Pulsar
       - SMTP_USE_TLS=false
+      # OpenTelemetry configuration (set OTEL_ENABLED=true to enable)
+      - OTEL_ENABLED=true
+      - OTEL_SERVICE_NAME=pulsar-backend
+      - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_ENVIRONMENT=development
     depends_on:
       postgres:
         condition: service_healthy
@@ -68,6 +74,7 @@ services:
       - go_modules:/go/pkg/mod
     networks:
       - pulsar-network
+      - instrumentation_observability
 
   frontend:
     build:
@@ -96,3 +103,5 @@ volumes:
 networks:
   pulsar-network:
     driver: bridge
+  instrumentation_observability:
+    external: true

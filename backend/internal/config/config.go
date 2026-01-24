@@ -8,11 +8,22 @@ import (
 )
 
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-	JWT      JWTConfig
-	CORS     CORSConfig
-	SMTP     SMTPConfig
+	Server    ServerConfig
+	Database  DatabaseConfig
+	JWT       JWTConfig
+	CORS      CORSConfig
+	SMTP      SMTPConfig
+	Email     EmailConfig
+	Telemetry TelemetryConfig
+}
+
+// TelemetryConfig holds OpenTelemetry configuration
+type TelemetryConfig struct {
+	Enabled      bool
+	ServiceName  string
+	OTLPEndpoint string // e.g., "localhost:4317" for gRPC or "localhost:4318" for HTTP
+	OTLPProtocol string // "grpc" or "http"
+	Environment  string // e.g., "development", "production"
 }
 
 type SMTPConfig struct {
@@ -24,6 +35,16 @@ type SMTPConfig struct {
 	FromName string // Sender display name
 	Enabled  bool
 	UseTLS   bool
+}
+
+// EmailConfig holds email provider configuration
+// Provider can be "smtp" (for development with Mailpit) or "resend" (for production)
+type EmailConfig struct {
+	Provider     string // "smtp" or "resend"
+	Enabled      bool
+	From         string // Sender email address
+	FromName     string // Sender display name
+	ResendAPIKey string // Resend API key (used when Provider is "resend")
 }
 
 type ServerConfig struct {
@@ -73,6 +94,20 @@ func Load() (*Config, error) {
 			FromName: getEnv("SMTP_FROM_NAME", "Pulsar"),
 			Enabled:  getEnv("SMTP_ENABLED", "false") == "true",
 			UseTLS:   getEnv("SMTP_USE_TLS", "true") == "true",
+		},
+		Email: EmailConfig{
+			Provider:     getEnv("EMAIL_PROVIDER", "smtp"), // "smtp" for dev (Mailpit), "resend" for production
+			Enabled:      getEnv("EMAIL_ENABLED", "false") == "true",
+			From:         getEnv("EMAIL_FROM", "noreply@pulsar.local"),
+			FromName:     getEnv("EMAIL_FROM_NAME", "Pulsar"),
+			ResendAPIKey: getEnv("RESEND_API_KEY", ""),
+		},
+		Telemetry: TelemetryConfig{
+			Enabled:      getEnv("OTEL_ENABLED", "false") == "true",
+			ServiceName:  getEnv("OTEL_SERVICE_NAME", "pulsar-backend"),
+			OTLPEndpoint: getEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317"),
+			OTLPProtocol: getEnv("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc"), // "grpc" or "http"
+			Environment:  getEnv("OTEL_ENVIRONMENT", "development"),
 		},
 	}
 

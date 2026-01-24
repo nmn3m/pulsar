@@ -1,0 +1,29 @@
+apiVersion: 1
+
+datasources:
+  # VictoriaMetrics as Prometheus-compatible datasource
+  - name: VictoriaMetrics
+    uid: victoriametrics
+    type: prometheus
+    access: proxy
+    url: http://victoriametrics:8428
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: "15s"
+
+  # VictoriaLogs datasource
+  - name: VictoriaLogs
+    uid: victorialogs
+    type: victorialogs-datasource
+    access: proxy
+    url: http://victorialogs:9428
+    editable: false
+
+  # VictoriaTraces datasource (uses Jaeger Query API)
+  - name: VictoriaTraces
+    uid: victoriatraces
+    type: jaeger
+    access: proxy
+    url: http://victoriatraces:10428/select/jaeger
+    editable: false

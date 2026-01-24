@@ -7,21 +7,51 @@ import (
 	"net/smtp"
 	"strings"
 
+	"github.com/resend/resend-go/v2"
+
 	"github.com/nmn3m/pulsar/backend/internal/config"
 )
 
-type EmailService struct {
-	config *config.SMTPConfig
+// EmailSender defines the interface for sending emails
+type EmailSender interface {
+	Send(msg *EmailMessage) error
 }
 
-func NewEmailService(cfg *config.SMTPConfig) *EmailService {
-	return &EmailService{
-		config: cfg,
+// EmailService handles email operations using configurable providers
+type EmailService struct {
+	config *config.EmailConfig
+	smtp   *config.SMTPConfig
+	sender EmailSender
+}
+
+// NewEmailService creates a new email service with the appropriate provider
+func NewEmailService(emailCfg *config.EmailConfig, smtpCfg *config.SMTPConfig) *EmailService {
+	svc := &EmailService{
+		config: emailCfg,
+		smtp:   smtpCfg,
 	}
+
+	// Initialize the appropriate sender based on provider
+	if emailCfg.Provider == "resend" && emailCfg.ResendAPIKey != "" {
+		svc.sender = NewResendSender(emailCfg)
+	} else {
+		// Default to SMTP (for development with Mailpit)
+		svc.sender = NewSMTPSender(smtpCfg)
+	}
+
+	return svc
 }
 
 func (s *EmailService) IsConfigured() bool {
-	return s.config.Enabled && s.config.Host != ""
+	if s.config.Provider == "resend" {
+		return s.config.Enabled && s.config.ResendAPIKey != ""
+	}
+	// SMTP mode - check SMTP config
+	return s.smtp.Enabled && s.smtp.Host != ""
+}
+
+func (s *EmailService) GetProvider() string {
+	return s.config.Provider
 }
 
 type EmailMessage struct {
@@ -35,7 +65,22 @@ func (s *EmailService) Send(msg *EmailMessage) error {
 	if !s.IsConfigured() {
 		return fmt.Errorf("email service is not configured")
 	}
+	return s.sender.Send(msg)
+}
 
+// =============================================================================
+// SMTP Sender (for development with Mailpit)
+// =============================================================================
+
+type SMTPSender struct {
+	config *config.SMTPConfig
+}
+
+func NewSMTPSender(cfg *config.SMTPConfig) *SMTPSender {
+	return &SMTPSender{config: cfg}
+}
+
+func (s *SMTPSender) Send(msg *EmailMessage) error {
 	// Build the email message
 	from := s.config.From
 	if s.config.FromName != "" {
@@ -75,7 +120,7 @@ func (s *EmailService) Send(msg *EmailMessage) error {
 	return smtp.SendMail(addr, auth, s.config.From, msg.To, []byte(message.String()))
 }
 
-func (s *EmailService) sendWithTLS(addr string, auth smtp.Auth, from string, to []string, msg []byte) error {
+func (s *SMTPSender) sendWithTLS(addr string, auth smtp.Auth, from string, to []string, msg []byte) error {
 	// Connect to the server
 	conn, err := tls.Dial("tcp", addr, &tls.Config{
 		ServerName: s.config.Host,
@@ -126,7 +171,7 @@ func (s *EmailService) sendWithTLS(addr string, auth smtp.Auth, from string, to 
 	return client.Quit()
 }
 
-func (s *EmailService) sendWithSTARTTLS(addr string, auth smtp.Auth, from string, to []string, msg []byte) error {
+func (s *SMTPSender) sendWithSTARTTLS(addr string, auth smtp.Auth, from string, to []string, msg []byte) error {
 	client, err := smtp.Dial(addr)
 	if err != nil {
 		return fmt.Errorf("failed to connect to SMTP server: %w", err)
@@ -174,6 +219,53 @@ func (s *EmailService) sendWithSTARTTLS(addr string, auth smtp.Auth, from string
 
 	return client.Quit()
 }
+
+// =============================================================================
+// Resend Sender (for production)
+// =============================================================================
+
+type ResendSender struct {
+	client *resend.Client
+	config *config.EmailConfig
+}
+
+func NewResendSender(cfg *config.EmailConfig) *ResendSender {
+	return &ResendSender{
+		client: resend.NewClient(cfg.ResendAPIKey),
+		config: cfg,
+	}
+}
+
+func (s *ResendSender) Send(msg *EmailMessage) error {
+	// Build the from address
+	from := s.config.From
+	if s.config.FromName != "" {
+		from = fmt.Sprintf("%s <%s>", s.config.FromName, s.config.From)
+	}
+
+	params := &resend.SendEmailRequest{
+		From:    from,
+		To:      msg.To,
+		Subject: msg.Subject,
+	}
+
+	if msg.IsHTML {
+		params.Html = msg.Body
+	} else {
+		params.Text = msg.Body
+	}
+
+	_, err := s.client.Emails.Send(params)
+	if err != nil {
+		return fmt.Errorf("failed to send email via Resend: %w", err)
+	}
+
+	return nil
+}
+
+// =============================================================================
+// Email Templates (used by auth and team services)
+// =============================================================================
 
 // SendTeamInvitation sends a team invitation email
 func (s *EmailService) SendTeamInvitation(ctx context.Context, toEmail, teamName, inviterName, inviteToken string) error {

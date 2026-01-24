@@ -1,0 +1,103 @@
+services:
+  # VictoriaMetrics - Time series database for metrics
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.102.0
+    container_name: victoriametrics
+    ports:
+      - "8428:8428"
+    volumes:
+      - victoriametrics_data:/storage
+    command:
+      - "--storageDataPath=/storage"
+      - "--httpListenAddr=:8428"
+      - "--retentionPeriod=30d"
+    restart: unless-stopped
+    networks:
+      - observability
+
+  # VictoriaLogs - Log aggregation and storage
+  victorialogs:
+    image: victoriametrics/victoria-logs:v1.0.0-victorialogs
+    container_name: victorialogs
+    ports:
+      - "9428:9428"
+    volumes:
+      - victorialogs_data:/vlogs
+    command:
+      - "--storageDataPath=/vlogs"
+      - "--httpListenAddr=:9428"
+      - "--retentionPeriod=30d"
+    restart: unless-stopped
+    networks:
+      - observability
+
+  # VictoriaTraces - Distributed tracing backend
+  victoriatraces:
+    image: victoriametrics/victoria-traces:latest
+    container_name: victoriatraces
+    ports:
+      - "10428:10428"  # HTTP API
+      - "14317:4317"   # OTLP gRPC
+    volumes:
+      - victoriatraces_data:/victoria-traces-data
+    command:
+      - "--storageDataPath=/victoria-traces-data"
+      - "--httpListenAddr=:10428"
+      - "--retentionPeriod=30d"
+      - "-otlpGRPCListenAddr=:4317"
+      - "-otlpGRPC.tls=false"
+    restart: unless-stopped
+    networks:
+      - observability
+
+  # OpenTelemetry Collector - Receives and exports telemetry data
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    container_name: otel-collector
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+      - "8889:8889"   # Prometheus metrics exposed by the collector
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    command:
+      - "--config=/etc/otelcol-contrib/config.yaml"
+    depends_on:
+      - victoriametrics
+      - victorialogs
+      - victoriatraces
+    restart: unless-stopped
+    networks:
+      - observability
+
+  # Grafana - Visualization and dashboards
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=https://github.com/VictoriaMetrics/victorialogs-datasource/releases/download/v0.4.0/victorialogs-datasource-v0.4.0.zip;victorialogs-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - victoriametrics
+      - victorialogs
+      - victoriatraces
+    restart: unless-stopped
+    networks:
+      - observability
+
+volumes:
+  victoriametrics_data:
+  victorialogs_data:
+  victoriatraces_data:
+  grafana_data:
+
+networks:
+  observability:
+    driver: bridge

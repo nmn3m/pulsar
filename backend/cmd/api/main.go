@@ -45,6 +45,7 @@ import (
 	"github.com/nmn3m/pulsar/backend/internal/handler/rest"
 	"github.com/nmn3m/pulsar/backend/internal/middleware"
 	"github.com/nmn3m/pulsar/backend/internal/pkg/logger"
+	"github.com/nmn3m/pulsar/backend/internal/pkg/telemetry"
 	"github.com/nmn3m/pulsar/backend/internal/repository/postgres"
 	"github.com/nmn3m/pulsar/backend/internal/service"
 )
@@ -57,8 +58,29 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Initialize logger
-	log, err := logger.New(cfg.Server.Env)
+	// Initialize OpenTelemetry if enabled (must be before logger for OTEL logs)
+	var otelTelemetry *telemetry.Telemetry
+	if cfg.Telemetry.Enabled {
+		otelTelemetry, err = telemetry.Initialize(context.Background(), telemetry.Config{
+			ServiceName:  cfg.Telemetry.ServiceName,
+			Environment:  cfg.Telemetry.Environment,
+			OTLPEndpoint: cfg.Telemetry.OTLPEndpoint,
+			OTLPProtocol: cfg.Telemetry.OTLPProtocol,
+		})
+		if err != nil {
+			fmt.Printf("Failed to initialize telemetry: %v\n", err)
+			os.Exit(1)
+		}
+		defer otelTelemetry.Shutdown(context.Background())
+	}
+
+	// Initialize logger (with OTEL integration if telemetry is enabled)
+	var log *zap.Logger
+	if cfg.Telemetry.Enabled {
+		log, err = logger.NewWithOTEL(cfg.Server.Env)
+	} else {
+		log, err = logger.New(cfg.Server.Env)
+	}
 	if err != nil {
 		fmt.Printf("Failed to initialize logger: %v\n", err)
 		os.Exit(1)
@@ -69,6 +91,16 @@ func main() {
 		zap.String("env", cfg.Server.Env),
 		zap.String("port", cfg.Server.Port),
 	)
+
+	if cfg.Telemetry.Enabled {
+		log.Info("OpenTelemetry initialized",
+			zap.String("service", cfg.Telemetry.ServiceName),
+			zap.String("endpoint", cfg.Telemetry.OTLPEndpoint),
+			zap.String("protocol", cfg.Telemetry.OTLPProtocol),
+		)
+	} else {
+		log.Info("OpenTelemetry disabled")
+	}
 
 	// Connect to database
 	db, err := postgres.NewDB(cfg.Database.URL)
@@ -96,18 +128,24 @@ func main() {
 	dndRepo := postgres.NewDNDSettingsRepository(db)
 	invitationRepo := postgres.NewTeamInvitationRepo(db)
 
-	// Initialize email service (for OTP verification)
+	// Initialize email service (for OTP verification and team invitations)
 	var emailService *service.EmailService
 	var emailVerificationService *service.EmailVerificationService
-	if cfg.SMTP.Enabled {
-		emailService = service.NewEmailService(&cfg.SMTP)
+	if cfg.Email.Enabled || cfg.SMTP.Enabled {
+		emailService = service.NewEmailService(&cfg.Email, &cfg.SMTP)
 		emailVerificationService = service.NewEmailVerificationService(emailVerificationRepo, userRepo, emailService)
-		log.Info("Email verification service enabled",
-			zap.String("smtp_host", cfg.SMTP.Host),
-			zap.Int("smtp_port", cfg.SMTP.Port),
-		)
+		if cfg.Email.Provider == "resend" {
+			log.Info("Email service enabled with Resend provider",
+				zap.String("from", cfg.Email.From),
+			)
+		} else {
+			log.Info("Email service enabled with SMTP provider",
+				zap.String("smtp_host", cfg.SMTP.Host),
+				zap.Int("smtp_port", cfg.SMTP.Port),
+			)
+		}
 	} else {
-		log.Info("Email verification service disabled (SMTP not configured)")
+		log.Info("Email service disabled (not configured)")
 	}
 
 	// Initialize services
@@ -168,6 +206,12 @@ func main() {
 	router.Use(gin.Recovery())
 	router.Use(middleware.Logger(log))
 	router.Use(middleware.CORS(cfg.CORS.AllowedOrigins))
+
+	// Add OpenTelemetry middleware if enabled
+	if cfg.Telemetry.Enabled {
+		router.Use(middleware.OTelMiddleware(cfg.Telemetry.ServiceName))
+		router.Use(middleware.OTelMetricsMiddleware())
+	}
 
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
