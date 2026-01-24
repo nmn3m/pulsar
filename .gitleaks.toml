@@ -1,0 +1,27 @@
+# Gitleaks configuration file
+# https://github.com/gitleaks/gitleaks
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlist for false positives"
+
+# Allowlist specific paths
+paths = [
+    '''docs/.*\.html$''',
+    '''.*\.md$''',
+]
+
+# Allowlist specific regex patterns (false positives)
+regexes = [
+    # Placeholder Slack webhook URLs (T00000000/B00000000)
+    '''T00000000/B00000000/[A-Z]+''',
+    # Example tokens in documentation
+    '''whk_abc123xyz''',
+    # Truncated JWT examples
+    '''eyJhbGciOiJIUzI1NiIs\.\.\.''',
+    # CI test JWT secrets (intentionally non-secret)
+    '''test_jwt_secret_for_ci_min_32_characters''',
+    '''test_refresh_secret_for_ci_min_32_characters''',
+]
