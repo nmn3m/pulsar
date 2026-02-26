@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/nmn3m/pulsar/backend/internal/domain"
-	"github.com/nmn3m/pulsar/backend/internal/service"
+	"github.com/nmn3m/pulsar/backend/internal/usecase"
 )
 
 // TestFixtures provides methods to create test data
@@ -31,7 +31,7 @@ type TestUser struct {
 
 // CreateUser creates a user with the given email, username, and organization name
 func (f *TestFixtures) CreateUser(ctx context.Context, email, username, orgName string) (*TestUser, error) {
-	req := &service.RegisterRequest{
+	req := &usecase.RegisterRequest{
 		Email:            email,
 		Username:         username,
 		Password:         "TestPassword123!",
@@ -39,7 +39,7 @@ func (f *TestFixtures) CreateUser(ctx context.Context, email, username, orgName 
 		OrganizationName: orgName,
 	}
 
-	resp, err := f.server.AuthService.Register(ctx, req)
+	resp, err := f.server.AuthUsecase.Register(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to register user: %w", err)
 	}
@@ -65,11 +65,11 @@ func (f *TestFixtures) CreateUniqueUser(ctx context.Context) (*TestUser, error) 
 // CreateTeam creates a team in the organization
 func (f *TestFixtures) CreateTeam(ctx context.Context, orgID uuid.UUID, name string) (*domain.Team, error) {
 	desc := "Test team description"
-	req := &service.CreateTeamRequest{
+	req := &usecase.CreateTeamRequest{
 		Name:        name,
 		Description: &desc,
 	}
-	return f.server.TeamService.CreateTeam(ctx, orgID, req)
+	return f.server.TeamUsecase.CreateTeam(ctx, orgID, req)
 }
 
 // CreateUniqueTeam creates a team with a unique name
@@ -80,13 +80,13 @@ func (f *TestFixtures) CreateUniqueTeam(ctx context.Context, orgID uuid.UUID) (*
 
 // CreateAlert creates an alert in the organization
 func (f *TestFixtures) CreateAlert(ctx context.Context, orgID uuid.UUID, message string) (*domain.Alert, error) {
-	req := &service.CreateAlertRequest{
+	req := &usecase.CreateAlertRequest{
 		Source:   "test",
 		Priority: "P3",
 		Message:  message,
 		Tags:     []string{"test"},
 	}
-	return f.server.AlertService.CreateAlert(ctx, orgID, req)
+	return f.server.AlertUsecase.CreateAlert(ctx, orgID, req)
 }
 
 // CreateUniqueAlert creates an alert with a unique message
@@ -98,12 +98,12 @@ func (f *TestFixtures) CreateUniqueAlert(ctx context.Context, orgID uuid.UUID) (
 // CreateSchedule creates a schedule in the organization
 func (f *TestFixtures) CreateSchedule(ctx context.Context, orgID uuid.UUID, name string) (*domain.Schedule, error) {
 	desc := "Test schedule"
-	req := &service.CreateScheduleRequest{
+	req := &usecase.CreateScheduleRequest{
 		Name:        name,
 		Description: &desc,
 		Timezone:    "UTC",
 	}
-	return f.server.ScheduleService.CreateSchedule(ctx, orgID, req)
+	return f.server.ScheduleUsecase.CreateSchedule(ctx, orgID, req)
 }
 
 // CreateUniqueSchedule creates a schedule with a unique name
@@ -115,11 +115,11 @@ func (f *TestFixtures) CreateUniqueSchedule(ctx context.Context, orgID uuid.UUID
 // CreateEscalationPolicy creates an escalation policy in the organization
 func (f *TestFixtures) CreateEscalationPolicy(ctx context.Context, orgID uuid.UUID, name string) (*domain.EscalationPolicy, error) {
 	desc := "Test escalation policy"
-	req := &service.CreateEscalationPolicyRequest{
+	req := &usecase.CreateEscalationPolicyRequest{
 		Name:        name,
 		Description: &desc,
 	}
-	return f.server.EscalationService.CreatePolicy(ctx, orgID, req)
+	return f.server.EscalationUsecase.CreatePolicy(ctx, orgID, req)
 }
 
 // CreateUniqueEscalationPolicy creates an escalation policy with a unique name
@@ -139,13 +139,13 @@ func (f *TestFixtures) CreateNotificationChannel(ctx context.Context, orgID uuid
 		"from_address":  "test@test.com",
 	})
 
-	req := &domain.CreateNotificationChannelRequest{
+	req := &usecase.CreateNotificationChannelRequest{
 		Name:        name,
 		ChannelType: domain.ChannelTypeEmail,
 		IsEnabled:   true,
 		Config:      configJSON,
 	}
-	return f.server.NotificationService.CreateChannel(ctx, orgID, req)
+	return f.server.NotificationUsecase.CreateChannel(ctx, orgID, req)
 }
 
 // CreateUniqueNotificationChannel creates a notification channel with a unique name
@@ -157,13 +157,13 @@ func (f *TestFixtures) CreateUniqueNotificationChannel(ctx context.Context, orgI
 // CreateIncident creates an incident in the organization
 func (f *TestFixtures) CreateIncident(ctx context.Context, orgID, userID uuid.UUID, title string) (*domain.Incident, error) {
 	desc := "Test incident description"
-	req := &service.CreateIncidentRequest{
+	req := &usecase.CreateIncidentRequest{
 		Title:       title,
 		Description: &desc,
 		Severity:    "medium",
 		Priority:    "P3",
 	}
-	return f.server.IncidentService.CreateIncident(ctx, orgID, userID, req)
+	return f.server.IncidentUsecase.CreateIncident(ctx, orgID, userID, req)
 }
 
 // CreateUniqueIncident creates an incident with a unique title
@@ -174,14 +174,14 @@ func (f *TestFixtures) CreateUniqueIncident(ctx context.Context, orgID, userID u
 
 // CreateWebhookEndpoint creates a webhook endpoint in the organization
 func (f *TestFixtures) CreateWebhookEndpoint(ctx context.Context, orgID uuid.UUID, name, url string) (*domain.WebhookEndpoint, error) {
-	req := &domain.CreateWebhookEndpointRequest{
+	req := &usecase.CreateWebhookEndpointRequest{
 		Name:         name,
 		URL:          url,
 		Enabled:      true,
 		AlertCreated: true,
 		AlertUpdated: true,
 	}
-	return f.server.WebhookService.CreateEndpoint(ctx, orgID, req)
+	return f.server.WebhookUsecase.CreateEndpoint(ctx, orgID, req)
 }
 
 // CreateUniqueWebhookEndpoint creates a webhook endpoint with a unique name
@@ -195,11 +195,11 @@ func (f *TestFixtures) CreateUniqueWebhookEndpoint(ctx context.Context, orgID uu
 
 // CreateIncomingWebhookToken creates an incoming webhook token
 func (f *TestFixtures) CreateIncomingWebhookToken(ctx context.Context, orgID uuid.UUID, name string) (*domain.IncomingWebhookToken, error) {
-	req := &domain.CreateIncomingWebhookTokenRequest{
+	req := &usecase.CreateIncomingWebhookTokenRequest{
 		Name:            name,
-		IntegrationType: domain.IncomingWebhookGeneric,
+		IntegrationType: string(domain.IncomingWebhookGeneric),
 	}
-	return f.server.WebhookService.CreateIncomingToken(ctx, orgID, req)
+	return f.server.WebhookUsecase.CreateIncomingToken(ctx, orgID, req)
 }
 
 // CreateUniqueIncomingWebhookToken creates an incoming webhook token with a unique name

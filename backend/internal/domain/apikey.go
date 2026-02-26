@@ -11,22 +11,18 @@ import (
 
 // APIKey represents an API key for programmatic access
 type APIKey struct {
-	ID             uuid.UUID  `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
-	OrganizationID uuid.UUID  `json:"organization_id" gorm:"type:uuid;not null"`
-	UserID         uuid.UUID  `json:"user_id" gorm:"type:uuid;not null"`
-	Name           string     `json:"name" gorm:"not null"`
-	KeyPrefix      string     `json:"key_prefix" gorm:"not null"` // First 8 chars for identification
-	KeyHash        string     `json:"-" gorm:"not null"`          // SHA-256 hash of the full key
-	Scopes         []string   `json:"scopes" gorm:"type:text[];default:'{}'"`
-	LastUsedAt     *time.Time `json:"last_used_at"`
-	ExpiresAt      *time.Time `json:"expires_at"`
-	IsActive       bool       `json:"is_active" gorm:"default:true"`
-	CreatedAt      time.Time  `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt      time.Time  `json:"updated_at" gorm:"autoUpdateTime"`
-
-	// Relations
-	Organization *Organization `json:"organization,omitempty" gorm:"foreignKey:OrganizationID"`
-	User         *User         `json:"user,omitempty" gorm:"foreignKey:UserID"`
+	ID             uuid.UUID
+	OrganizationID uuid.UUID
+	UserID         uuid.UUID
+	Name           string
+	KeyPrefix      string     // First 8 chars for identification
+	KeyHash        string     // SHA-256 hash of the full key
+	Scopes         []string
+	LastUsedAt     *time.Time
+	ExpiresAt      *time.Time
+	IsActive       bool
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 // APIKeyScope defines available API key scopes
@@ -126,24 +122,4 @@ func GenerateAPIKey() (rawKey, keyPrefix, keyHash string, err error) {
 func HashAPIKey(key string) string {
 	hash := sha256.Sum256([]byte(key))
 	return hex.EncodeToString(hash[:])
-}
-
-// CreateAPIKeyRequest represents a request to create an API key
-type CreateAPIKeyRequest struct {
-	Name      string   `json:"name" binding:"required,min=1,max=255"`
-	Scopes    []string `json:"scopes" binding:"required,min=1"`
-	ExpiresAt *string  `json:"expires_at,omitempty"` // RFC3339 format
-}
-
-// UpdateAPIKeyRequest represents a request to update an API key
-type UpdateAPIKeyRequest struct {
-	Name     *string  `json:"name,omitempty"`
-	Scopes   []string `json:"scopes,omitempty"`
-	IsActive *bool    `json:"is_active,omitempty"`
-}
-
-// APIKeyResponse includes the raw key (only shown once at creation)
-type APIKeyResponse struct {
-	*APIKey
-	RawKey string `json:"key,omitempty"` // Only populated on creation
 }

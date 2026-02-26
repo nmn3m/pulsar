@@ -7,25 +7,25 @@ import (
 )
 
 type User struct {
-	ID                      uuid.UUID              `json:"id" db:"id"`
-	Email                   string                 `json:"email" db:"email"`
-	Username                string                 `json:"username" db:"username"`
-	PasswordHash            string                 `json:"-" db:"password_hash"`
-	FullName                *string                `json:"full_name,omitempty" db:"full_name"`
-	Phone                   *string                `json:"phone,omitempty" db:"phone"`
-	Timezone                string                 `json:"timezone" db:"timezone"`
-	NotificationPreferences map[string]interface{} `json:"notification_preferences" db:"notification_preferences"`
-	IsActive                bool                   `json:"is_active" db:"is_active"`
-	EmailVerified           bool                   `json:"email_verified" db:"email_verified"`
-	CreatedAt               time.Time              `json:"created_at" db:"created_at"`
-	UpdatedAt               time.Time              `json:"updated_at" db:"updated_at"`
+	ID                      uuid.UUID
+	Email                   string
+	Username                string
+	PasswordHash            string
+	FullName                *string
+	Phone                   *string
+	Timezone                string
+	NotificationPreferences map[string]interface{}
+	IsActive                bool
+	EmailVerified           bool
+	CreatedAt               time.Time
+	UpdatedAt               time.Time
 }
 
 type OrganizationUser struct {
-	OrganizationID uuid.UUID `json:"organization_id" db:"organization_id"`
-	UserID         uuid.UUID `json:"user_id" db:"user_id"`
-	Role           string    `json:"role" db:"role"`
-	JoinedAt       time.Time `json:"joined_at" db:"joined_at"`
+	OrganizationID uuid.UUID
+	UserID         uuid.UUID
+	Role           string
+	JoinedAt       time.Time
 }
 
 // UserRole represents the user's role within an organization
@@ -53,6 +53,6 @@ func (r UserRole) IsValid() bool {
 // UserWithOrganization represents a user with their organization role
 type UserWithOrganization struct {
 	User
-	OrganizationID uuid.UUID `json:"organization_id"`
-	Role           UserRole  `json:"role"`
+	OrganizationID uuid.UUID
+	Role           UserRole
 }

@@ -9,14 +9,14 @@ import (
 
 // UserDNDSettings represents a user's Do Not Disturb configuration
 type UserDNDSettings struct {
-	ID              uuid.UUID       `json:"id" db:"id"`
-	UserID          uuid.UUID       `json:"user_id" db:"user_id"`
-	Enabled         bool            `json:"enabled" db:"enabled"`
-	Schedule        json.RawMessage `json:"schedule" db:"schedule"`
-	Overrides       json.RawMessage `json:"overrides" db:"overrides"`
-	AllowP1Override bool            `json:"allow_p1_override" db:"allow_p1_override"`
-	CreatedAt       time.Time       `json:"created_at" db:"created_at"`
-	UpdatedAt       time.Time       `json:"updated_at" db:"updated_at"`
+	ID              uuid.UUID
+	UserID          uuid.UUID
+	Enabled         bool
+	Schedule        json.RawMessage
+	Overrides       json.RawMessage
+	AllowP1Override bool
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }
 
 // DNDSchedule represents the weekly schedule for DND
@@ -36,29 +36,6 @@ type DNDTimeSlot struct {
 type DNDOverride struct {
 	Start  time.Time `json:"start"`
 	End    time.Time `json:"end"`
-	Reason string    `json:"reason,omitempty"`
-}
-
-// CreateDNDSettingsRequest is the request to create/update DND settings
-type CreateDNDSettingsRequest struct {
-	Enabled         *bool           `json:"enabled,omitempty"`
-	Schedule        json.RawMessage `json:"schedule,omitempty"`
-	Overrides       json.RawMessage `json:"overrides,omitempty"`
-	AllowP1Override *bool           `json:"allow_p1_override,omitempty"`
-}
-
-// UpdateDNDSettingsRequest is the request to update DND settings
-type UpdateDNDSettingsRequest struct {
-	Enabled         *bool           `json:"enabled,omitempty"`
-	Schedule        json.RawMessage `json:"schedule,omitempty"`
-	Overrides       json.RawMessage `json:"overrides,omitempty"`
-	AllowP1Override *bool           `json:"allow_p1_override,omitempty"`
-}
-
-// AddDNDOverrideRequest is the request to add a temporary DND override
-type AddDNDOverrideRequest struct {
-	Start  time.Time `json:"start" binding:"required"`
-	End    time.Time `json:"end" binding:"required"`
 	Reason string    `json:"reason,omitempty"`
 }
 

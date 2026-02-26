@@ -9,14 +9,13 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/nmn3m/pulsar/backend/internal/domain"
-	"github.com/nmn3m/pulsar/backend/internal/repository"
 )
 
 type metricsRepository struct {
 	db *sqlx.DB
 }
 
-func NewMetricsRepository(db *sqlx.DB) repository.MetricsRepository {
+func NewMetricsRepository(db *sqlx.DB) *metricsRepository {
 	return &metricsRepository{db: db}
 }
 

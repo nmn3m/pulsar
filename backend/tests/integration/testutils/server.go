@@ -7,10 +7,10 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/nmn3m/pulsar/backend/internal/config"
-	"github.com/nmn3m/pulsar/backend/internal/handler/rest"
-	"github.com/nmn3m/pulsar/backend/internal/middleware"
+	"github.com/nmn3m/pulsar/backend/internal/delivery/rest/handler"
+	"github.com/nmn3m/pulsar/backend/internal/delivery/rest/middleware"
 	"github.com/nmn3m/pulsar/backend/internal/repository/postgres"
-	"github.com/nmn3m/pulsar/backend/internal/service"
+	"github.com/nmn3m/pulsar/backend/internal/usecase"
 )
 
 // TestServer wraps httptest.Server with all dependencies
@@ -21,17 +21,17 @@ type TestServer struct {
 	Config *config.Config
 	Logger *zap.Logger
 
-	// Services exposed for direct manipulation in tests
-	AuthService         *service.AuthService
-	AlertService        *service.AlertService
-	TeamService         *service.TeamService
-	ScheduleService     *service.ScheduleService
-	EscalationService   *service.EscalationService
-	NotificationService *service.NotificationService
-	IncidentService     *service.IncidentService
-	WebhookService      *service.WebhookService
-	UserService         *service.UserService
-	MetricsService      *service.MetricsService
+	// Usecases exposed for direct manipulation in tests
+	AuthUsecase         *usecase.AuthUsecase
+	AlertUsecase        *usecase.AlertUsecase
+	TeamUsecase         *usecase.TeamUsecase
+	ScheduleUsecase     *usecase.ScheduleUsecase
+	EscalationUsecase   *usecase.EscalationUsecase
+	NotificationUsecase *usecase.NotificationUsecase
+	IncidentUsecase     *usecase.IncidentUsecase
+	WebhookUsecase      *usecase.WebhookUsecase
+	UserUsecase         *usecase.UserUsecase
+	MetricsUsecase      *usecase.MetricsUsecase
 }
 
 // NewTestServer creates a new test server with all dependencies wired up
@@ -77,39 +77,44 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 	metricsRepo := postgres.NewMetricsRepository(testDB.DB)
 	dndRepo := postgres.NewDNDSettingsRepository(db)
 
-	// Initialize services
+	// Initialize usecases
 	// Email verification is nil for tests (SMTP not configured)
-	var emailVerificationService *service.EmailVerificationService
-	authService := service.NewAuthService(userRepo, orgRepo, cfg, emailVerificationService)
-	teamService := service.NewTeamService(teamRepo, userRepo)
-	userService := service.NewUserService(orgRepo)
-	scheduleService := service.NewScheduleService(scheduleRepo, userRepo)
-	notificationService := service.NewNotificationService(notificationRepo)
-	wsService := service.NewWebSocketService(logger)
-	incidentService := service.NewIncidentService(incidentRepo, wsService)
-	webhookService := service.NewWebhookService(webhookRepo, logger)
-	metricsService := service.NewMetricsService(metricsRepo)
-	dndService := service.NewDNDService(dndRepo)
+	var emailVerificationUsecase *usecase.EmailVerificationUsecase
+	authUsecase := usecase.NewAuthUsecase(userRepo, orgRepo, usecase.AuthConfig{
+		JWTSecret:        cfg.JWT.Secret,
+		JWTRefreshSecret: cfg.JWT.RefreshSecret,
+		AccessTTLMinutes: cfg.JWT.AccessTTL,
+		RefreshTTLDays:   cfg.JWT.RefreshTTL,
+	}, emailVerificationUsecase)
+	teamUsecase := usecase.NewTeamUsecase(teamRepo, userRepo)
+	userUsecase := usecase.NewUserUsecase(orgRepo)
+	scheduleUsecase := usecase.NewScheduleUsecase(scheduleRepo, userRepo)
+	notificationUsecase := usecase.NewNotificationUsecase(notificationRepo)
+	wsUsecase := usecase.NewWebSocketUsecase(logger)
+	incidentUsecase := usecase.NewIncidentUsecase(incidentRepo, wsUsecase)
+	webhookUsecase := usecase.NewWebhookUsecase(webhookRepo, logger)
+	metricsUsecase := usecase.NewMetricsUsecase(metricsRepo)
+	dndUsecase := usecase.NewDNDUsecase(dndRepo)
 
 	// Initialize alert notifier with dependencies
-	alertNotifier := service.NewAlertNotifier(notificationService, userRepo, teamRepo, scheduleService, dndService)
+	alertNotifier := usecase.NewAlertNotifier(notificationUsecase, userRepo, teamRepo, scheduleUsecase, dndUsecase)
 
-	// Initialize alert and escalation services with notifier
-	alertService := service.NewAlertService(alertRepo, alertNotifier, wsService, webhookService)
-	escalationService := service.NewEscalationService(escalationRepo, alertRepo, alertNotifier)
+	// Initialize alert and escalation usecases with notifier
+	alertUsecase := usecase.NewAlertUsecase(alertRepo, alertNotifier, wsUsecase, webhookUsecase)
+	escalationUsecase := usecase.NewEscalationUsecase(escalationRepo, alertRepo, alertNotifier)
 
 	// Initialize handlers
-	authHandler := rest.NewAuthHandler(authService, emailVerificationService)
-	alertHandler := rest.NewAlertHandler(alertService)
-	teamHandler := rest.NewTeamHandler(teamService)
-	userHandler := rest.NewUserHandler(userService)
-	scheduleHandler := rest.NewScheduleHandler(scheduleService)
-	escalationHandler := rest.NewEscalationHandler(escalationService)
-	notificationHandler := rest.NewNotificationHandler(notificationService)
-	incidentHandler := rest.NewIncidentHandler(incidentService)
-	webhookHandler := rest.NewWebhookHandler(webhookService)
-	incomingWebhookHandler := rest.NewIncomingWebhookHandler(webhookService, alertService, logger)
-	metricsHandler := rest.NewMetricsHandler(metricsService)
+	authHandler := handler.NewAuthHandler(authUsecase, emailVerificationUsecase)
+	alertHandler := handler.NewAlertHandler(alertUsecase)
+	teamHandler := handler.NewTeamHandler(teamUsecase)
+	userHandler := handler.NewUserHandler(userUsecase)
+	scheduleHandler := handler.NewScheduleHandler(scheduleUsecase)
+	escalationHandler := handler.NewEscalationHandler(escalationUsecase)
+	notificationHandler := handler.NewNotificationHandler(notificationUsecase)
+	incidentHandler := handler.NewIncidentHandler(incidentUsecase)
+	webhookHandler := handler.NewWebhookHandler(webhookUsecase)
+	incomingWebhookHandler := handler.NewIncomingWebhookHandler(webhookUsecase, alertUsecase, logger)
+	metricsHandler := handler.NewMetricsHandler(metricsUsecase)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret)
@@ -132,16 +137,16 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 		DB:                  testDB,
 		Config:              cfg,
 		Logger:              logger,
-		AuthService:         authService,
-		AlertService:        alertService,
-		TeamService:         teamService,
-		ScheduleService:     scheduleService,
-		EscalationService:   escalationService,
-		NotificationService: notificationService,
-		IncidentService:     incidentService,
-		WebhookService:      webhookService,
-		UserService:         userService,
-		MetricsService:      metricsService,
+		AuthUsecase:         authUsecase,
+		AlertUsecase:        alertUsecase,
+		TeamUsecase:         teamUsecase,
+		ScheduleUsecase:     scheduleUsecase,
+		EscalationUsecase:   escalationUsecase,
+		NotificationUsecase: notificationUsecase,
+		IncidentUsecase:     incidentUsecase,
+		WebhookUsecase:      webhookUsecase,
+		UserUsecase:         userUsecase,
+		MetricsUsecase:      metricsUsecase,
 	}, nil
 }
 
@@ -149,17 +154,17 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 func setupRoutes(
 	router *gin.Engine,
 	authMiddleware *middleware.AuthMiddleware,
-	authHandler *rest.AuthHandler,
-	alertHandler *rest.AlertHandler,
-	teamHandler *rest.TeamHandler,
-	userHandler *rest.UserHandler,
-	scheduleHandler *rest.ScheduleHandler,
-	escalationHandler *rest.EscalationHandler,
-	notificationHandler *rest.NotificationHandler,
-	incidentHandler *rest.IncidentHandler,
-	webhookHandler *rest.WebhookHandler,
-	incomingWebhookHandler *rest.IncomingWebhookHandler,
-	metricsHandler *rest.MetricsHandler,
+	authHandler *handler.AuthHandler,
+	alertHandler *handler.AlertHandler,
+	teamHandler *handler.TeamHandler,
+	userHandler *handler.UserHandler,
+	scheduleHandler *handler.ScheduleHandler,
+	escalationHandler *handler.EscalationHandler,
+	notificationHandler *handler.NotificationHandler,
+	incidentHandler *handler.IncidentHandler,
+	webhookHandler *handler.WebhookHandler,
+	incomingWebhookHandler *handler.IncomingWebhookHandler,
+	metricsHandler *handler.MetricsHandler,
 ) {
 	// API v1 routes
 	v1 := router.Group("/api/v1")

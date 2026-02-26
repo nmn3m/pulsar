@@ -14,8 +14,8 @@ import (
 
 	"github.com/nmn3m/pulsar/backend/internal/config"
 	"github.com/nmn3m/pulsar/backend/internal/domain"
-	"github.com/nmn3m/pulsar/backend/internal/repository"
 	"github.com/nmn3m/pulsar/backend/internal/repository/postgres"
+	"github.com/nmn3m/pulsar/backend/internal/usecase/repository"
 )
 
 // Demo Data Configuration

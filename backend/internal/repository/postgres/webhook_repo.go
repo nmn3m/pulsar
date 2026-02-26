@@ -10,14 +10,13 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/nmn3m/pulsar/backend/internal/domain"
-	"github.com/nmn3m/pulsar/backend/internal/repository"
 )
 
 type webhookRepository struct {
 	db *sqlx.DB
 }
 
-func NewWebhookRepository(db *sqlx.DB) repository.WebhookRepository {
+func NewWebhookRepository(db *sqlx.DB) *webhookRepository {
 	return &webhookRepository{db: db}
 }
 

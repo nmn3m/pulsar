@@ -7,19 +7,19 @@ import (
 )
 
 type Team struct {
-	ID             uuid.UUID `json:"id" db:"id"`
-	OrganizationID uuid.UUID `json:"organization_id" db:"organization_id"`
-	Name           string    `json:"name" db:"name"`
-	Description    *string   `json:"description,omitempty" db:"description"`
-	CreatedAt      time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at" db:"updated_at"`
+	ID             uuid.UUID
+	OrganizationID uuid.UUID
+	Name           string
+	Description    *string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 type TeamMember struct {
-	TeamID   uuid.UUID `json:"team_id" db:"team_id"`
-	UserID   uuid.UUID `json:"user_id" db:"user_id"`
-	Role     string    `json:"role" db:"role"`
-	JoinedAt time.Time `json:"joined_at" db:"joined_at"`
+	TeamID   uuid.UUID
+	UserID   uuid.UUID
+	Role     string
+	JoinedAt time.Time
 }
 
 type TeamRole string
@@ -35,6 +35,6 @@ func (r TeamRole) String() string {
 
 type UserWithTeamRole struct {
 	User
-	Role     string    `json:"role"`
-	JoinedAt time.Time `json:"joined_at"`
+	Role     string
+	JoinedAt time.Time
 }

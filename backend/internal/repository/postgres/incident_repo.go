@@ -11,7 +11,6 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/nmn3m/pulsar/backend/internal/domain"
-	"github.com/nmn3m/pulsar/backend/internal/repository"
 )
 
 type incidentRepository struct {
@@ -19,7 +18,7 @@ type incidentRepository struct {
 }
 
 // NewIncidentRepository creates a new incident repository
-func NewIncidentRepository(db *sqlx.DB) repository.IncidentRepository {
+func NewIncidentRepository(db *sqlx.DB) *incidentRepository {
 	return &incidentRepository{db: db}
 }
 

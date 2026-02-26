@@ -37,11 +37,11 @@ const (
 
 // WSMessage represents a WebSocket message
 type WSMessage struct {
-	ID             string                 `json:"id"`
-	Type           WSEventType            `json:"type"`
-	OrganizationID uuid.UUID              `json:"organization_id"`
-	Payload        map[string]interface{} `json:"payload"`
-	Timestamp      time.Time              `json:"timestamp"`
+	ID             string
+	Type           WSEventType
+	OrganizationID uuid.UUID
+	Payload        map[string]interface{}
+	Timestamp      time.Time
 }
 
 // NewWSMessage creates a new WebSocket message

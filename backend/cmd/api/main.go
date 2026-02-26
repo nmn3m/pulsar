@@ -42,12 +42,12 @@ import (
 
 	_ "github.com/nmn3m/pulsar/backend/docs"
 	"github.com/nmn3m/pulsar/backend/internal/config"
-	"github.com/nmn3m/pulsar/backend/internal/handler/rest"
-	"github.com/nmn3m/pulsar/backend/internal/middleware"
+	"github.com/nmn3m/pulsar/backend/internal/delivery/rest/handler"
+	"github.com/nmn3m/pulsar/backend/internal/delivery/rest/middleware"
 	"github.com/nmn3m/pulsar/backend/internal/pkg/logger"
 	"github.com/nmn3m/pulsar/backend/internal/pkg/telemetry"
 	"github.com/nmn3m/pulsar/backend/internal/repository/postgres"
-	"github.com/nmn3m/pulsar/backend/internal/service"
+	"github.com/nmn3m/pulsar/backend/internal/usecase"
 )
 
 func main() {
@@ -129,11 +129,11 @@ func main() {
 	invitationRepo := postgres.NewTeamInvitationRepo(db)
 
 	// Initialize email service (for OTP verification and team invitations)
-	var emailService *service.EmailService
-	var emailVerificationService *service.EmailVerificationService
+	var emailService *usecase.EmailService
+	var emailVerificationUsecase *usecase.EmailVerificationUsecase
 	if cfg.Email.Enabled || cfg.SMTP.Enabled {
-		emailService = service.NewEmailService(&cfg.Email, &cfg.SMTP)
-		emailVerificationService = service.NewEmailVerificationService(emailVerificationRepo, userRepo, emailService)
+		emailService = usecase.NewEmailService(&cfg.Email, &cfg.SMTP)
+		emailVerificationUsecase = usecase.NewEmailVerificationUsecase(emailVerificationRepo, userRepo, emailService)
 		if cfg.Email.Provider == "resend" {
 			log.Info("Email service enabled with Resend provider",
 				zap.String("from", cfg.Email.From),
@@ -148,53 +148,58 @@ func main() {
 		log.Info("Email service disabled (not configured)")
 	}
 
-	// Initialize services
-	authService := service.NewAuthService(userRepo, orgRepo, cfg, emailVerificationService)
-	teamService := service.NewTeamService(teamRepo, userRepo)
-	teamService.SetInvitationRepo(invitationRepo)
+	// Initialize usecases
+	authUsecase := usecase.NewAuthUsecase(userRepo, orgRepo, usecase.AuthConfig{
+		JWTSecret:        cfg.JWT.Secret,
+		JWTRefreshSecret: cfg.JWT.RefreshSecret,
+		AccessTTLMinutes: cfg.JWT.AccessTTL,
+		RefreshTTLDays:   cfg.JWT.RefreshTTL,
+	}, emailVerificationUsecase)
+	teamUsecase := usecase.NewTeamUsecase(teamRepo, userRepo)
+	teamUsecase.SetInvitationRepo(invitationRepo)
 	if emailService != nil {
-		teamService.SetEmailService(emailService)
+		teamUsecase.SetEmailService(emailService)
 	}
-	userService := service.NewUserService(orgRepo)
-	scheduleService := service.NewScheduleService(scheduleRepo, userRepo)
-	notificationService := service.NewNotificationService(notificationRepo)
-	wsService := service.NewWebSocketService(log)
-	incidentService := service.NewIncidentService(incidentRepo, wsService)
-	webhookService := service.NewWebhookService(webhookRepo, log)
-	apiKeyService := service.NewAPIKeyService(apiKeyRepo)
-	metricsService := service.NewMetricsService(metricsRepo)
+	userUsecase := usecase.NewUserUsecase(orgRepo)
+	scheduleUsecase := usecase.NewScheduleUsecase(scheduleRepo, userRepo)
+	notificationUsecase := usecase.NewNotificationUsecase(notificationRepo)
+	wsUsecase := usecase.NewWebSocketUsecase(log)
+	incidentUsecase := usecase.NewIncidentUsecase(incidentRepo, wsUsecase)
+	webhookUsecase := usecase.NewWebhookUsecase(webhookRepo, log)
+	apiKeyUsecase := usecase.NewAPIKeyUsecase(apiKeyRepo)
+	metricsUsecase := usecase.NewMetricsUsecase(metricsRepo)
 
-	// Initialize DND and routing services
-	dndService := service.NewDNDService(dndRepo)
-	routingService := service.NewRoutingService(routingRepo)
+	// Initialize DND and routing usecases
+	dndUsecase := usecase.NewDNDUsecase(dndRepo)
+	routingUsecase := usecase.NewRoutingUsecase(routingRepo)
 
-	// Initialize alert notifier with dependencies (including DND service for quiet hours)
-	alertNotifier := service.NewAlertNotifier(notificationService, userRepo, teamRepo, scheduleService, dndService)
+	// Initialize alert notifier with dependencies (including DND usecase for quiet hours)
+	alertNotifier := usecase.NewAlertNotifier(notificationUsecase, userRepo, teamRepo, scheduleUsecase, dndUsecase)
 
-	// Initialize alert and escalation services with notifier
-	alertService := service.NewAlertService(alertRepo, alertNotifier, wsService, webhookService)
-	escalationService := service.NewEscalationService(escalationRepo, alertRepo, alertNotifier)
+	// Initialize alert and escalation usecases with notifier
+	alertUsecase := usecase.NewAlertUsecase(alertRepo, alertNotifier, wsUsecase, webhookUsecase)
+	escalationUsecase := usecase.NewEscalationUsecase(escalationRepo, alertRepo, alertNotifier)
 
 	// Initialize handlers
-	authHandler := rest.NewAuthHandler(authService, emailVerificationService)
-	alertHandler := rest.NewAlertHandler(alertService)
-	teamHandler := rest.NewTeamHandler(teamService)
-	userHandler := rest.NewUserHandler(userService)
-	scheduleHandler := rest.NewScheduleHandler(scheduleService)
-	escalationHandler := rest.NewEscalationHandler(escalationService)
-	notificationHandler := rest.NewNotificationHandler(notificationService)
-	incidentHandler := rest.NewIncidentHandler(incidentService)
-	wsHandler := rest.NewWebSocketHandler(wsService, log)
-	webhookHandler := rest.NewWebhookHandler(webhookService)
-	incomingWebhookHandler := rest.NewIncomingWebhookHandler(webhookService, alertService, log)
-	apiKeyHandler := rest.NewAPIKeyHandler(apiKeyService)
-	metricsHandler := rest.NewMetricsHandler(metricsService)
-	routingHandler := rest.NewRoutingHandler(routingService)
-	dndHandler := rest.NewDNDHandler(dndService)
+	authHandler := handler.NewAuthHandler(authUsecase, emailVerificationUsecase)
+	alertHandler := handler.NewAlertHandler(alertUsecase)
+	teamHandler := handler.NewTeamHandler(teamUsecase)
+	userHandler := handler.NewUserHandler(userUsecase)
+	scheduleHandler := handler.NewScheduleHandler(scheduleUsecase)
+	escalationHandler := handler.NewEscalationHandler(escalationUsecase)
+	notificationHandler := handler.NewNotificationHandler(notificationUsecase)
+	incidentHandler := handler.NewIncidentHandler(incidentUsecase)
+	wsHandler := handler.NewWebSocketHandler(wsUsecase, log)
+	webhookHandler := handler.NewWebhookHandler(webhookUsecase)
+	incomingWebhookHandler := handler.NewIncomingWebhookHandler(webhookUsecase, alertUsecase, log)
+	apiKeyHandler := handler.NewAPIKeyHandler(apiKeyUsecase)
+	metricsHandler := handler.NewMetricsHandler(metricsUsecase)
+	routingHandler := handler.NewRoutingHandler(routingUsecase)
+	dndHandler := handler.NewDNDHandler(dndUsecase)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret)
-	apiKeyMiddleware := middleware.NewAPIKeyMiddleware(apiKeyService)
+	apiKeyMiddleware := middleware.NewAPIKeyMiddleware(apiKeyUsecase)
 	combinedAuth := middleware.NewCombinedAuthMiddleware(authMiddleware, apiKeyMiddleware)
 
 	// Setup router
@@ -491,7 +496,7 @@ func main() {
 	}
 
 	// Start WebSocket hub
-	go wsService.Run()
+	go wsUsecase.Run()
 	log.Info("WebSocket hub started")
 
 	// Start server in a goroutine
@@ -514,7 +519,7 @@ func main() {
 			select {
 			case <-ticker.C:
 				ctx := context.Background()
-				if err := escalationService.ProcessPendingEscalations(ctx); err != nil {
+				if err := escalationUsecase.ProcessPendingEscalations(ctx); err != nil {
 					log.Error("Failed to process pending escalations", zap.Error(err))
 				}
 			case <-escalationWorkerQuit:
@@ -536,7 +541,7 @@ func main() {
 			select {
 			case <-ticker.C:
 				ctx := context.Background()
-				if err := webhookService.ProcessPendingDeliveries(ctx); err != nil {
+				if err := webhookUsecase.ProcessPendingDeliveries(ctx); err != nil {
 					log.Error("Failed to process pending webhook deliveries", zap.Error(err))
 				}
 			case <-webhookWorkerQuit:

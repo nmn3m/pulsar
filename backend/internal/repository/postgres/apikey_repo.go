@@ -10,14 +10,13 @@ import (
 	"github.com/lib/pq"
 
 	"github.com/nmn3m/pulsar/backend/internal/domain"
-	"github.com/nmn3m/pulsar/backend/internal/repository"
 )
 
 type apiKeyRepository struct {
 	db *sqlx.DB
 }
 
-func NewAPIKeyRepository(db *sqlx.DB) repository.APIKeyRepository {
+func NewAPIKeyRepository(db *sqlx.DB) *apiKeyRepository {
 	return &apiKeyRepository{db: db}
 }
 

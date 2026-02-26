@@ -7,13 +7,13 @@ import (
 )
 
 type Organization struct {
-	ID        uuid.UUID              `json:"id" db:"id"`
-	Name      string                 `json:"name" db:"name"`
-	Slug      string                 `json:"slug" db:"slug"`
-	Plan      string                 `json:"plan" db:"plan"`
-	Settings  map[string]interface{} `json:"settings" db:"settings"`
-	CreatedAt time.Time              `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time              `json:"updated_at" db:"updated_at"`
+	ID        uuid.UUID
+	Name      string
+	Slug      string
+	Plan      string
+	Settings  map[string]interface{}
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 // PlanType represents the organization's subscription plan
