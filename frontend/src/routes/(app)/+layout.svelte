@@ -147,6 +147,18 @@
                     class="absolute top-full right-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[9999]"
                   >
                     <a
+                      href="/settings/profile"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith(
+                        '/settings/profile'
+                      )
+                        ? 'bg-gray-50'
+                        : ''}"
+                      on:click={() => (showSettingsMenu = false)}
+                    >
+                      <div class="font-medium">Profile</div>
+                      <div class="text-xs text-gray-500">Phone number & personal info</div>
+                    </a>
+                    <a
                       href="/settings/routing-rules"
                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {$page.url.pathname.startsWith(
                         '/settings/routing-rules'

@@ -87,7 +87,7 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 		RefreshTTLDays:   cfg.JWT.RefreshTTL,
 	}, emailVerificationUsecase)
 	teamUsecase := usecase.NewTeamUsecase(teamRepo, userRepo)
-	userUsecase := usecase.NewUserUsecase(orgRepo)
+	userUsecase := usecase.NewUserUsecase(orgRepo, userRepo)
 	scheduleUsecase := usecase.NewScheduleUsecase(scheduleRepo, userRepo)
 	notificationUsecase := usecase.NewNotificationUsecase(notificationRepo)
 	wsUsecase := usecase.NewWebSocketUsecase(logger)

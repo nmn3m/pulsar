@@ -49,6 +49,12 @@
     timeout: '30',
   };
 
+  let smsConfig = {
+    api_key: '',
+    from_number: '',
+    messaging_profile_id: '',
+  };
+
   onMount(async () => {
     await loadChannel();
   });
@@ -99,6 +105,13 @@
             timeout: String(config.timeout || 30),
           };
           break;
+        case 'sms':
+          smsConfig = {
+            api_key: config.api_key || '',
+            from_number: config.from_number || '',
+            messaging_profile_id: config.messaging_profile_id || '',
+          };
+          break;
       }
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to load notification channel';
@@ -129,6 +142,17 @@
         case 'webhook':
           config = { ...webhookConfig, timeout: parseInt(webhookConfig.timeout, 10) };
           break;
+        case 'sms': {
+          const cfg: Record<string, unknown> = {
+            api_key: smsConfig.api_key,
+            from_number: smsConfig.from_number,
+          };
+          if (smsConfig.messaging_profile_id) {
+            cfg.messaging_profile_id = smsConfig.messaging_profile_id;
+          }
+          config = cfg;
+          break;
+        }
       }
 
       await api.updateNotificationChannel(channelId, {
@@ -160,6 +184,8 @@
         return 'Microsoft Teams';
       case 'webhook':
         return 'Webhook';
+      case 'sms':
+        return 'SMS (Telnyx)';
       default:
         return type;
     }
@@ -175,6 +201,8 @@
         return '👥';
       case 'webhook':
         return '🔗';
+      case 'sms':
+        return '📱';
       default:
         return '📡';
     }
@@ -391,6 +419,33 @@
                 class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900"
               />
             </div>
+          </div>
+        {/if}
+
+        <!-- SMS Configuration -->
+        {#if channel.channel_type === 'sms'}
+          <div class="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h4 class="text-md font-semibold text-gray-900">SMS Configuration (Telnyx)</h4>
+            <Input
+              id="sms-api-key"
+              label="API Key"
+              type="password"
+              bind:value={smsConfig.api_key}
+              placeholder="Leave empty to keep existing"
+            />
+            <Input
+              id="sms-from-number"
+              label="From Number (E.164)"
+              bind:value={smsConfig.from_number}
+              placeholder="+1234567890"
+              required
+            />
+            <Input
+              id="sms-messaging-profile-id"
+              label="Messaging Profile ID (optional)"
+              bind:value={smsConfig.messaging_profile_id}
+              placeholder=""
+            />
           </div>
         {/if}
 

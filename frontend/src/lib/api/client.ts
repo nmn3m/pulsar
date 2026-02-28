@@ -319,6 +319,13 @@ class APIClient {
     return this.request<{ users: User[] }>('/api/v1/users');
   }
 
+  async updateProfile(data: { full_name?: string; phone?: string; timezone?: string }): Promise<User> {
+    return this.request<User>('/api/v1/users/me', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
   // Alert endpoints
   async listAlerts(params?: ListAlertsParams): Promise<ListAlertsResponse> {
     const queryParams = new URLSearchParams();

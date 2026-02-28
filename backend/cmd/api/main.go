@@ -160,7 +160,7 @@ func main() {
 	if emailService != nil {
 		teamUsecase.SetEmailService(emailService)
 	}
-	userUsecase := usecase.NewUserUsecase(orgRepo)
+	userUsecase := usecase.NewUserUsecase(orgRepo, userRepo)
 	scheduleUsecase := usecase.NewScheduleUsecase(scheduleRepo, userRepo)
 	notificationUsecase := usecase.NewNotificationUsecase(notificationRepo)
 	wsUsecase := usecase.NewWebSocketUsecase(log)
@@ -264,6 +264,7 @@ func main() {
 
 			// User routes
 			protected.GET("/users", userHandler.ListOrganizationUsers)
+			protected.PATCH("/users/me", userHandler.UpdateProfile)
 
 			// Alert routes
 			alerts := protected.Group("/alerts")

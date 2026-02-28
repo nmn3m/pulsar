@@ -45,3 +45,38 @@ func (h *UserHandler) ListOrganizationUsers(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"users": users})
 }
+
+// UpdateProfile godoc
+// @Summary      Update current user's profile
+// @Description  Update the authenticated user's profile (full name, phone, timezone)
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        body body usecase.UpdateProfileRequest true "Profile update fields"
+// @Success      200 {object} domain.User
+// @Failure      400 {object} map[string]string
+// @Failure      401 {object} map[string]string
+// @Failure      500 {object} map[string]string
+// @Router       /users/me [patch]
+func (h *UserHandler) UpdateProfile(c *gin.Context) {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	var req usecase.UpdateProfileRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := h.userUsecase.UpdateProfile(c.Request.Context(), userID, &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}

@@ -125,6 +125,13 @@ function createAuthStore() {
       await api.resendOTP(data);
     },
 
+    setUser(user: User) {
+      update((state) => ({
+        ...state,
+        user,
+      }));
+    },
+
     setPendingVerificationEmail(email: string | null) {
       update((state) => ({
         ...state,
