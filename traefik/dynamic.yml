@@ -1,0 +1,26 @@
+http:
+  routers:
+    backend:
+      rule: "Host(`pulsar.localhost`) && PathPrefix(`/api`)"
+      entryPoints:
+        - websecure
+      service: backend
+      tls: {}
+
+    frontend:
+      rule: "Host(`pulsar.localhost`)"
+      entryPoints:
+        - websecure
+      service: frontend
+      tls: {}
+
+  services:
+    backend:
+      loadBalancer:
+        servers:
+          - url: "http://backend:8080"
+
+    frontend:
+      loadBalancer:
+        servers:
+          - url: "http://frontend:5173"

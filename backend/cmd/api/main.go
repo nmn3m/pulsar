@@ -218,20 +218,19 @@ func main() {
 		router.Use(middleware.OTelMetricsMiddleware())
 	}
 
-	// Health check
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status": "healthy",
-			"time":   time.Now().UTC(),
-		})
-	})
-
 	// Swagger documentation
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// API v1 routes
 	v1 := router.Group("/api/v1")
 	{
+		// Health check
+		v1.GET("/health", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"status": "healthy",
+				"time":   time.Now().UTC(),
+			})
+		})
 		// Auth routes (public)
 		auth := v1.Group("/auth")
 		{
