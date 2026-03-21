@@ -101,13 +101,6 @@ func (s *NotificationUsecase) createProviderFromChannel(channel *domain.Notifica
 		}
 		return providers.NewWebhookProvider(config), nil
 
-	case domain.ChannelTypeSMS:
-		var config providers.TelnyxSMSConfig
-		if err := json.Unmarshal(channel.Config, &config); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal sms config: %w", err)
-		}
-		return providers.NewTelnyxSMSProvider(config), nil
-
 	default:
 		return nil, fmt.Errorf("unsupported channel type: %s", channel.ChannelType)
 	}
@@ -130,10 +123,6 @@ func (s *NotificationUsecase) validateChannelConfig(channelType domain.ChannelTy
 
 	case domain.ChannelTypeWebhook:
 		provider := &providers.WebhookProvider{}
-		return provider.ValidateConfig(config)
-
-	case domain.ChannelTypeSMS:
-		provider := &providers.TelnyxSMSProvider{}
 		return provider.ValidateConfig(config)
 
 	default:

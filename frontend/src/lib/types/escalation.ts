@@ -31,7 +31,7 @@ export interface EscalationTarget {
 
 // Notification channel override configuration for escalation targets
 export interface TargetNotificationConfig {
-  channels: string[]; // e.g., ["email", "slack", "sms", "webhook"]
+  channels: string[]; // e.g., ["email", "slack", "webhook"]
   urgent?: boolean; // If true, use urgent/high-priority notification
 }
 

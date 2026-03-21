@@ -189,7 +189,6 @@
     const displayNames: Record<string, string> = {
       email: 'Email',
       slack: 'Slack',
-      sms: 'SMS',
       webhook: 'Webhook',
       msteams: 'MS Teams',
     };
@@ -697,7 +696,7 @@
           </label>
           <p class="text-xs text-gray-500 mb-2">Leave unchecked to use all available channels</p>
           <div class="space-y-2">
-            {#each ['email', 'slack', 'sms', 'webhook', 'msteams'] as channelType}
+            {#each ['email', 'slack', 'webhook', 'msteams'] as channelType}
               <label class="flex items-center gap-2">
                 <input
                   type="checkbox"

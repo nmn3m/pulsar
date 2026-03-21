@@ -138,14 +138,7 @@ func (n *AlertNotifier) NotifyAlertEscalated(
 					}
 				}
 
-				// For SMS channels, use phone number instead of email
 				recipientAddr := recipient.ContactInfo
-				if channel.ChannelType == domain.ChannelTypeSMS {
-					if recipient.Phone == nil || *recipient.Phone == "" {
-						continue // Skip SMS if user has no phone number
-					}
-					recipientAddr = *recipient.Phone
-				}
 
 				// Construct notification request
 				req := &SendNotificationRequest{
@@ -169,8 +162,7 @@ func (n *AlertNotifier) NotifyAlertEscalated(
 // RecipientInfo contains user contact information for notifications
 type RecipientInfo struct {
 	UserID      uuid.UUID
-	ContactInfo string // email, phone, slack user id, etc.
-	Phone       *string
+	ContactInfo string // email, slack user id, etc.
 }
 
 // resolveEscalationTarget resolves an escalation target to actual recipients
@@ -190,7 +182,6 @@ func (n *AlertNotifier) resolveEscalationTarget(
 		recipients = append(recipients, RecipientInfo{
 			UserID:      user.ID,
 			ContactInfo: user.Email,
-			Phone:       user.Phone,
 		})
 
 	case domain.EscalationTargetTypeTeam:
@@ -203,7 +194,6 @@ func (n *AlertNotifier) resolveEscalationTarget(
 			recipients = append(recipients, RecipientInfo{
 				UserID:      member.ID,
 				ContactInfo: member.Email,
-				Phone:       member.Phone,
 			})
 		}
 
@@ -224,7 +214,6 @@ func (n *AlertNotifier) resolveEscalationTarget(
 				recipients = append(recipients, RecipientInfo{
 					UserID:      user.ID,
 					ContactInfo: user.Email,
-					Phone:       user.Phone,
 				})
 			}
 		}

@@ -1,4 +1,4 @@
-export type ChannelType = 'email' | 'slack' | 'teams' | 'webhook' | 'sms';
+export type ChannelType = 'email' | 'slack' | 'teams' | 'webhook';
 export type NotificationStatus = 'pending' | 'sent' | 'failed';
 
 export interface NotificationChannel {
@@ -129,8 +129,3 @@ export interface WebhookConfig {
   timeout?: number;
 }
 
-export interface TelnyxSMSConfig {
-  api_key: string;
-  from_number: string;
-  messaging_profile_id?: string;
-}

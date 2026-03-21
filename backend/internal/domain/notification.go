@@ -14,7 +14,6 @@ const (
 	ChannelTypeSlack   ChannelType = "slack"
 	ChannelTypeTeams   ChannelType = "teams"
 	ChannelTypeWebhook ChannelType = "webhook"
-	ChannelTypeSMS     ChannelType = "sms"
 )
 
 // NotificationStatus represents the status of a notification

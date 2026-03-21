@@ -37,3 +37,4 @@ Thumbs.db
 keys/
 # instrumentation/
 DEPLOYMENT.md
+Design/*

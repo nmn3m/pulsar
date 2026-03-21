@@ -38,7 +38,7 @@ type EscalationTarget struct {
 
 // TargetNotificationConfig represents the notification channel override for a target
 type TargetNotificationConfig struct {
-	Channels []string `json:"channels"` // e.g., ["email", "slack", "sms", "webhook"]
+	Channels []string `json:"channels"` // e.g., ["email", "slack", "webhook"]
 	Urgent   bool     `json:"urgent"`   // If true, use urgent/high-priority notification
 }
 
