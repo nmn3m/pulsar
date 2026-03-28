@@ -61,7 +61,9 @@ func (h *IncidentHandler) Get(c *gin.Context) {
 		return
 	}
 
-	incident, err := h.incidentUsecase.GetIncident(c.Request.Context(), id)
+	orgID, _ := middleware.GetOrganizationID(c)
+
+	incident, err := h.incidentUsecase.GetIncident(c.Request.Context(), id, orgID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -90,7 +92,9 @@ func (h *IncidentHandler) GetWithDetails(c *gin.Context) {
 		return
 	}
 
-	incident, err := h.incidentUsecase.GetIncidentWithDetails(c.Request.Context(), id)
+	orgID, _ := middleware.GetOrganizationID(c)
+
+	incident, err := h.incidentUsecase.GetIncidentWithDetails(c.Request.Context(), id, orgID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -126,9 +130,10 @@ func (h *IncidentHandler) Update(c *gin.Context) {
 		return
 	}
 
+	orgID, _ := middleware.GetOrganizationID(c)
 	userID, _ := middleware.GetUserID(c)
 
-	incident, err := h.incidentUsecase.UpdateIncident(c.Request.Context(), id, userID, &req)
+	incident, err := h.incidentUsecase.UpdateIncident(c.Request.Context(), id, orgID, userID, &req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -157,7 +162,9 @@ func (h *IncidentHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := h.incidentUsecase.DeleteIncident(c.Request.Context(), id); err != nil {
+	orgID, _ := middleware.GetOrganizationID(c)
+
+	if err := h.incidentUsecase.DeleteIncident(c.Request.Context(), id, orgID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -268,7 +275,9 @@ func (h *IncidentHandler) RemoveResponder(c *gin.Context) {
 
 	userID, _ := middleware.GetUserID(c)
 
-	if err := h.incidentUsecase.RemoveResponder(c.Request.Context(), id, responderID, userID); err != nil {
+	orgID, _ := middleware.GetOrganizationID(c)
+
+	if err := h.incidentUsecase.RemoveResponder(c.Request.Context(), id, orgID, responderID, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -311,7 +320,9 @@ func (h *IncidentHandler) UpdateResponderRole(c *gin.Context) {
 		return
 	}
 
-	if err := h.incidentUsecase.UpdateResponderRole(c.Request.Context(), id, responderID, &req); err != nil {
+	orgID, _ := middleware.GetOrganizationID(c)
+
+	if err := h.incidentUsecase.UpdateResponderRole(c.Request.Context(), id, orgID, responderID, &req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -339,7 +350,9 @@ func (h *IncidentHandler) ListResponders(c *gin.Context) {
 		return
 	}
 
-	responders, err := h.incidentUsecase.ListResponders(c.Request.Context(), id)
+	orgID, _ := middleware.GetOrganizationID(c)
+
+	responders, err := h.incidentUsecase.ListResponders(c.Request.Context(), id, orgID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -380,9 +393,10 @@ func (h *IncidentHandler) AddNote(c *gin.Context) {
 		return
 	}
 
+	orgID, _ := middleware.GetOrganizationID(c)
 	userID, _ := middleware.GetUserID(c)
 
-	event, err := h.incidentUsecase.AddNote(c.Request.Context(), id, userID, &req)
+	event, err := h.incidentUsecase.AddNote(c.Request.Context(), id, orgID, userID, &req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -411,7 +425,9 @@ func (h *IncidentHandler) GetTimeline(c *gin.Context) {
 		return
 	}
 
-	timeline, err := h.incidentUsecase.GetTimeline(c.Request.Context(), id)
+	orgID, _ := middleware.GetOrganizationID(c)
+
+	timeline, err := h.incidentUsecase.GetTimeline(c.Request.Context(), id, orgID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -452,9 +468,10 @@ func (h *IncidentHandler) LinkAlert(c *gin.Context) {
 		return
 	}
 
+	orgID, _ := middleware.GetOrganizationID(c)
 	userID, _ := middleware.GetUserID(c)
 
-	link, err := h.incidentUsecase.LinkAlert(c.Request.Context(), id, userID, &req)
+	link, err := h.incidentUsecase.LinkAlert(c.Request.Context(), id, orgID, userID, &req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -491,9 +508,10 @@ func (h *IncidentHandler) UnlinkAlert(c *gin.Context) {
 		return
 	}
 
+	orgID, _ := middleware.GetOrganizationID(c)
 	userID, _ := middleware.GetUserID(c)
 
-	if err := h.incidentUsecase.UnlinkAlert(c.Request.Context(), id, alertID, userID); err != nil {
+	if err := h.incidentUsecase.UnlinkAlert(c.Request.Context(), id, orgID, alertID, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -521,7 +539,9 @@ func (h *IncidentHandler) ListAlerts(c *gin.Context) {
 		return
 	}
 
-	alerts, err := h.incidentUsecase.ListAlerts(c.Request.Context(), id)
+	orgID, _ := middleware.GetOrganizationID(c)
+
+	alerts, err := h.incidentUsecase.ListAlerts(c.Request.Context(), id, orgID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

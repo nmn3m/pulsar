@@ -131,8 +131,8 @@ func (s *IncidentUsecase) CreateIncident(ctx context.Context, orgID, userID uuid
 	return incident, nil
 }
 
-func (s *IncidentUsecase) GetIncident(ctx context.Context, id uuid.UUID) (*domain.Incident, error) {
-	incident, err := s.incidentRepo.GetByID(ctx, id)
+func (s *IncidentUsecase) GetIncident(ctx context.Context, id, orgID uuid.UUID) (*domain.Incident, error) {
+	incident, err := s.incidentRepo.GetByID(ctx, id, orgID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get incident: %w", err)
 	}
@@ -140,8 +140,8 @@ func (s *IncidentUsecase) GetIncident(ctx context.Context, id uuid.UUID) (*domai
 	return incident, nil
 }
 
-func (s *IncidentUsecase) GetIncidentWithDetails(ctx context.Context, id uuid.UUID) (*domain.IncidentWithDetails, error) {
-	incident, err := s.incidentRepo.GetWithDetails(ctx, id)
+func (s *IncidentUsecase) GetIncidentWithDetails(ctx context.Context, id, orgID uuid.UUID) (*domain.IncidentWithDetails, error) {
+	incident, err := s.incidentRepo.GetWithDetails(ctx, id, orgID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get incident with details: %w", err)
 	}
@@ -149,8 +149,8 @@ func (s *IncidentUsecase) GetIncidentWithDetails(ctx context.Context, id uuid.UU
 	return incident, nil
 }
 
-func (s *IncidentUsecase) UpdateIncident(ctx context.Context, id, userID uuid.UUID, req *UpdateIncidentRequest) (*domain.Incident, error) {
-	incident, err := s.incidentRepo.GetByID(ctx, id)
+func (s *IncidentUsecase) UpdateIncident(ctx context.Context, id, orgID, userID uuid.UUID, req *UpdateIncidentRequest) (*domain.Incident, error) {
+	incident, err := s.incidentRepo.GetByID(ctx, id, orgID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get incident: %w", err)
 	}
@@ -255,8 +255,8 @@ func (s *IncidentUsecase) UpdateIncident(ctx context.Context, id, userID uuid.UU
 	return incident, nil
 }
 
-func (s *IncidentUsecase) DeleteIncident(ctx context.Context, id uuid.UUID) error {
-	if err := s.incidentRepo.Delete(ctx, id); err != nil {
+func (s *IncidentUsecase) DeleteIncident(ctx context.Context, id, orgID uuid.UUID) error {
+	if err := s.incidentRepo.Delete(ctx, id, orgID); err != nil {
 		return fmt.Errorf("failed to delete incident: %w", err)
 	}
 
@@ -360,8 +360,8 @@ func (s *IncidentUsecase) AddResponder(ctx context.Context, incidentID uuid.UUID
 	return responder, nil
 }
 
-func (s *IncidentUsecase) RemoveResponder(ctx context.Context, incidentID, responderUserID, actionUserID uuid.UUID) error {
-	if err := s.incidentRepo.RemoveResponder(ctx, incidentID, responderUserID); err != nil {
+func (s *IncidentUsecase) RemoveResponder(ctx context.Context, incidentID, orgID, responderUserID, actionUserID uuid.UUID) error {
+	if err := s.incidentRepo.RemoveResponder(ctx, incidentID, orgID, responderUserID); err != nil {
 		return fmt.Errorf("failed to remove responder: %w", err)
 	}
 
@@ -384,21 +384,21 @@ func (s *IncidentUsecase) RemoveResponder(ctx context.Context, incidentID, respo
 	return nil
 }
 
-func (s *IncidentUsecase) UpdateResponderRole(ctx context.Context, incidentID, responderUserID uuid.UUID, req *UpdateResponderRoleRequest) error {
+func (s *IncidentUsecase) UpdateResponderRole(ctx context.Context, incidentID, orgID, responderUserID uuid.UUID, req *UpdateResponderRoleRequest) error {
 	role := domain.ResponderRole(req.Role)
 	if !role.IsValid() {
 		return fmt.Errorf("invalid responder role: %s", req.Role)
 	}
 
-	if err := s.incidentRepo.UpdateResponderRole(ctx, incidentID, responderUserID, role); err != nil {
+	if err := s.incidentRepo.UpdateResponderRole(ctx, incidentID, orgID, responderUserID, role); err != nil {
 		return fmt.Errorf("failed to update responder role: %w", err)
 	}
 
 	return nil
 }
 
-func (s *IncidentUsecase) ListResponders(ctx context.Context, incidentID uuid.UUID) ([]*domain.ResponderWithUser, error) {
-	responders, err := s.incidentRepo.ListResponders(ctx, incidentID)
+func (s *IncidentUsecase) ListResponders(ctx context.Context, incidentID, orgID uuid.UUID) ([]*domain.ResponderWithUser, error) {
+	responders, err := s.incidentRepo.ListResponders(ctx, incidentID, orgID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list responders: %w", err)
 	}
@@ -408,7 +408,7 @@ func (s *IncidentUsecase) ListResponders(ctx context.Context, incidentID uuid.UU
 
 // Timeline management
 
-func (s *IncidentUsecase) AddNote(ctx context.Context, incidentID, userID uuid.UUID, req *AddNoteRequest) (*domain.IncidentTimelineEvent, error) {
+func (s *IncidentUsecase) AddNote(ctx context.Context, incidentID, orgID, userID uuid.UUID, req *AddNoteRequest) (*domain.IncidentTimelineEvent, error) {
 	event := &domain.IncidentTimelineEvent{
 		ID:          uuid.New(),
 		IncidentID:  incidentID,
@@ -424,7 +424,7 @@ func (s *IncidentUsecase) AddNote(ctx context.Context, incidentID, userID uuid.U
 
 	// Broadcast WebSocket event
 	if s.wsUsecase != nil {
-		incident, err := s.incidentRepo.GetByID(ctx, incidentID)
+		incident, err := s.incidentRepo.GetByID(ctx, incidentID, orgID)
 		if err == nil {
 			s.wsUsecase.BroadcastIncidentTimelineEvent(incident.OrganizationID, incidentID, event)
 		}
@@ -433,8 +433,8 @@ func (s *IncidentUsecase) AddNote(ctx context.Context, incidentID, userID uuid.U
 	return event, nil
 }
 
-func (s *IncidentUsecase) GetTimeline(ctx context.Context, incidentID uuid.UUID) ([]*domain.TimelineEventWithUser, error) {
-	timeline, err := s.incidentRepo.GetTimeline(ctx, incidentID)
+func (s *IncidentUsecase) GetTimeline(ctx context.Context, incidentID, orgID uuid.UUID) ([]*domain.TimelineEventWithUser, error) {
+	timeline, err := s.incidentRepo.GetTimeline(ctx, incidentID, orgID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get timeline: %w", err)
 	}
@@ -444,7 +444,7 @@ func (s *IncidentUsecase) GetTimeline(ctx context.Context, incidentID uuid.UUID)
 
 // Alert linking
 
-func (s *IncidentUsecase) LinkAlert(ctx context.Context, incidentID, userID uuid.UUID, req *LinkAlertRequest) (*domain.IncidentAlert, error) {
+func (s *IncidentUsecase) LinkAlert(ctx context.Context, incidentID, orgID, userID uuid.UUID, req *LinkAlertRequest) (*domain.IncidentAlert, error) {
 	link := &domain.IncidentAlert{
 		ID:             uuid.New(),
 		IncidentID:     incidentID,
@@ -475,8 +475,8 @@ func (s *IncidentUsecase) LinkAlert(ctx context.Context, incidentID, userID uuid
 	return link, nil
 }
 
-func (s *IncidentUsecase) UnlinkAlert(ctx context.Context, incidentID, alertID, userID uuid.UUID) error {
-	if err := s.incidentRepo.UnlinkAlert(ctx, incidentID, alertID); err != nil {
+func (s *IncidentUsecase) UnlinkAlert(ctx context.Context, incidentID, orgID, alertID, userID uuid.UUID) error {
+	if err := s.incidentRepo.UnlinkAlert(ctx, incidentID, orgID, alertID); err != nil {
 		return fmt.Errorf("failed to unlink alert: %w", err)
 	}
 
@@ -499,8 +499,8 @@ func (s *IncidentUsecase) UnlinkAlert(ctx context.Context, incidentID, alertID, 
 	return nil
 }
 
-func (s *IncidentUsecase) ListAlerts(ctx context.Context, incidentID uuid.UUID) ([]*domain.IncidentAlertWithDetails, error) {
-	alerts, err := s.incidentRepo.ListAlerts(ctx, incidentID)
+func (s *IncidentUsecase) ListAlerts(ctx context.Context, incidentID, orgID uuid.UUID) ([]*domain.IncidentAlertWithDetails, error) {
+	alerts, err := s.incidentRepo.ListAlerts(ctx, incidentID, orgID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list alerts: %w", err)
 	}

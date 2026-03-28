@@ -67,6 +67,12 @@ func (h *AlertHandler) Create(c *gin.Context) {
 // @Failure      404 {object} map[string]string
 // @Router       /alerts/{id} [get]
 func (h *AlertHandler) Get(c *gin.Context) {
+	orgID, ok := middleware.GetOrganizationID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -74,7 +80,7 @@ func (h *AlertHandler) Get(c *gin.Context) {
 		return
 	}
 
-	alert, err := h.alertUsecase.GetAlert(c.Request.Context(), id)
+	alert, err := h.alertUsecase.GetAlert(c.Request.Context(), id, orgID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -96,6 +102,12 @@ func (h *AlertHandler) Get(c *gin.Context) {
 // @Failure      400 {object} map[string]string
 // @Router       /alerts/{id} [patch]
 func (h *AlertHandler) Update(c *gin.Context) {
+	orgID, ok := middleware.GetOrganizationID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -109,7 +121,7 @@ func (h *AlertHandler) Update(c *gin.Context) {
 		return
 	}
 
-	alert, err := h.alertUsecase.UpdateAlert(c.Request.Context(), id, &req)
+	alert, err := h.alertUsecase.UpdateAlert(c.Request.Context(), id, orgID, &req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -130,6 +142,12 @@ func (h *AlertHandler) Update(c *gin.Context) {
 // @Failure      400 {object} map[string]string
 // @Router       /alerts/{id} [delete]
 func (h *AlertHandler) Delete(c *gin.Context) {
+	orgID, ok := middleware.GetOrganizationID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -137,7 +155,7 @@ func (h *AlertHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := h.alertUsecase.DeleteAlert(c.Request.Context(), id); err != nil {
+	if err := h.alertUsecase.DeleteAlert(c.Request.Context(), id, orgID); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -200,6 +218,12 @@ func (h *AlertHandler) List(c *gin.Context) {
 // @Failure      401 {object} map[string]string
 // @Router       /alerts/{id}/acknowledge [post]
 func (h *AlertHandler) Acknowledge(c *gin.Context) {
+	orgID, ok := middleware.GetOrganizationID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -213,7 +237,7 @@ func (h *AlertHandler) Acknowledge(c *gin.Context) {
 		return
 	}
 
-	if err := h.alertUsecase.AcknowledgeAlert(c.Request.Context(), id, userID); err != nil {
+	if err := h.alertUsecase.AcknowledgeAlert(c.Request.Context(), id, orgID, userID); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -235,6 +259,12 @@ func (h *AlertHandler) Acknowledge(c *gin.Context) {
 // @Failure      401 {object} map[string]string
 // @Router       /alerts/{id}/close [post]
 func (h *AlertHandler) Close(c *gin.Context) {
+	orgID, ok := middleware.GetOrganizationID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -254,7 +284,7 @@ func (h *AlertHandler) Close(c *gin.Context) {
 		return
 	}
 
-	if err := h.alertUsecase.CloseAlert(c.Request.Context(), id, userID, req.Reason); err != nil {
+	if err := h.alertUsecase.CloseAlert(c.Request.Context(), id, orgID, userID, req.Reason); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -275,6 +305,12 @@ func (h *AlertHandler) Close(c *gin.Context) {
 // @Failure      400 {object} map[string]string
 // @Router       /alerts/{id}/snooze [post]
 func (h *AlertHandler) Snooze(c *gin.Context) {
+	orgID, ok := middleware.GetOrganizationID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -288,7 +324,7 @@ func (h *AlertHandler) Snooze(c *gin.Context) {
 		return
 	}
 
-	if err := h.alertUsecase.SnoozeAlert(c.Request.Context(), id, req.Until); err != nil {
+	if err := h.alertUsecase.SnoozeAlert(c.Request.Context(), id, orgID, req.Until); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -309,6 +345,12 @@ func (h *AlertHandler) Snooze(c *gin.Context) {
 // @Failure      400 {object} map[string]string
 // @Router       /alerts/{id}/assign [post]
 func (h *AlertHandler) Assign(c *gin.Context) {
+	orgID, ok := middleware.GetOrganizationID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -322,7 +364,7 @@ func (h *AlertHandler) Assign(c *gin.Context) {
 		return
 	}
 
-	if err := h.alertUsecase.AssignAlert(c.Request.Context(), id, req.UserID, req.TeamID); err != nil {
+	if err := h.alertUsecase.AssignAlert(c.Request.Context(), id, orgID, req.UserID, req.TeamID); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

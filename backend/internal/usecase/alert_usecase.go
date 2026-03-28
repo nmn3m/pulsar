@@ -103,7 +103,7 @@ func (s *AlertUsecase) CreateAlert(ctx context.Context, orgID uuid.UUID, req *Cr
 			}
 
 			// Refresh the alert to get updated values
-			updatedAlert, err := s.alertRepo.GetByID(ctx, existingAlert.ID)
+			updatedAlert, err := s.alertRepo.GetByID(ctx, existingAlert.ID, orgID)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get updated alert: %w", err)
 			}
@@ -183,8 +183,8 @@ func (s *AlertUsecase) CreateAlert(ctx context.Context, orgID uuid.UUID, req *Cr
 	return alert, nil
 }
 
-func (s *AlertUsecase) GetAlert(ctx context.Context, id uuid.UUID) (*domain.Alert, error) {
-	alert, err := s.alertRepo.GetByID(ctx, id)
+func (s *AlertUsecase) GetAlert(ctx context.Context, id, orgID uuid.UUID) (*domain.Alert, error) {
+	alert, err := s.alertRepo.GetByID(ctx, id, orgID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get alert: %w", err)
 	}
@@ -192,8 +192,8 @@ func (s *AlertUsecase) GetAlert(ctx context.Context, id uuid.UUID) (*domain.Aler
 	return alert, nil
 }
 
-func (s *AlertUsecase) UpdateAlert(ctx context.Context, id uuid.UUID, req *UpdateAlertRequest) (*domain.Alert, error) {
-	alert, err := s.alertRepo.GetByID(ctx, id)
+func (s *AlertUsecase) UpdateAlert(ctx context.Context, id, orgID uuid.UUID, req *UpdateAlertRequest) (*domain.Alert, error) {
+	alert, err := s.alertRepo.GetByID(ctx, id, orgID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get alert: %w", err)
 	}
@@ -249,8 +249,8 @@ func (s *AlertUsecase) UpdateAlert(ctx context.Context, id uuid.UUID, req *Updat
 	return alert, nil
 }
 
-func (s *AlertUsecase) DeleteAlert(ctx context.Context, id uuid.UUID) error {
-	if err := s.alertRepo.Delete(ctx, id); err != nil {
+func (s *AlertUsecase) DeleteAlert(ctx context.Context, id, orgID uuid.UUID) error {
+	if err := s.alertRepo.Delete(ctx, id, orgID); err != nil {
 		return fmt.Errorf("failed to delete alert: %w", err)
 	}
 
@@ -317,15 +317,15 @@ func (s *AlertUsecase) ListAlerts(ctx context.Context, orgID uuid.UUID, req *Lis
 	}, nil
 }
 
-func (s *AlertUsecase) AcknowledgeAlert(ctx context.Context, id, userID uuid.UUID) error {
-	if err := s.alertRepo.Acknowledge(ctx, id, userID); err != nil {
+func (s *AlertUsecase) AcknowledgeAlert(ctx context.Context, id, orgID, userID uuid.UUID) error {
+	if err := s.alertRepo.Acknowledge(ctx, id, orgID, userID); err != nil {
 		return fmt.Errorf("failed to acknowledge alert: %w", err)
 	}
 
 	// Send notification for acknowledged alert (async)
 	if s.alertNotifier != nil {
 		go func() {
-			alert, err := s.alertRepo.GetByID(context.Background(), id)
+			alert, err := s.alertRepo.GetByID(context.Background(), id, orgID)
 			if err == nil {
 				if err := s.alertNotifier.NotifyAlertAcknowledged(context.Background(), alert, userID); err != nil {
 					fmt.Printf("Failed to send alert acknowledgment notification: %v\n", err)
@@ -336,7 +336,7 @@ func (s *AlertUsecase) AcknowledgeAlert(ctx context.Context, id, userID uuid.UUI
 
 	// Broadcast WebSocket event and trigger webhooks
 	if s.wsUsecase != nil || s.webhookUsecase != nil {
-		alert, err := s.alertRepo.GetByID(ctx, id)
+		alert, err := s.alertRepo.GetByID(ctx, id, orgID)
 		if err == nil {
 			if s.wsUsecase != nil {
 				s.wsUsecase.BroadcastAlertEvent(domain.WSEventAlertAcknowledged, alert.OrganizationID, alert)
@@ -358,15 +358,15 @@ func (s *AlertUsecase) AcknowledgeAlert(ctx context.Context, id, userID uuid.UUI
 	return nil
 }
 
-func (s *AlertUsecase) CloseAlert(ctx context.Context, id, userID uuid.UUID, reason string) error {
-	if err := s.alertRepo.Close(ctx, id, userID, reason); err != nil {
+func (s *AlertUsecase) CloseAlert(ctx context.Context, id, orgID, userID uuid.UUID, reason string) error {
+	if err := s.alertRepo.Close(ctx, id, orgID, userID, reason); err != nil {
 		return fmt.Errorf("failed to close alert: %w", err)
 	}
 
 	// Send notification for closed alert (async)
 	if s.alertNotifier != nil {
 		go func() {
-			alert, err := s.alertRepo.GetByID(context.Background(), id)
+			alert, err := s.alertRepo.GetByID(context.Background(), id, orgID)
 			if err == nil {
 				if err := s.alertNotifier.NotifyAlertClosed(context.Background(), alert, userID, reason); err != nil {
 					fmt.Printf("Failed to send alert closure notification: %v\n", err)
@@ -377,7 +377,7 @@ func (s *AlertUsecase) CloseAlert(ctx context.Context, id, userID uuid.UUID, rea
 
 	// Broadcast WebSocket event and trigger webhooks
 	if s.wsUsecase != nil || s.webhookUsecase != nil {
-		alert, err := s.alertRepo.GetByID(ctx, id)
+		alert, err := s.alertRepo.GetByID(ctx, id, orgID)
 		if err == nil {
 			if s.wsUsecase != nil {
 				s.wsUsecase.BroadcastAlertEvent(domain.WSEventAlertClosed, alert.OrganizationID, alert)
@@ -400,24 +400,24 @@ func (s *AlertUsecase) CloseAlert(ctx context.Context, id, userID uuid.UUID, rea
 	return nil
 }
 
-func (s *AlertUsecase) SnoozeAlert(ctx context.Context, id uuid.UUID, until time.Time) error {
+func (s *AlertUsecase) SnoozeAlert(ctx context.Context, id, orgID uuid.UUID, until time.Time) error {
 	if until.Before(time.Now()) {
 		return fmt.Errorf("snooze time must be in the future")
 	}
 
-	if err := s.alertRepo.Snooze(ctx, id, until); err != nil {
+	if err := s.alertRepo.Snooze(ctx, id, orgID, until); err != nil {
 		return fmt.Errorf("failed to snooze alert: %w", err)
 	}
 
 	return nil
 }
 
-func (s *AlertUsecase) AssignAlert(ctx context.Context, id uuid.UUID, userID, teamID *uuid.UUID) error {
+func (s *AlertUsecase) AssignAlert(ctx context.Context, id, orgID uuid.UUID, userID, teamID *uuid.UUID) error {
 	if userID == nil && teamID == nil {
 		return fmt.Errorf("must assign to either a user or a team")
 	}
 
-	if err := s.alertRepo.Assign(ctx, id, userID, teamID); err != nil {
+	if err := s.alertRepo.Assign(ctx, id, orgID, userID, teamID); err != nil {
 		return fmt.Errorf("failed to assign alert: %w", err)
 	}
 

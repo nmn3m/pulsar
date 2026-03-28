@@ -29,25 +29,34 @@ const (
 	maxMessageSize = 512
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		// TODO: In production, validate origin properly
-		return true
-	},
-}
-
 type WebSocketHandler struct {
 	wsUsecase *usecase.WebSocketUsecase
 	logger    *zap.Logger
+	upgrader  websocket.Upgrader
 }
 
-func NewWebSocketHandler(wsUsecase *usecase.WebSocketUsecase, logger *zap.Logger) *WebSocketHandler {
-	return &WebSocketHandler{
+func NewWebSocketHandler(wsUsecase *usecase.WebSocketUsecase, logger *zap.Logger, allowedOrigins []string) *WebSocketHandler {
+	originsSet := make(map[string]bool, len(allowedOrigins))
+	for _, o := range allowedOrigins {
+		originsSet[o] = true
+	}
+
+	h := &WebSocketHandler{
 		wsUsecase: wsUsecase,
 		logger:    logger,
 	}
+	h.upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			origin := r.Header.Get("Origin")
+			if origin == "" {
+				return false
+			}
+			return originsSet[origin]
+		},
+	}
+	return h
 }
 
 // HandleWebSocket handles WebSocket connections
@@ -57,7 +66,7 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 	orgID, _ := middleware.GetOrganizationID(c)
 
 	// Upgrade HTTP connection to WebSocket
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	conn, err := h.upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		h.logger.Error("Failed to upgrade to WebSocket", zap.Error(err))
 		return

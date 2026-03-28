@@ -260,9 +260,9 @@ func (s *EscalationUsecase) ListTargets(ctx context.Context, ruleID uuid.UUID) (
 
 // Escalation logic
 
-func (s *EscalationUsecase) StartEscalation(ctx context.Context, alertID uuid.UUID) error {
+func (s *EscalationUsecase) StartEscalation(ctx context.Context, alertID, orgID uuid.UUID) error {
 	// Get the alert to find its policy
-	alert, err := s.alertRepo.GetByID(ctx, alertID)
+	alert, err := s.alertRepo.GetByID(ctx, alertID, orgID)
 	if err != nil {
 		return fmt.Errorf("failed to get alert: %w", err)
 	}
@@ -344,7 +344,7 @@ func (s *EscalationUsecase) processEscalation(ctx context.Context, event *domain
 		}
 
 		// Trigger notifications to targets in nextRule
-		if err := s.sendEscalationNotifications(ctx, event, nextRule); err != nil {
+		if err := s.sendEscalationNotifications(ctx, event, nextRule, policy.OrganizationID); err != nil {
 			fmt.Printf("Failed to send escalation notifications for alert %s: %v\n", event.AlertID, err)
 		}
 
@@ -365,7 +365,7 @@ func (s *EscalationUsecase) processEscalation(ctx context.Context, event *domain
 			}
 
 			// Trigger notifications to targets in firstRule (repeat cycle)
-			if err := s.sendEscalationNotifications(ctx, event, firstRule); err != nil {
+			if err := s.sendEscalationNotifications(ctx, event, firstRule, policy.OrganizationID); err != nil {
 				fmt.Printf("Failed to send escalation notifications for alert %s (repeat): %v\n", event.AlertID, err)
 			}
 		} else {
@@ -390,14 +390,14 @@ func (s *EscalationUsecase) processEscalation(ctx context.Context, event *domain
 	return nil
 }
 
-func (s *EscalationUsecase) sendEscalationNotifications(ctx context.Context, event *domain.AlertEscalationEvent, rule *domain.EscalationRuleWithTargets) error {
+func (s *EscalationUsecase) sendEscalationNotifications(ctx context.Context, event *domain.AlertEscalationEvent, rule *domain.EscalationRuleWithTargets, orgID uuid.UUID) error {
 	// Only send notifications if alertNotifier is configured
 	if s.alertNotifier == nil {
 		return nil
 	}
 
 	// Get the alert
-	alert, err := s.alertRepo.GetByID(ctx, event.AlertID)
+	alert, err := s.alertRepo.GetByID(ctx, event.AlertID, orgID)
 	if err != nil {
 		return fmt.Errorf("failed to get alert: %w", err)
 	}

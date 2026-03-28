@@ -17,6 +17,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/nmn3m/pulsar/backend/internal/domain"
+	"github.com/nmn3m/pulsar/backend/internal/pkg/urlvalidation"
 	"github.com/nmn3m/pulsar/backend/internal/usecase/repository"
 )
 
@@ -82,6 +83,10 @@ func NewWebhookUsecase(webhookRepo repository.WebhookRepository, logger *zap.Log
 // Endpoint Management
 
 func (s *WebhookUsecase) CreateEndpoint(ctx context.Context, orgID uuid.UUID, req *CreateWebhookEndpointRequest) (*domain.WebhookEndpoint, error) {
+	if err := urlvalidation.ValidateWebhookURL(req.URL); err != nil {
+		return nil, fmt.Errorf("invalid webhook URL: %w", err)
+	}
+
 	// Generate a secure secret for HMAC signing
 	secret, err := generateSecret()
 	if err != nil {
@@ -143,6 +148,9 @@ func (s *WebhookUsecase) UpdateEndpoint(ctx context.Context, id, orgID uuid.UUID
 		endpoint.Name = *req.Name
 	}
 	if req.URL != nil {
+		if err := urlvalidation.ValidateWebhookURL(*req.URL); err != nil {
+			return nil, fmt.Errorf("invalid webhook URL: %w", err)
+		}
 		endpoint.URL = *req.URL
 	}
 	if req.Enabled != nil {
@@ -255,6 +263,13 @@ func (s *WebhookUsecase) deliverWebhook(ctx context.Context, endpoint *domain.We
 	if err != nil {
 		s.logger.Error("Failed to serialize webhook payload", zap.Error(err))
 		s.markDeliveryFailed(ctx, delivery, "Failed to serialize payload: "+err.Error())
+		return
+	}
+
+	// Validate URL at delivery time (defense against DNS rebinding)
+	if err := urlvalidation.ValidateWebhookURL(endpoint.URL); err != nil {
+		s.logger.Error("Webhook URL failed validation at delivery time", zap.Error(err))
+		s.markDeliveryFailed(ctx, delivery, "URL validation failed: "+err.Error())
 		return
 	}
 

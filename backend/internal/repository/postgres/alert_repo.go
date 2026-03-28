@@ -74,7 +74,7 @@ func (r *AlertRepository) Create(ctx context.Context, alert *domain.Alert) error
 	return nil
 }
 
-func (r *AlertRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Alert, error) {
+func (r *AlertRepository) GetByID(ctx context.Context, id, orgID uuid.UUID) (*domain.Alert, error) {
 	query := `
 		SELECT
 			id, organization_id, source, source_id, priority, status,
@@ -87,13 +87,13 @@ func (r *AlertRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Al
 			dedup_key, dedup_count, first_occurrence_at, last_occurrence_at,
 			created_at, updated_at
 		FROM alerts
-		WHERE id = $1
+		WHERE id = $1 AND organization_id = $2
 	`
 
 	var alert domain.Alert
 	var tagsJSON, customFieldsJSON []byte
 
-	err := r.db.QueryRowContext(ctx, query, id).Scan(
+	err := r.db.QueryRowContext(ctx, query, id, orgID).Scan(
 		&alert.ID,
 		&alert.OrganizationID,
 		&alert.Source,
@@ -152,7 +152,7 @@ func (r *AlertRepository) Update(ctx context.Context, alert *domain.Alert) error
 			closed_by = $14, closed_at = $15, close_reason = $16,
 			snoozed_until = $17,
 			escalation_policy_id = $18, escalation_level = $19, last_escalated_at = $20
-		WHERE id = $1
+		WHERE id = $1 AND organization_id = $21
 		RETURNING updated_at
 	`
 
@@ -189,6 +189,7 @@ func (r *AlertRepository) Update(ctx context.Context, alert *domain.Alert) error
 		alert.EscalationPolicyID,
 		alert.EscalationLevel,
 		alert.LastEscalatedAt,
+		alert.OrganizationID,
 	).Scan(&alert.UpdatedAt)
 
 	if err != nil {
@@ -198,10 +199,10 @@ func (r *AlertRepository) Update(ctx context.Context, alert *domain.Alert) error
 	return nil
 }
 
-func (r *AlertRepository) Delete(ctx context.Context, id uuid.UUID) error {
-	query := `DELETE FROM alerts WHERE id = $1`
+func (r *AlertRepository) Delete(ctx context.Context, id, orgID uuid.UUID) error {
+	query := `DELETE FROM alerts WHERE id = $1 AND organization_id = $2`
 
-	result, err := r.db.ExecContext(ctx, query, id)
+	result, err := r.db.ExecContext(ctx, query, id, orgID)
 	if err != nil {
 		return fmt.Errorf("failed to delete alert: %w", err)
 	}
@@ -360,14 +361,14 @@ func (r *AlertRepository) List(ctx context.Context, filter *domain.AlertFilter) 
 	return alerts, total, nil
 }
 
-func (r *AlertRepository) Acknowledge(ctx context.Context, id, userID uuid.UUID) error {
+func (r *AlertRepository) Acknowledge(ctx context.Context, id, orgID, userID uuid.UUID) error {
 	query := `
 		UPDATE alerts
 		SET
 			status = $2,
 			acknowledged_by = $3,
 			acknowledged_at = $4
-		WHERE id = $1 AND status = 'open'
+		WHERE id = $1 AND organization_id = $5 AND status = 'open'
 		RETURNING updated_at
 	`
 
@@ -379,6 +380,7 @@ func (r *AlertRepository) Acknowledge(ctx context.Context, id, userID uuid.UUID)
 		domain.AlertStatusAcknowledged.String(),
 		userID,
 		time.Now(),
+		orgID,
 	).Scan(&updatedAt)
 
 	if err == sql.ErrNoRows {
@@ -391,7 +393,7 @@ func (r *AlertRepository) Acknowledge(ctx context.Context, id, userID uuid.UUID)
 	return nil
 }
 
-func (r *AlertRepository) Close(ctx context.Context, id, userID uuid.UUID, reason string) error {
+func (r *AlertRepository) Close(ctx context.Context, id, orgID, userID uuid.UUID, reason string) error {
 	query := `
 		UPDATE alerts
 		SET
@@ -399,7 +401,7 @@ func (r *AlertRepository) Close(ctx context.Context, id, userID uuid.UUID, reaso
 			closed_by = $3,
 			closed_at = $4,
 			close_reason = $5
-		WHERE id = $1 AND status != 'closed'
+		WHERE id = $1 AND organization_id = $6 AND status != 'closed'
 		RETURNING updated_at
 	`
 
@@ -412,6 +414,7 @@ func (r *AlertRepository) Close(ctx context.Context, id, userID uuid.UUID, reaso
 		userID,
 		time.Now(),
 		reason,
+		orgID,
 	).Scan(&updatedAt)
 
 	if err == sql.ErrNoRows {
@@ -424,13 +427,13 @@ func (r *AlertRepository) Close(ctx context.Context, id, userID uuid.UUID, reaso
 	return nil
 }
 
-func (r *AlertRepository) Snooze(ctx context.Context, id uuid.UUID, until time.Time) error {
+func (r *AlertRepository) Snooze(ctx context.Context, id, orgID uuid.UUID, until time.Time) error {
 	query := `
 		UPDATE alerts
 		SET
 			status = $2,
 			snoozed_until = $3
-		WHERE id = $1 AND status != 'closed'
+		WHERE id = $1 AND organization_id = $4 AND status != 'closed'
 		RETURNING updated_at
 	`
 
@@ -441,6 +444,7 @@ func (r *AlertRepository) Snooze(ctx context.Context, id uuid.UUID, until time.T
 		id,
 		domain.AlertStatusSnoozed.String(),
 		until,
+		orgID,
 	).Scan(&updatedAt)
 
 	if err == sql.ErrNoRows {
@@ -453,13 +457,13 @@ func (r *AlertRepository) Snooze(ctx context.Context, id uuid.UUID, until time.T
 	return nil
 }
 
-func (r *AlertRepository) Assign(ctx context.Context, id uuid.UUID, userID, teamID *uuid.UUID) error {
+func (r *AlertRepository) Assign(ctx context.Context, id, orgID uuid.UUID, userID, teamID *uuid.UUID) error {
 	query := `
 		UPDATE alerts
 		SET
 			assigned_to_user_id = $2,
 			assigned_to_team_id = $3
-		WHERE id = $1
+		WHERE id = $1 AND organization_id = $4
 		RETURNING updated_at
 	`
 
@@ -470,6 +474,7 @@ func (r *AlertRepository) Assign(ctx context.Context, id uuid.UUID, userID, team
 		id,
 		userID,
 		teamID,
+		orgID,
 	).Scan(&updatedAt)
 
 	if err == sql.ErrNoRows {

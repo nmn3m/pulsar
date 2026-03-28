@@ -233,6 +233,9 @@ func (s *AuthUsecase) Login(ctx context.Context, req *LoginRequest) (*AuthRespon
 func (s *AuthUsecase) RefreshToken(ctx context.Context, refreshToken string) (*AuthResponse, error) {
 	// Parse refresh token
 	token, err := jwt.ParseWithClaims(refreshToken, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
 		return []byte(s.config.JWTRefreshSecret), nil
 	})
 

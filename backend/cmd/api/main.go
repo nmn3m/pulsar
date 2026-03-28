@@ -189,7 +189,7 @@ func main() {
 	escalationHandler := handler.NewEscalationHandler(escalationUsecase)
 	notificationHandler := handler.NewNotificationHandler(notificationUsecase)
 	incidentHandler := handler.NewIncidentHandler(incidentUsecase)
-	wsHandler := handler.NewWebSocketHandler(wsUsecase, log)
+	wsHandler := handler.NewWebSocketHandler(wsUsecase, log, cfg.CORS.AllowedOrigins)
 	webhookHandler := handler.NewWebhookHandler(webhookUsecase)
 	incomingWebhookHandler := handler.NewIncomingWebhookHandler(webhookUsecase, alertUsecase, log)
 	apiKeyHandler := handler.NewAPIKeyHandler(apiKeyUsecase)
@@ -231,8 +231,10 @@ func main() {
 				"time":   time.Now().UTC(),
 			})
 		})
-		// Auth routes (public)
+		// Auth routes (public) with rate limiting
+		authRateLimiter := middleware.NewRateLimiter(5.0/60.0, 10) // 5 req/min, burst 10
 		auth := v1.Group("/auth")
+		auth.Use(authRateLimiter.Limit())
 		{
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)

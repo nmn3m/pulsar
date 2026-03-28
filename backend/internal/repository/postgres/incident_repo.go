@@ -43,11 +43,11 @@ func (r *incidentRepository) Create(ctx context.Context, incident *domain.Incide
 }
 
 // GetByID retrieves an incident by ID
-func (r *incidentRepository) GetByID(ctx context.Context, id uuid.UUID) (*domain.Incident, error) {
+func (r *incidentRepository) GetByID(ctx context.Context, id uuid.UUID, orgID uuid.UUID) (*domain.Incident, error) {
 	var incident domain.Incident
-	query := `SELECT * FROM incidents WHERE id = $1`
+	query := `SELECT * FROM incidents WHERE id = $1 AND organization_id = $2`
 
-	err := r.db.GetContext(ctx, &incident, query, id)
+	err := r.db.GetContext(ctx, &incident, query, id, orgID)
 	if err == sql.ErrNoRows {
 		return nil, domain.ErrNotFound
 	}
@@ -69,7 +69,7 @@ func (r *incidentRepository) Update(ctx context.Context, incident *domain.Incide
 			priority = $5,
 			assigned_to_team_id = $6,
 			resolved_at = $7
-		WHERE id = $8
+		WHERE id = $8 AND organization_id = $9
 		RETURNING updated_at
 	`
 
@@ -77,13 +77,14 @@ func (r *incidentRepository) Update(ctx context.Context, incident *domain.Incide
 		ctx, query,
 		incident.Title, incident.Description, incident.Severity, incident.Status,
 		incident.Priority, incident.AssignedToTeamID, incident.ResolvedAt, incident.ID,
+		incident.OrganizationID,
 	).Scan(&incident.UpdatedAt)
 }
 
 // Delete deletes an incident
-func (r *incidentRepository) Delete(ctx context.Context, id uuid.UUID) error {
-	query := `DELETE FROM incidents WHERE id = $1`
-	result, err := r.db.ExecContext(ctx, query, id)
+func (r *incidentRepository) Delete(ctx context.Context, id uuid.UUID, orgID uuid.UUID) error {
+	query := `DELETE FROM incidents WHERE id = $1 AND organization_id = $2`
+	result, err := r.db.ExecContext(ctx, query, id, orgID)
 	if err != nil {
 		return err
 	}
@@ -192,9 +193,9 @@ func (r *incidentRepository) AddResponder(ctx context.Context, responder *domain
 }
 
 // RemoveResponder removes a responder from an incident
-func (r *incidentRepository) RemoveResponder(ctx context.Context, incidentID, userID uuid.UUID) error {
-	query := `DELETE FROM incident_responders WHERE incident_id = $1 AND user_id = $2`
-	result, err := r.db.ExecContext(ctx, query, incidentID, userID)
+func (r *incidentRepository) RemoveResponder(ctx context.Context, incidentID, orgID, userID uuid.UUID) error {
+	query := `DELETE FROM incident_responders WHERE incident_id = $1 AND user_id = $2 AND EXISTS (SELECT 1 FROM incidents WHERE id = $1 AND organization_id = $3)`
+	result, err := r.db.ExecContext(ctx, query, incidentID, userID, orgID)
 	if err != nil {
 		return err
 	}
@@ -212,9 +213,9 @@ func (r *incidentRepository) RemoveResponder(ctx context.Context, incidentID, us
 }
 
 // UpdateResponderRole updates a responder's role
-func (r *incidentRepository) UpdateResponderRole(ctx context.Context, incidentID, userID uuid.UUID, role domain.ResponderRole) error {
-	query := `UPDATE incident_responders SET role = $1 WHERE incident_id = $2 AND user_id = $3`
-	result, err := r.db.ExecContext(ctx, query, role, incidentID, userID)
+func (r *incidentRepository) UpdateResponderRole(ctx context.Context, incidentID, orgID, userID uuid.UUID, role domain.ResponderRole) error {
+	query := `UPDATE incident_responders SET role = $1 WHERE incident_id = $2 AND user_id = $3 AND EXISTS (SELECT 1 FROM incidents WHERE id = $2 AND organization_id = $4)`
+	result, err := r.db.ExecContext(ctx, query, role, incidentID, userID, orgID)
 	if err != nil {
 		return err
 	}
@@ -232,18 +233,18 @@ func (r *incidentRepository) UpdateResponderRole(ctx context.Context, incidentID
 }
 
 // ListResponders retrieves all responders for an incident with user details
-func (r *incidentRepository) ListResponders(ctx context.Context, incidentID uuid.UUID) ([]*domain.ResponderWithUser, error) {
+func (r *incidentRepository) ListResponders(ctx context.Context, incidentID uuid.UUID, orgID uuid.UUID) ([]*domain.ResponderWithUser, error) {
 	query := `
 		SELECT
 			ir.id, ir.incident_id, ir.user_id, ir.role, ir.added_at,
 			u.id, u.email, u.username, u.full_name, u.created_at, u.updated_at
 		FROM incident_responders ir
 		JOIN users u ON ir.user_id = u.id
-		WHERE ir.incident_id = $1
+		WHERE ir.incident_id = $1 AND EXISTS (SELECT 1 FROM incidents WHERE id = $1 AND organization_id = $2)
 		ORDER BY ir.added_at ASC
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, incidentID)
+	rows, err := r.db.QueryContext(ctx, query, incidentID, orgID)
 	if err != nil {
 		return nil, err
 	}
@@ -292,18 +293,18 @@ func (r *incidentRepository) AddTimelineEvent(ctx context.Context, event *domain
 }
 
 // GetTimeline retrieves the timeline for an incident with user details
-func (r *incidentRepository) GetTimeline(ctx context.Context, incidentID uuid.UUID) ([]*domain.TimelineEventWithUser, error) {
+func (r *incidentRepository) GetTimeline(ctx context.Context, incidentID uuid.UUID, orgID uuid.UUID) ([]*domain.TimelineEventWithUser, error) {
 	query := `
 		SELECT
 			t.id, t.incident_id, t.event_type, t.user_id, t.description, t.metadata, t.created_at,
 			u.id, u.email, u.username, u.full_name, u.created_at, u.updated_at
 		FROM incident_timeline t
 		LEFT JOIN users u ON t.user_id = u.id
-		WHERE t.incident_id = $1
+		WHERE t.incident_id = $1 AND EXISTS (SELECT 1 FROM incidents WHERE id = $1 AND organization_id = $2)
 		ORDER BY t.created_at ASC
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, incidentID)
+	rows, err := r.db.QueryContext(ctx, query, incidentID, orgID)
 	if err != nil {
 		return nil, err
 	}
@@ -372,9 +373,9 @@ func (r *incidentRepository) LinkAlert(ctx context.Context, link *domain.Inciden
 }
 
 // UnlinkAlert unlinks an alert from an incident
-func (r *incidentRepository) UnlinkAlert(ctx context.Context, incidentID, alertID uuid.UUID) error {
-	query := `DELETE FROM incident_alerts WHERE incident_id = $1 AND alert_id = $2`
-	result, err := r.db.ExecContext(ctx, query, incidentID, alertID)
+func (r *incidentRepository) UnlinkAlert(ctx context.Context, incidentID, orgID, alertID uuid.UUID) error {
+	query := `DELETE FROM incident_alerts WHERE incident_id = $1 AND alert_id = $2 AND EXISTS (SELECT 1 FROM incidents WHERE id = $1 AND organization_id = $3)`
+	result, err := r.db.ExecContext(ctx, query, incidentID, alertID, orgID)
 	if err != nil {
 		return err
 	}
@@ -392,7 +393,7 @@ func (r *incidentRepository) UnlinkAlert(ctx context.Context, incidentID, alertI
 }
 
 // ListAlerts retrieves all alerts linked to an incident
-func (r *incidentRepository) ListAlerts(ctx context.Context, incidentID uuid.UUID) ([]*domain.IncidentAlertWithDetails, error) {
+func (r *incidentRepository) ListAlerts(ctx context.Context, incidentID uuid.UUID, orgID uuid.UUID) ([]*domain.IncidentAlertWithDetails, error) {
 	query := `
 		SELECT
 			ia.id, ia.incident_id, ia.alert_id, ia.linked_at, ia.linked_by_user_id,
@@ -404,11 +405,11 @@ func (r *incidentRepository) ListAlerts(ctx context.Context, incidentID uuid.UUI
 			a.last_escalated_at, a.created_at, a.updated_at
 		FROM incident_alerts ia
 		JOIN alerts a ON ia.alert_id = a.id
-		WHERE ia.incident_id = $1
+		WHERE ia.incident_id = $1 AND EXISTS (SELECT 1 FROM incidents WHERE id = $1 AND organization_id = $2)
 		ORDER BY ia.linked_at DESC
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, incidentID)
+	rows, err := r.db.QueryContext(ctx, query, incidentID, orgID)
 	if err != nil {
 		return nil, err
 	}
@@ -451,9 +452,9 @@ func (r *incidentRepository) ListAlerts(ctx context.Context, incidentID uuid.UUI
 }
 
 // GetWithDetails retrieves an incident with all related data
-func (r *incidentRepository) GetWithDetails(ctx context.Context, id uuid.UUID) (*domain.IncidentWithDetails, error) {
+func (r *incidentRepository) GetWithDetails(ctx context.Context, id uuid.UUID, orgID uuid.UUID) (*domain.IncidentWithDetails, error) {
 	// Get base incident
-	incident, err := r.GetByID(ctx, id)
+	incident, err := r.GetByID(ctx, id, orgID)
 	if err != nil {
 		return nil, err
 	}
@@ -463,21 +464,21 @@ func (r *incidentRepository) GetWithDetails(ctx context.Context, id uuid.UUID) (
 	}
 
 	// Get responders
-	responders, err := r.ListResponders(ctx, id)
+	responders, err := r.ListResponders(ctx, id, orgID)
 	if err != nil {
 		return nil, err
 	}
 	result.Responders = responders
 
 	// Get alerts
-	alerts, err := r.ListAlerts(ctx, id)
+	alerts, err := r.ListAlerts(ctx, id, orgID)
 	if err != nil {
 		return nil, err
 	}
 	result.Alerts = alerts
 
 	// Get timeline
-	timeline, err := r.GetTimeline(ctx, id)
+	timeline, err := r.GetTimeline(ctx, id, orgID)
 	if err != nil {
 		return nil, err
 	}
