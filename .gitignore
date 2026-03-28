@@ -11,6 +11,8 @@
 *.test
 *.out
 /backend/tmp/
+/backend/api
+/backend/seed
 
 # Frontend
 node_modules/

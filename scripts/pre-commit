@@ -10,6 +10,23 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Check for binary files in staged changes
+echo -e "${YELLOW}Checking for binary files...${NC}"
+BINARY_FILES=""
+for file in $(git diff --cached --name-only --diff-filter=ACM); do
+    if [ -f "$file" ] && file "$file" | grep -qE 'ELF|Mach-O|PE32|executable.*not.*script'; then
+        BINARY_FILES="$BINARY_FILES\n  $file"
+    fi
+done
+
+if [ -n "$BINARY_FILES" ]; then
+    echo -e "${RED}Binary files detected in staged changes:${NC}"
+    echo -e "${RED}${BINARY_FILES}${NC}"
+    echo -e "${YELLOW}Remove them with: git reset HEAD <file>${NC}"
+    exit 1
+fi
+echo -e "${GREEN}No binary files detected.${NC}"
+
 echo -e "${YELLOW}Running gitleaks secret scan...${NC}"
 
 # Check if gitleaks is installed
