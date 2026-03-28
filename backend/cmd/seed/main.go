@@ -13,9 +13,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/nmn3m/pulsar/backend/internal/config"
-	"github.com/nmn3m/pulsar/backend/internal/domain"
-	"github.com/nmn3m/pulsar/backend/internal/repository/postgres"
-	"github.com/nmn3m/pulsar/backend/internal/usecase/repository"
+	"github.com/nmn3m/pulsar/backend/internal/adapter/outbound/postgres"
+	"github.com/nmn3m/pulsar/backend/internal/core/domain"
+	"github.com/nmn3m/pulsar/backend/internal/core/port/outbound"
 )
 
 // Demo Data Configuration
@@ -746,7 +746,7 @@ func seedAlerts(ctx context.Context, repo *postgres.AlertRepository, policies ma
 	return alerts, nil
 }
 
-func seedIncidents(ctx context.Context, repo repository.IncidentRepository, alerts []*domain.Alert) error {
+func seedIncidents(ctx context.Context, repo outbound.IncidentRepository, alerts []*domain.Alert) error {
 	fmt.Println("\n🔥 Creating sample incidents...")
 
 	now := time.Now()
@@ -983,7 +983,7 @@ func seedNotificationChannels(ctx context.Context, repo *postgres.NotificationRe
 	return nil
 }
 
-func seedWebhooks(ctx context.Context, repo repository.WebhookRepository) error {
+func seedWebhooks(ctx context.Context, repo outbound.WebhookRepository) error {
 	fmt.Println("\n🔗 Creating webhooks...")
 
 	// Create outgoing webhook endpoints
@@ -1113,7 +1113,7 @@ func seedWebhooks(ctx context.Context, repo repository.WebhookRepository) error 
 	return nil
 }
 
-func seedAPIKeys(ctx context.Context, repo repository.APIKeyRepository) (string, error) {
+func seedAPIKeys(ctx context.Context, repo outbound.APIKeyRepository) (string, error) {
 	fmt.Println("\n🔑 Creating API keys...")
 
 	// Generate API key

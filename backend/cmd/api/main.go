@@ -41,14 +41,14 @@ import (
 	"go.uber.org/zap"
 
 	_ "github.com/nmn3m/pulsar/backend/docs"
+	"github.com/nmn3m/pulsar/backend/internal/adapter/inbound/rest/handler"
+	"github.com/nmn3m/pulsar/backend/internal/adapter/inbound/rest/middleware"
+	"github.com/nmn3m/pulsar/backend/internal/adapter/outbound/postgres"
 	"github.com/nmn3m/pulsar/backend/internal/config"
-	"github.com/nmn3m/pulsar/backend/internal/delivery/rest/handler"
-	"github.com/nmn3m/pulsar/backend/internal/delivery/rest/middleware"
+	"github.com/nmn3m/pulsar/backend/internal/core/service"
 	"github.com/nmn3m/pulsar/backend/internal/pkg/logger"
 	"github.com/nmn3m/pulsar/backend/internal/pkg/telemetry"
 	"github.com/nmn3m/pulsar/backend/internal/pkg/tokenblacklist"
-	"github.com/nmn3m/pulsar/backend/internal/repository/postgres"
-	"github.com/nmn3m/pulsar/backend/internal/usecase"
 )
 
 func main() {
@@ -132,11 +132,11 @@ func main() {
 	invitationRepo := postgres.NewTeamInvitationRepo(db)
 
 	// Initialize email service (for OTP verification and team invitations)
-	var emailService *usecase.EmailService
-	var emailVerificationUsecase *usecase.EmailVerificationUsecase
+	var emailSvc *service.EmailService
+	var emailVerificationService *service.EmailVerificationService
 	if cfg.Email.Enabled || cfg.SMTP.Enabled {
-		emailService = usecase.NewEmailService(&cfg.Email, &cfg.SMTP)
-		emailVerificationUsecase = usecase.NewEmailVerificationUsecase(emailVerificationRepo, userRepo, emailService)
+		emailSvc = service.NewEmailService(&cfg.Email, &cfg.SMTP)
+		emailVerificationService = service.NewEmailVerificationService(emailVerificationRepo, userRepo, emailSvc)
 		if cfg.Email.Provider == "resend" {
 			log.Info("Email service enabled with Resend provider",
 				zap.String("from", cfg.Email.From),
@@ -154,58 +154,58 @@ func main() {
 	// Initialize token blacklist
 	tokenBlacklist := tokenblacklist.New()
 
-	// Initialize usecases
-	authUsecase := usecase.NewAuthUsecase(userRepo, orgRepo, usecase.AuthConfig{
+	// Initialize services
+	authService := service.NewAuthService(userRepo, orgRepo, service.AuthConfig{
 		JWTSecret:        cfg.JWT.Secret,
 		JWTRefreshSecret: cfg.JWT.RefreshSecret,
 		AccessTTLMinutes: cfg.JWT.AccessTTL,
 		RefreshTTLDays:   cfg.JWT.RefreshTTL,
-	}, emailVerificationUsecase, tokenBlacklist, log)
-	teamUsecase := usecase.NewTeamUsecase(teamRepo, userRepo)
-	teamUsecase.SetInvitationRepo(invitationRepo)
-	if emailService != nil {
-		teamUsecase.SetEmailService(emailService)
+	}, emailVerificationService, tokenBlacklist, log)
+	teamService := service.NewTeamService(teamRepo, userRepo)
+	teamService.SetInvitationRepo(invitationRepo)
+	if emailSvc != nil {
+		teamService.SetEmailService(emailSvc)
 	}
-	userUsecase := usecase.NewUserUsecase(orgRepo, userRepo)
-	scheduleUsecase := usecase.NewScheduleUsecase(scheduleRepo, userRepo)
-	notificationUsecase := usecase.NewNotificationUsecase(notificationRepo)
-	wsUsecase := usecase.NewWebSocketUsecase(log)
-	incidentUsecase := usecase.NewIncidentUsecase(incidentRepo, wsUsecase)
-	webhookUsecase := usecase.NewWebhookUsecase(webhookRepo, log)
-	apiKeyUsecase := usecase.NewAPIKeyUsecase(apiKeyRepo)
-	metricsUsecase := usecase.NewMetricsUsecase(metricsRepo)
+	userService := service.NewUserService(orgRepo, userRepo)
+	scheduleService := service.NewScheduleService(scheduleRepo, userRepo)
+	notificationService := service.NewNotificationService(notificationRepo)
+	wsService := service.NewWebSocketService(log)
+	incidentService := service.NewIncidentService(incidentRepo, wsService)
+	webhookService := service.NewWebhookService(webhookRepo, log)
+	apiKeyService := service.NewAPIKeyService(apiKeyRepo)
+	metricsService := service.NewMetricsService(metricsRepo)
 
-	// Initialize DND and routing usecases
-	dndUsecase := usecase.NewDNDUsecase(dndRepo)
-	routingUsecase := usecase.NewRoutingUsecase(routingRepo)
+	// Initialize DND and routing services
+	dndService := service.NewDNDService(dndRepo)
+	routingService := service.NewRoutingService(routingRepo)
 
-	// Initialize alert notifier with dependencies (including DND usecase for quiet hours)
-	alertNotifier := usecase.NewAlertNotifier(notificationUsecase, userRepo, teamRepo, scheduleUsecase, dndUsecase)
+	// Initialize alert notifier with dependencies (including DND service for quiet hours)
+	alertNotifier := service.NewAlertNotifier(notificationService, userRepo, teamRepo, scheduleService, dndService)
 
-	// Initialize alert and escalation usecases with notifier
-	alertUsecase := usecase.NewAlertUsecase(alertRepo, alertNotifier, wsUsecase, webhookUsecase)
-	escalationUsecase := usecase.NewEscalationUsecase(escalationRepo, alertRepo, alertNotifier)
+	// Initialize alert and escalation services with notifier
+	alertService := service.NewAlertService(alertRepo, alertNotifier, wsService, webhookService)
+	escalationService := service.NewEscalationService(escalationRepo, alertRepo, alertNotifier)
 
 	// Initialize handlers
-	authHandler := handler.NewAuthHandler(authUsecase, emailVerificationUsecase, tokenBlacklist)
-	alertHandler := handler.NewAlertHandler(alertUsecase)
-	teamHandler := handler.NewTeamHandler(teamUsecase)
-	userHandler := handler.NewUserHandler(userUsecase)
-	scheduleHandler := handler.NewScheduleHandler(scheduleUsecase)
-	escalationHandler := handler.NewEscalationHandler(escalationUsecase)
-	notificationHandler := handler.NewNotificationHandler(notificationUsecase)
-	incidentHandler := handler.NewIncidentHandler(incidentUsecase)
-	wsHandler := handler.NewWebSocketHandler(wsUsecase, log, cfg.CORS.AllowedOrigins)
-	webhookHandler := handler.NewWebhookHandler(webhookUsecase)
-	incomingWebhookHandler := handler.NewIncomingWebhookHandler(webhookUsecase, alertUsecase, log)
-	apiKeyHandler := handler.NewAPIKeyHandler(apiKeyUsecase)
-	metricsHandler := handler.NewMetricsHandler(metricsUsecase)
-	routingHandler := handler.NewRoutingHandler(routingUsecase)
-	dndHandler := handler.NewDNDHandler(dndUsecase)
+	authHandler := handler.NewAuthHandler(authService, emailVerificationService, tokenBlacklist)
+	alertHandler := handler.NewAlertHandler(alertService)
+	teamHandler := handler.NewTeamHandler(teamService)
+	userHandler := handler.NewUserHandler(userService)
+	scheduleHandler := handler.NewScheduleHandler(scheduleService)
+	escalationHandler := handler.NewEscalationHandler(escalationService)
+	notificationHandler := handler.NewNotificationHandler(notificationService)
+	incidentHandler := handler.NewIncidentHandler(incidentService)
+	wsHandler := handler.NewWebSocketHandler(wsService, log, cfg.CORS.AllowedOrigins)
+	webhookHandler := handler.NewWebhookHandler(webhookService)
+	incomingWebhookHandler := handler.NewIncomingWebhookHandler(webhookService, alertService, log)
+	apiKeyHandler := handler.NewAPIKeyHandler(apiKeyService)
+	metricsHandler := handler.NewMetricsHandler(metricsService)
+	routingHandler := handler.NewRoutingHandler(routingService)
+	dndHandler := handler.NewDNDHandler(dndService)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret, tokenBlacklist)
-	apiKeyMiddleware := middleware.NewAPIKeyMiddleware(apiKeyUsecase)
+	apiKeyMiddleware := middleware.NewAPIKeyMiddleware(apiKeyService)
 	combinedAuth := middleware.NewCombinedAuthMiddleware(authMiddleware, apiKeyMiddleware)
 
 	// Setup router
@@ -507,7 +507,7 @@ func main() {
 	}
 
 	// Start WebSocket hub
-	go wsUsecase.Run()
+	go wsService.Run()
 	log.Info("WebSocket hub started")
 
 	// Start server in a goroutine
@@ -530,7 +530,7 @@ func main() {
 			select {
 			case <-ticker.C:
 				ctx := context.Background()
-				if err := escalationUsecase.ProcessPendingEscalations(ctx); err != nil {
+				if err := escalationService.ProcessPendingEscalations(ctx); err != nil {
 					log.Error("Failed to process pending escalations", zap.Error(err))
 				}
 			case <-escalationWorkerQuit:
@@ -552,7 +552,7 @@ func main() {
 			select {
 			case <-ticker.C:
 				ctx := context.Background()
-				if err := webhookUsecase.ProcessPendingDeliveries(ctx); err != nil {
+				if err := webhookService.ProcessPendingDeliveries(ctx); err != nil {
 					log.Error("Failed to process pending webhook deliveries", zap.Error(err))
 				}
 			case <-webhookWorkerQuit:

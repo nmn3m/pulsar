@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/nmn3m/pulsar/backend/internal/usecase"
+	"github.com/nmn3m/pulsar/backend/internal/core/dto"
 )
 
 // ============================================================================
@@ -294,7 +294,7 @@ func TestTeams_ListMembers_Success(t *testing.T) {
 	team, _ := testFixtures.CreateTeam(ctx, user.Organization.ID, "Test Team")
 
 	// Add member
-	testServer.TeamUsecase.AddMember(ctx, team.ID, &usecase.AddTeamMemberRequest{
+	testServer.TeamService.AddMember(ctx, team.ID, &dto.AddTeamMemberRequest{
 		UserID: &user.User.ID,
 		Role:   "member",
 	})
@@ -352,7 +352,7 @@ func TestTeams_RemoveMember_Success(t *testing.T) {
 	team, _ := testFixtures.CreateTeam(ctx, user.Organization.ID, "Test Team")
 
 	// Add member first
-	testServer.TeamUsecase.AddMember(ctx, team.ID, &usecase.AddTeamMemberRequest{
+	testServer.TeamService.AddMember(ctx, team.ID, &dto.AddTeamMemberRequest{
 		UserID: &user.User.ID,
 		Role:   "member",
 	})
@@ -376,7 +376,7 @@ func TestTeams_UpdateMemberRole_Success(t *testing.T) {
 	team, _ := testFixtures.CreateTeam(ctx, user.Organization.ID, "Test Team")
 
 	// Add member first
-	testServer.TeamUsecase.AddMember(ctx, team.ID, &usecase.AddTeamMemberRequest{
+	testServer.TeamService.AddMember(ctx, team.ID, &dto.AddTeamMemberRequest{
 		UserID: &user.User.ID,
 		Role:   "member",
 	})

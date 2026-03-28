@@ -6,12 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 
+	"github.com/nmn3m/pulsar/backend/internal/adapter/inbound/rest/handler"
+	"github.com/nmn3m/pulsar/backend/internal/adapter/inbound/rest/middleware"
+	"github.com/nmn3m/pulsar/backend/internal/adapter/outbound/postgres"
 	"github.com/nmn3m/pulsar/backend/internal/config"
-	"github.com/nmn3m/pulsar/backend/internal/delivery/rest/handler"
-	"github.com/nmn3m/pulsar/backend/internal/delivery/rest/middleware"
+	"github.com/nmn3m/pulsar/backend/internal/core/service"
 	"github.com/nmn3m/pulsar/backend/internal/pkg/tokenblacklist"
-	"github.com/nmn3m/pulsar/backend/internal/repository/postgres"
-	"github.com/nmn3m/pulsar/backend/internal/usecase"
 )
 
 // TestServer wraps httptest.Server with all dependencies
@@ -22,17 +22,17 @@ type TestServer struct {
 	Config *config.Config
 	Logger *zap.Logger
 
-	// Usecases exposed for direct manipulation in tests
-	AuthUsecase         *usecase.AuthUsecase
-	AlertUsecase        *usecase.AlertUsecase
-	TeamUsecase         *usecase.TeamUsecase
-	ScheduleUsecase     *usecase.ScheduleUsecase
-	EscalationUsecase   *usecase.EscalationUsecase
-	NotificationUsecase *usecase.NotificationUsecase
-	IncidentUsecase     *usecase.IncidentUsecase
-	WebhookUsecase      *usecase.WebhookUsecase
-	UserUsecase         *usecase.UserUsecase
-	MetricsUsecase      *usecase.MetricsUsecase
+	// Services exposed for direct manipulation in tests
+	AuthService         *service.AuthService
+	AlertService        *service.AlertService
+	TeamService         *service.TeamService
+	ScheduleService     *service.ScheduleService
+	EscalationService   *service.EscalationService
+	NotificationService *service.NotificationService
+	IncidentService     *service.IncidentService
+	WebhookService      *service.WebhookService
+	UserService         *service.UserService
+	MetricsService      *service.MetricsService
 }
 
 // NewTestServer creates a new test server with all dependencies wired up
@@ -78,45 +78,45 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 	metricsRepo := postgres.NewMetricsRepository(testDB.DB)
 	dndRepo := postgres.NewDNDSettingsRepository(db)
 
-	// Initialize usecases
+	// Initialize services
 	bl := tokenblacklist.New()
 	// Email verification is nil for tests (SMTP not configured)
-	var emailVerificationUsecase *usecase.EmailVerificationUsecase
-	authUsecase := usecase.NewAuthUsecase(userRepo, orgRepo, usecase.AuthConfig{
+	var emailVerificationService *service.EmailVerificationService
+	authService := service.NewAuthService(userRepo, orgRepo, service.AuthConfig{
 		JWTSecret:        cfg.JWT.Secret,
 		JWTRefreshSecret: cfg.JWT.RefreshSecret,
 		AccessTTLMinutes: cfg.JWT.AccessTTL,
 		RefreshTTLDays:   cfg.JWT.RefreshTTL,
-	}, emailVerificationUsecase, bl, logger)
-	teamUsecase := usecase.NewTeamUsecase(teamRepo, userRepo)
-	userUsecase := usecase.NewUserUsecase(orgRepo, userRepo)
-	scheduleUsecase := usecase.NewScheduleUsecase(scheduleRepo, userRepo)
-	notificationUsecase := usecase.NewNotificationUsecase(notificationRepo)
-	wsUsecase := usecase.NewWebSocketUsecase(logger)
-	incidentUsecase := usecase.NewIncidentUsecase(incidentRepo, wsUsecase)
-	webhookUsecase := usecase.NewWebhookUsecase(webhookRepo, logger)
-	metricsUsecase := usecase.NewMetricsUsecase(metricsRepo)
-	dndUsecase := usecase.NewDNDUsecase(dndRepo)
+	}, emailVerificationService, bl, logger)
+	teamService := service.NewTeamService(teamRepo, userRepo)
+	userService := service.NewUserService(orgRepo, userRepo)
+	scheduleService := service.NewScheduleService(scheduleRepo, userRepo)
+	notificationService := service.NewNotificationService(notificationRepo)
+	wsService := service.NewWebSocketService(logger)
+	incidentService := service.NewIncidentService(incidentRepo, wsService)
+	webhookService := service.NewWebhookService(webhookRepo, logger)
+	metricsService := service.NewMetricsService(metricsRepo)
+	dndService := service.NewDNDService(dndRepo)
 
 	// Initialize alert notifier with dependencies
-	alertNotifier := usecase.NewAlertNotifier(notificationUsecase, userRepo, teamRepo, scheduleUsecase, dndUsecase)
+	alertNotifier := service.NewAlertNotifier(notificationService, userRepo, teamRepo, scheduleService, dndService)
 
-	// Initialize alert and escalation usecases with notifier
-	alertUsecase := usecase.NewAlertUsecase(alertRepo, alertNotifier, wsUsecase, webhookUsecase)
-	escalationUsecase := usecase.NewEscalationUsecase(escalationRepo, alertRepo, alertNotifier)
+	// Initialize alert and escalation services with notifier
+	alertService := service.NewAlertService(alertRepo, alertNotifier, wsService, webhookService)
+	escalationService := service.NewEscalationService(escalationRepo, alertRepo, alertNotifier)
 
 	// Initialize handlers
-	authHandler := handler.NewAuthHandler(authUsecase, emailVerificationUsecase, bl)
-	alertHandler := handler.NewAlertHandler(alertUsecase)
-	teamHandler := handler.NewTeamHandler(teamUsecase)
-	userHandler := handler.NewUserHandler(userUsecase)
-	scheduleHandler := handler.NewScheduleHandler(scheduleUsecase)
-	escalationHandler := handler.NewEscalationHandler(escalationUsecase)
-	notificationHandler := handler.NewNotificationHandler(notificationUsecase)
-	incidentHandler := handler.NewIncidentHandler(incidentUsecase)
-	webhookHandler := handler.NewWebhookHandler(webhookUsecase)
-	incomingWebhookHandler := handler.NewIncomingWebhookHandler(webhookUsecase, alertUsecase, logger)
-	metricsHandler := handler.NewMetricsHandler(metricsUsecase)
+	authHandler := handler.NewAuthHandler(authService, emailVerificationService, bl)
+	alertHandler := handler.NewAlertHandler(alertService)
+	teamHandler := handler.NewTeamHandler(teamService)
+	userHandler := handler.NewUserHandler(userService)
+	scheduleHandler := handler.NewScheduleHandler(scheduleService)
+	escalationHandler := handler.NewEscalationHandler(escalationService)
+	notificationHandler := handler.NewNotificationHandler(notificationService)
+	incidentHandler := handler.NewIncidentHandler(incidentService)
+	webhookHandler := handler.NewWebhookHandler(webhookService)
+	incomingWebhookHandler := handler.NewIncomingWebhookHandler(webhookService, alertService, logger)
+	metricsHandler := handler.NewMetricsHandler(metricsService)
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret, bl)
@@ -139,16 +139,16 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 		DB:                  testDB,
 		Config:              cfg,
 		Logger:              logger,
-		AuthUsecase:         authUsecase,
-		AlertUsecase:        alertUsecase,
-		TeamUsecase:         teamUsecase,
-		ScheduleUsecase:     scheduleUsecase,
-		EscalationUsecase:   escalationUsecase,
-		NotificationUsecase: notificationUsecase,
-		IncidentUsecase:     incidentUsecase,
-		WebhookUsecase:      webhookUsecase,
-		UserUsecase:         userUsecase,
-		MetricsUsecase:      metricsUsecase,
+		AuthService:         authService,
+		AlertService:        alertService,
+		TeamService:         teamService,
+		ScheduleService:     scheduleService,
+		EscalationService:   escalationService,
+		NotificationService: notificationService,
+		IncidentService:     incidentService,
+		WebhookService:      webhookService,
+		UserService:         userService,
+		MetricsService:      metricsService,
 	}, nil
 }
 
