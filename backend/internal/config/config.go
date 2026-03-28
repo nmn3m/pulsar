@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -21,9 +22,11 @@ type Config struct {
 type TelemetryConfig struct {
 	Enabled      bool
 	ServiceName  string
-	OTLPEndpoint string // e.g., "localhost:4317" for gRPC or "localhost:4318" for HTTP
-	OTLPProtocol string // "grpc" or "http"
-	Environment  string // e.g., "development", "production"
+	OTLPEndpoint string  // e.g., "localhost:4317" for gRPC or "localhost:4318" for HTTP
+	OTLPProtocol string  // "grpc" or "http"
+	Environment  string  // e.g., "development", "production"
+	Insecure     bool    // Whether to use insecure (non-TLS) connections to the OTLP endpoint
+	SampleRate   float64 // Trace sampling rate: 1.0 = always, 0.0 = never, 0.5 = 50%
 }
 
 type SMTPConfig struct {
@@ -108,6 +111,8 @@ func Load() (*Config, error) {
 			OTLPEndpoint: getEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317"),
 			OTLPProtocol: getEnv("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc"), // "grpc" or "http"
 			Environment:  getEnv("OTEL_ENVIRONMENT", "development"),
+			Insecure:     getEnv("OTEL_INSECURE", "false") == "true",
+			SampleRate:   getEnvFloat("OTEL_SAMPLE_RATE", 1.0),
 		},
 	}
 
@@ -154,6 +159,15 @@ func getEnvInt(key string, fallback int) int {
 	if value := os.Getenv(key); value != "" {
 		if intVal, err := strconv.Atoi(value); err == nil {
 			return intVal
+		}
+	}
+	return fallback
+}
+
+func getEnvFloat(key string, fallback float64) float64 {
+	if value := os.Getenv(key); value != "" {
+		if floatVal, err := strconv.ParseFloat(value, 64); err == nil {
+			return math.Max(0, math.Min(1, floatVal))
 		}
 	}
 	return fallback

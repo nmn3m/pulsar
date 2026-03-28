@@ -9,6 +9,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"io"
 	"net/http"
 	"time"
@@ -285,8 +286,11 @@ func (s *WebhookUsecase) deliverWebhook(ctx context.Context, endpoint *domain.We
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "Pulsar-Webhooks/1.0")
 
-	// Add custom headers
+	// Add custom headers (skip any with CRLF injection attempts)
 	for key, value := range endpoint.Headers {
+		if strings.ContainsAny(key, "\r\n") || strings.ContainsAny(value, "\r\n") {
+			continue // skip invalid headers
+		}
 		req.Header.Set(key, value)
 	}
 

@@ -104,6 +104,12 @@ func (h *APIKeyHandler) ListAll(c *gin.Context) {
 		return
 	}
 
+	role, _ := middleware.GetRole(c)
+	if role != "owner" && role != "admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "admin access required"})
+		return
+	}
+
 	keys, err := h.apiKeyUsecase.ListAPIKeys(c.Request.Context(), orgID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

@@ -2,10 +2,14 @@ package handler
 
 import (
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/nmn3m/pulsar/backend/internal/delivery/rest/middleware"
+	"github.com/nmn3m/pulsar/backend/internal/pkg/tokenblacklist"
 	"github.com/nmn3m/pulsar/backend/internal/usecase"
 )
 
@@ -23,9 +27,10 @@ type ResendOTPRequest struct {
 type AuthHandler struct {
 	authUsecase              *usecase.AuthUsecase
 	emailVerificationUsecase *usecase.EmailVerificationUsecase
+	blacklist                *tokenblacklist.Blacklist
 }
 
-func NewAuthHandler(authUsecase *usecase.AuthUsecase, emailVerificationUsecase *usecase.EmailVerificationUsecase) *AuthHandler {
+func NewAuthHandler(authUsecase *usecase.AuthUsecase, emailVerificationUsecase *usecase.EmailVerificationUsecase, blacklist *tokenblacklist.Blacklist) *AuthHandler {
 	return &AuthHandler{
 		authUsecase:              authUsecase,
 		emailVerificationUsecase: emailVerificationUsecase,
@@ -151,9 +156,22 @@ func (h *AuthHandler) GetMe(c *gin.Context) {
 // @Success      200 {object} map[string]string
 // @Router       /auth/logout [post]
 func (h *AuthHandler) Logout(c *gin.Context) {
-	// In a stateless JWT implementation, logout is handled client-side
-	// by removing the token. For enhanced security, you could implement
-	// token blacklisting here.
+	authHeader := c.GetHeader("Authorization")
+	parts := strings.Split(authHeader, " ")
+	if len(parts) == 2 && parts[0] == "Bearer" {
+		tokenString := parts[1]
+		// Parse without validation to extract expiry for blacklist TTL
+		token, _ := jwt.ParseWithClaims(tokenString, &middleware.Claims{}, func(token *jwt.Token) (interface{}, error) {
+			return nil, nil
+		})
+		expiry := time.Now().Add(24 * time.Hour) // fallback expiry
+		if token != nil {
+			if claims, ok := token.Claims.(*middleware.Claims); ok && claims.ExpiresAt != nil {
+				expiry = claims.ExpiresAt.Time
+			}
+		}
+		h.blacklist.Revoke(tokenString, expiry)
+	}
 	c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 }
 

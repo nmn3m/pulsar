@@ -46,6 +46,7 @@ import (
 	"github.com/nmn3m/pulsar/backend/internal/delivery/rest/middleware"
 	"github.com/nmn3m/pulsar/backend/internal/pkg/logger"
 	"github.com/nmn3m/pulsar/backend/internal/pkg/telemetry"
+	"github.com/nmn3m/pulsar/backend/internal/pkg/tokenblacklist"
 	"github.com/nmn3m/pulsar/backend/internal/repository/postgres"
 	"github.com/nmn3m/pulsar/backend/internal/usecase"
 )
@@ -66,6 +67,8 @@ func main() {
 			Environment:  cfg.Telemetry.Environment,
 			OTLPEndpoint: cfg.Telemetry.OTLPEndpoint,
 			OTLPProtocol: cfg.Telemetry.OTLPProtocol,
+			Insecure:     cfg.Telemetry.Insecure,
+			SampleRate:   cfg.Telemetry.SampleRate,
 		})
 		if err != nil {
 			fmt.Printf("Failed to initialize telemetry: %v\n", err)
@@ -148,13 +151,16 @@ func main() {
 		log.Info("Email service disabled (not configured)")
 	}
 
+	// Initialize token blacklist
+	tokenBlacklist := tokenblacklist.New()
+
 	// Initialize usecases
 	authUsecase := usecase.NewAuthUsecase(userRepo, orgRepo, usecase.AuthConfig{
 		JWTSecret:        cfg.JWT.Secret,
 		JWTRefreshSecret: cfg.JWT.RefreshSecret,
 		AccessTTLMinutes: cfg.JWT.AccessTTL,
 		RefreshTTLDays:   cfg.JWT.RefreshTTL,
-	}, emailVerificationUsecase)
+	}, emailVerificationUsecase, tokenBlacklist, log)
 	teamUsecase := usecase.NewTeamUsecase(teamRepo, userRepo)
 	teamUsecase.SetInvitationRepo(invitationRepo)
 	if emailService != nil {
@@ -181,7 +187,7 @@ func main() {
 	escalationUsecase := usecase.NewEscalationUsecase(escalationRepo, alertRepo, alertNotifier)
 
 	// Initialize handlers
-	authHandler := handler.NewAuthHandler(authUsecase, emailVerificationUsecase)
+	authHandler := handler.NewAuthHandler(authUsecase, emailVerificationUsecase, tokenBlacklist)
 	alertHandler := handler.NewAlertHandler(alertUsecase)
 	teamHandler := handler.NewTeamHandler(teamUsecase)
 	userHandler := handler.NewUserHandler(userUsecase)
@@ -198,7 +204,7 @@ func main() {
 	dndHandler := handler.NewDNDHandler(dndUsecase)
 
 	// Initialize middleware
-	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret)
+	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret, tokenBlacklist)
 	apiKeyMiddleware := middleware.NewAPIKeyMiddleware(apiKeyUsecase)
 	combinedAuth := middleware.NewCombinedAuthMiddleware(authMiddleware, apiKeyMiddleware)
 
@@ -211,6 +217,7 @@ func main() {
 	router.Use(gin.Recovery())
 	router.Use(middleware.Logger(log))
 	router.Use(middleware.CORS(cfg.CORS.AllowedOrigins))
+	router.Use(middleware.SecurityHeaders())
 
 	// Add OpenTelemetry middleware if enabled
 	if cfg.Telemetry.Enabled {
@@ -219,7 +226,9 @@ func main() {
 	}
 
 	// Swagger documentation
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	if cfg.Server.Env != "production" {
+		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 
 	// API v1 routes
 	v1 := router.Group("/api/v1")

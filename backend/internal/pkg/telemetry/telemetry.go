@@ -28,7 +28,9 @@ type Config struct {
 	ServiceName  string
 	Environment  string
 	OTLPEndpoint string
-	OTLPProtocol string // "grpc" or "http"
+	OTLPProtocol string  // "grpc" or "http"
+	Insecure     bool    // Whether to use insecure (non-TLS) connections
+	SampleRate   float64 // Trace sampling rate: 1.0 = always, 0.0 = never
 }
 
 // Telemetry holds the OpenTelemetry providers
@@ -132,24 +134,35 @@ func newTracerProvider(ctx context.Context, cfg Config, res *resource.Resource) 
 	var err error
 
 	if cfg.OTLPProtocol == "http" {
-		exporter, err = otlptracehttp.New(ctx,
-			otlptracehttp.WithEndpoint(cfg.OTLPEndpoint),
-			otlptracehttp.WithInsecure(),
-		)
+		opts := []otlptracehttp.Option{otlptracehttp.WithEndpoint(cfg.OTLPEndpoint)}
+		if cfg.Insecure {
+			opts = append(opts, otlptracehttp.WithInsecure())
+		}
+		exporter, err = otlptracehttp.New(ctx, opts...)
 	} else {
-		exporter, err = otlptracegrpc.New(ctx,
-			otlptracegrpc.WithEndpoint(cfg.OTLPEndpoint),
-			otlptracegrpc.WithInsecure(),
-		)
+		opts := []otlptracegrpc.Option{otlptracegrpc.WithEndpoint(cfg.OTLPEndpoint)}
+		if cfg.Insecure {
+			opts = append(opts, otlptracegrpc.WithInsecure())
+		}
+		exporter, err = otlptracegrpc.New(ctx, opts...)
 	}
 	if err != nil {
 		return nil, err
 	}
 
+	var sampler sdktrace.Sampler
+	if cfg.SampleRate >= 1.0 {
+		sampler = sdktrace.AlwaysSample()
+	} else if cfg.SampleRate <= 0 {
+		sampler = sdktrace.NeverSample()
+	} else {
+		sampler = sdktrace.TraceIDRatioBased(cfg.SampleRate)
+	}
+
 	return sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithResource(res),
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithSampler(sampler),
 	), nil
 }
 
@@ -158,15 +171,17 @@ func newMeterProvider(ctx context.Context, cfg Config, res *resource.Resource) (
 	var err error
 
 	if cfg.OTLPProtocol == "http" {
-		exporter, err = otlpmetrichttp.New(ctx,
-			otlpmetrichttp.WithEndpoint(cfg.OTLPEndpoint),
-			otlpmetrichttp.WithInsecure(),
-		)
+		opts := []otlpmetrichttp.Option{otlpmetrichttp.WithEndpoint(cfg.OTLPEndpoint)}
+		if cfg.Insecure {
+			opts = append(opts, otlpmetrichttp.WithInsecure())
+		}
+		exporter, err = otlpmetrichttp.New(ctx, opts...)
 	} else {
-		exporter, err = otlpmetricgrpc.New(ctx,
-			otlpmetricgrpc.WithEndpoint(cfg.OTLPEndpoint),
-			otlpmetricgrpc.WithInsecure(),
-		)
+		opts := []otlpmetricgrpc.Option{otlpmetricgrpc.WithEndpoint(cfg.OTLPEndpoint)}
+		if cfg.Insecure {
+			opts = append(opts, otlpmetricgrpc.WithInsecure())
+		}
+		exporter, err = otlpmetricgrpc.New(ctx, opts...)
 	}
 	if err != nil {
 		return nil, err
@@ -183,15 +198,17 @@ func newLoggerProvider(ctx context.Context, cfg Config, res *resource.Resource) 
 	var err error
 
 	if cfg.OTLPProtocol == "http" {
-		exporter, err = otlploghttp.New(ctx,
-			otlploghttp.WithEndpoint(cfg.OTLPEndpoint),
-			otlploghttp.WithInsecure(),
-		)
+		opts := []otlploghttp.Option{otlploghttp.WithEndpoint(cfg.OTLPEndpoint)}
+		if cfg.Insecure {
+			opts = append(opts, otlploghttp.WithInsecure())
+		}
+		exporter, err = otlploghttp.New(ctx, opts...)
 	} else {
-		exporter, err = otlploggrpc.New(ctx,
-			otlploggrpc.WithEndpoint(cfg.OTLPEndpoint),
-			otlploggrpc.WithInsecure(),
-		)
+		opts := []otlploggrpc.Option{otlploggrpc.WithEndpoint(cfg.OTLPEndpoint)}
+		if cfg.Insecure {
+			opts = append(opts, otlploggrpc.WithInsecure())
+		}
+		exporter, err = otlploggrpc.New(ctx, opts...)
 	}
 	if err != nil {
 		return nil, err

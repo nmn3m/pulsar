@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -45,7 +46,8 @@ func (h *IncidentHandler) Create(c *gin.Context) {
 
 	incident, err := h.incidentUsecase.CreateIncident(c.Request.Context(), orgID, userID, &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR creating incident: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -65,7 +67,8 @@ func (h *IncidentHandler) Get(c *gin.Context) {
 
 	incident, err := h.incidentUsecase.GetIncident(c.Request.Context(), id, orgID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR getting incident: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -96,7 +99,8 @@ func (h *IncidentHandler) GetWithDetails(c *gin.Context) {
 
 	incident, err := h.incidentUsecase.GetIncidentWithDetails(c.Request.Context(), id, orgID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR getting incident with details: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -135,7 +139,8 @@ func (h *IncidentHandler) Update(c *gin.Context) {
 
 	incident, err := h.incidentUsecase.UpdateIncident(c.Request.Context(), id, orgID, userID, &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR updating incident: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -165,7 +170,8 @@ func (h *IncidentHandler) Delete(c *gin.Context) {
 	orgID, _ := middleware.GetOrganizationID(c)
 
 	if err := h.incidentUsecase.DeleteIncident(c.Request.Context(), id, orgID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR deleting incident: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -196,11 +202,19 @@ func (h *IncidentHandler) List(c *gin.Context) {
 		return
 	}
 
+	if req.PageSize <= 0 {
+		req.PageSize = 20
+	}
+	if req.PageSize > 100 {
+		req.PageSize = 100
+	}
+
 	orgID, _ := middleware.GetOrganizationID(c)
 
 	response, err := h.incidentUsecase.ListIncidents(c.Request.Context(), orgID, &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR listing incidents: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -238,7 +252,8 @@ func (h *IncidentHandler) AddResponder(c *gin.Context) {
 
 	responder, err := h.incidentUsecase.AddResponder(c.Request.Context(), id, userID, &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR adding responder: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -278,7 +293,8 @@ func (h *IncidentHandler) RemoveResponder(c *gin.Context) {
 	orgID, _ := middleware.GetOrganizationID(c)
 
 	if err := h.incidentUsecase.RemoveResponder(c.Request.Context(), id, orgID, responderID, userID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR removing responder: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -323,7 +339,8 @@ func (h *IncidentHandler) UpdateResponderRole(c *gin.Context) {
 	orgID, _ := middleware.GetOrganizationID(c)
 
 	if err := h.incidentUsecase.UpdateResponderRole(c.Request.Context(), id, orgID, responderID, &req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR updating responder role: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -354,7 +371,8 @@ func (h *IncidentHandler) ListResponders(c *gin.Context) {
 
 	responders, err := h.incidentUsecase.ListResponders(c.Request.Context(), id, orgID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR listing responders: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -398,7 +416,8 @@ func (h *IncidentHandler) AddNote(c *gin.Context) {
 
 	event, err := h.incidentUsecase.AddNote(c.Request.Context(), id, orgID, userID, &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR adding note: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -429,7 +448,8 @@ func (h *IncidentHandler) GetTimeline(c *gin.Context) {
 
 	timeline, err := h.incidentUsecase.GetTimeline(c.Request.Context(), id, orgID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR getting timeline: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -473,7 +493,8 @@ func (h *IncidentHandler) LinkAlert(c *gin.Context) {
 
 	link, err := h.incidentUsecase.LinkAlert(c.Request.Context(), id, orgID, userID, &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR linking alert: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -512,7 +533,8 @@ func (h *IncidentHandler) UnlinkAlert(c *gin.Context) {
 	userID, _ := middleware.GetUserID(c)
 
 	if err := h.incidentUsecase.UnlinkAlert(c.Request.Context(), id, orgID, alertID, userID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR unlinking alert: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 
@@ -543,7 +565,8 @@ func (h *IncidentHandler) ListAlerts(c *gin.Context) {
 
 	alerts, err := h.incidentUsecase.ListAlerts(c.Request.Context(), id, orgID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("ERROR listing incident alerts: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
 

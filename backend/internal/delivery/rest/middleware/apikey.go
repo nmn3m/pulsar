@@ -90,7 +90,7 @@ func (m *APIKeyMiddleware) RequireAPIKeyWithScope(scope domain.APIKeyScope) gin.
 }
 
 // extractAPIKey extracts the API key from the request
-// Supports: X-API-Key header, Authorization: ApiKey <key>, and query parameter ?api_key=<key>
+// Supports: X-API-Key header, Authorization: ApiKey <key>
 func extractAPIKey(c *gin.Context) string {
 	// Try X-API-Key header first
 	if key := c.GetHeader("X-API-Key"); key != "" {
@@ -104,11 +104,6 @@ func extractAPIKey(c *gin.Context) string {
 		if len(parts) == 2 && strings.EqualFold(parts[0], "apikey") {
 			return parts[1]
 		}
-	}
-
-	// Try query parameter (not recommended for security, but supported)
-	if key := c.Query("api_key"); key != "" {
-		return key
 	}
 
 	return ""

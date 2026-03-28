@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+
+	"github.com/nmn3m/pulsar/backend/internal/pkg/tokenblacklist"
 )
 
 type Claims struct {
@@ -21,11 +23,13 @@ type Claims struct {
 
 type AuthMiddleware struct {
 	jwtSecret string
+	blacklist *tokenblacklist.Blacklist
 }
 
-func NewAuthMiddleware(jwtSecret string) *AuthMiddleware {
+func NewAuthMiddleware(jwtSecret string, blacklist *tokenblacklist.Blacklist) *AuthMiddleware {
 	return &AuthMiddleware{
 		jwtSecret: jwtSecret,
+		blacklist: blacklist,
 	}
 }
 
@@ -72,6 +76,13 @@ func (m *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 		// Check if token is expired
 		if claims.ExpiresAt.Before(time.Now()) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
+			c.Abort()
+			return
+		}
+
+		// Check if token has been revoked
+		if m.blacklist != nil && m.blacklist.IsRevoked(tokenString) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "token has been revoked"})
 			c.Abort()
 			return
 		}

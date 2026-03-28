@@ -2,15 +2,20 @@ package usecase
 
 import (
 	"context"
+	crypto_rand "crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/nmn3m/pulsar/backend/internal/domain"
+	"github.com/nmn3m/pulsar/backend/internal/pkg/tokenblacklist"
 	"github.com/nmn3m/pulsar/backend/internal/usecase/repository"
 )
 
@@ -38,6 +43,8 @@ type AuthUsecase struct {
 	orgRepo                  repository.OrganizationRepository
 	config                   AuthConfig
 	emailVerificationUsecase *EmailVerificationUsecase
+	blacklist                *tokenblacklist.Blacklist
+	logger                   *zap.Logger
 }
 
 func NewAuthUsecase(
@@ -45,12 +52,16 @@ func NewAuthUsecase(
 	orgRepo repository.OrganizationRepository,
 	cfg AuthConfig,
 	emailVerificationUsecase *EmailVerificationUsecase,
+	blacklist *tokenblacklist.Blacklist,
+	logger *zap.Logger,
 ) *AuthUsecase {
 	return &AuthUsecase{
 		userRepo:                 userRepo,
 		orgRepo:                  orgRepo,
 		config:                   cfg,
 		emailVerificationUsecase: emailVerificationUsecase,
+		blacklist:                blacklist,
+		logger:                   logger,
 	}
 }
 
@@ -81,12 +92,17 @@ func (s *AuthUsecase) Register(ctx context.Context, req *RegisterRequest) (*Auth
 	// Check if user already exists
 	existingUser, _ := s.userRepo.GetByEmail(ctx, req.Email)
 	if existingUser != nil {
-		return nil, fmt.Errorf("user with this email already exists")
+		return nil, fmt.Errorf("registration failed, please try again")
 	}
 
 	existingUser, _ = s.userRepo.GetByUsername(ctx, req.Username)
 	if existingUser != nil {
-		return nil, fmt.Errorf("user with this username already exists")
+		return nil, fmt.Errorf("registration failed, please try again")
+	}
+
+	// Validate password strength
+	if err := validatePassword(req.Password); err != nil {
+		return nil, err
 	}
 
 	// Hash password
@@ -159,7 +175,7 @@ func (s *AuthUsecase) Register(ctx context.Context, req *RegisterRequest) (*Auth
 		if err := s.emailVerificationUsecase.CreateAndSendOTP(ctx, user.ID, user.Email, user.Username); err != nil {
 			// Log error but don't fail registration
 			// In production, you might want to handle this differently
-			fmt.Printf("Warning: failed to send verification email: %v\n", err)
+			s.logger.Warn("Failed to send verification email", zap.Error(err))
 		}
 	}
 
@@ -265,6 +281,11 @@ func (s *AuthUsecase) RefreshToken(ctx context.Context, refreshToken string) (*A
 		return nil, fmt.Errorf("organization not found")
 	}
 
+	// Revoke the old refresh token to prevent reuse
+	if s.blacklist != nil && claims.ExpiresAt != nil {
+		s.blacklist.Revoke(refreshToken, claims.ExpiresAt.Time)
+	}
+
 	// Generate new tokens
 	accessToken, err := s.generateAccessToken(user.ID, user.Email, org.ID, claims.Role)
 	if err != nil {
@@ -332,10 +353,46 @@ func (s *AuthUsecase) generateRefreshToken(userID uuid.UUID, email string, orgID
 }
 
 func generateSlug(name string) string {
-	// Simple slug generation (in production, use a proper library)
 	slug := strings.ToLower(name)
 	slug = strings.ReplaceAll(slug, " ", "-")
-	// Add timestamp to ensure uniqueness
-	slug = fmt.Sprintf("%s-%d", slug, time.Now().Unix())
+	// Add cryptographically random suffix to ensure uniqueness
+	b := make([]byte, 4)
+	crypto_rand.Read(b)
+	slug = fmt.Sprintf("%s-%s", slug, hex.EncodeToString(b))
 	return slug
+}
+
+func validatePassword(password string) error {
+	if len(password) < 10 {
+		return fmt.Errorf("password must be at least 10 characters long")
+	}
+
+	var hasUpper, hasLower, hasDigit, hasSpecial bool
+	for _, ch := range password {
+		switch {
+		case unicode.IsUpper(ch):
+			hasUpper = true
+		case unicode.IsLower(ch):
+			hasLower = true
+		case unicode.IsDigit(ch):
+			hasDigit = true
+		case unicode.IsPunct(ch) || unicode.IsSymbol(ch):
+			hasSpecial = true
+		}
+	}
+
+	if !hasUpper {
+		return fmt.Errorf("password must contain at least one uppercase letter")
+	}
+	if !hasLower {
+		return fmt.Errorf("password must contain at least one lowercase letter")
+	}
+	if !hasDigit {
+		return fmt.Errorf("password must contain at least one digit")
+	}
+	if !hasSpecial {
+		return fmt.Errorf("password must contain at least one special character")
+	}
+
+	return nil
 }

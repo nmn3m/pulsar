@@ -58,7 +58,7 @@ func (h *IncomingWebhookHandler) ReceiveWebhook(c *gin.Context) {
 	}
 
 	// Read request body
-	body, err := io.ReadAll(c.Request.Body)
+	body, err := io.ReadAll(io.LimitReader(c.Request.Body, 1<<20)) // 1MB limit
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read request body"})
 		return

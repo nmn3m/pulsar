@@ -9,6 +9,7 @@ import (
 	"github.com/nmn3m/pulsar/backend/internal/config"
 	"github.com/nmn3m/pulsar/backend/internal/delivery/rest/handler"
 	"github.com/nmn3m/pulsar/backend/internal/delivery/rest/middleware"
+	"github.com/nmn3m/pulsar/backend/internal/pkg/tokenblacklist"
 	"github.com/nmn3m/pulsar/backend/internal/repository/postgres"
 	"github.com/nmn3m/pulsar/backend/internal/usecase"
 )
@@ -78,6 +79,7 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 	dndRepo := postgres.NewDNDSettingsRepository(db)
 
 	// Initialize usecases
+	bl := tokenblacklist.New()
 	// Email verification is nil for tests (SMTP not configured)
 	var emailVerificationUsecase *usecase.EmailVerificationUsecase
 	authUsecase := usecase.NewAuthUsecase(userRepo, orgRepo, usecase.AuthConfig{
@@ -85,7 +87,7 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 		JWTRefreshSecret: cfg.JWT.RefreshSecret,
 		AccessTTLMinutes: cfg.JWT.AccessTTL,
 		RefreshTTLDays:   cfg.JWT.RefreshTTL,
-	}, emailVerificationUsecase)
+	}, emailVerificationUsecase, bl, logger)
 	teamUsecase := usecase.NewTeamUsecase(teamRepo, userRepo)
 	userUsecase := usecase.NewUserUsecase(orgRepo, userRepo)
 	scheduleUsecase := usecase.NewScheduleUsecase(scheduleRepo, userRepo)
@@ -104,7 +106,7 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 	escalationUsecase := usecase.NewEscalationUsecase(escalationRepo, alertRepo, alertNotifier)
 
 	// Initialize handlers
-	authHandler := handler.NewAuthHandler(authUsecase, emailVerificationUsecase)
+	authHandler := handler.NewAuthHandler(authUsecase, emailVerificationUsecase, bl)
 	alertHandler := handler.NewAlertHandler(alertUsecase)
 	teamHandler := handler.NewTeamHandler(teamUsecase)
 	userHandler := handler.NewUserHandler(userUsecase)
@@ -117,7 +119,7 @@ func NewTestServer(testDB *TestDB, testCfg *TestConfig) (*TestServer, error) {
 	metricsHandler := handler.NewMetricsHandler(metricsUsecase)
 
 	// Initialize middleware
-	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret)
+	authMiddleware := middleware.NewAuthMiddleware(cfg.JWT.Secret, bl)
 
 	// Setup router
 	router := gin.New()
