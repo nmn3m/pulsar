@@ -128,4 +128,3 @@ export interface WebhookConfig {
   headers?: Record<string, string>;
   timeout?: number;
 }
-

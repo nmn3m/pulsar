@@ -112,8 +112,8 @@ func (h *NotificationHandler) ListChannels(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-	"channels": channels,
-	"total":    len(channels),
+		"channels": channels,
+		"total":    len(channels),
 	})
 }
 
@@ -269,8 +269,8 @@ func (h *NotificationHandler) ListUserPreferences(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-	"preferences": prefs,
-	"total":       len(prefs),
+		"preferences": prefs,
+		"total":       len(prefs),
 	})
 }
 
@@ -433,10 +433,10 @@ func (h *NotificationHandler) ListLogs(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-	"logs":   logs,
-	"total":  len(logs),
-	"limit":  limit,
-	"offset": offset,
+		"logs":   logs,
+		"total":  len(logs),
+		"limit":  limit,
+		"offset": offset,
 	})
 }
 
@@ -467,8 +467,8 @@ func (h *NotificationHandler) ListLogsByAlert(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-	"logs":  logs,
-	"total": len(logs),
+		"logs":  logs,
+		"total": len(logs),
 	})
 }
 
@@ -502,9 +502,9 @@ func (h *NotificationHandler) ListLogsByUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-	"logs":   logs,
-	"total":  len(logs),
-	"limit":  limit,
-	"offset": offset,
+		"logs":   logs,
+		"total":  len(logs),
+		"limit":  limit,
+		"offset": offset,
 	})
 }

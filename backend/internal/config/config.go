@@ -2,8 +2,8 @@ package config
 
 import (
 	"fmt"
-	"os"
 	"math"
+	"os"
 	"strconv"
 	"strings"
 )

@@ -71,7 +71,8 @@
         </div>
 
         <div>
-          <label for="username" class="block text-sm font-medium text-gray-600 mb-1">Username</label>
+          <label for="username" class="block text-sm font-medium text-gray-600 mb-1">Username</label
+          >
           <input
             id="username"
             type="text"
@@ -96,16 +97,12 @@
             placeholder="+1234567890"
           />
           <p class="mt-1 text-xs text-gray-400">
-            Required for SMS notifications. Use international format, e.g. +20xxxxxxxxxx for Egypt, +1xxxxxxxxxx for US.
+            Required for SMS notifications. Use international format, e.g. +20xxxxxxxxxx for Egypt,
+            +1xxxxxxxxxx for US.
           </p>
         </div>
 
-        <Input
-          id="timezone"
-          label="Timezone"
-          bind:value={timezone}
-          placeholder="Africa/Cairo"
-        />
+        <Input id="timezone" label="Timezone" bind:value={timezone} placeholder="Africa/Cairo" />
       </div>
 
       {#if saveError}

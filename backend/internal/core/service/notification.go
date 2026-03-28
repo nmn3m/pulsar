@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 
+	providers "github.com/nmn3m/pulsar/backend/internal/adapter/outbound/provider"
 	"github.com/nmn3m/pulsar/backend/internal/core/domain"
 	"github.com/nmn3m/pulsar/backend/internal/core/dto"
 	"github.com/nmn3m/pulsar/backend/internal/core/port/outbound"
-	providers "github.com/nmn3m/pulsar/backend/internal/adapter/outbound/provider"
 )
 
 // NotificationProvider defines the interface for sending notifications

@@ -15,8 +15,8 @@ type APIKey struct {
 	OrganizationID uuid.UUID
 	UserID         uuid.UUID
 	Name           string
-	KeyPrefix      string     // First 8 chars for identification
-	KeyHash        string     // SHA-256 hash of the full key
+	KeyPrefix      string // First 8 chars for identification
+	KeyHash        string // SHA-256 hash of the full key
 	Scopes         []string
 	LastUsedAt     *time.Time
 	ExpiresAt      *time.Time

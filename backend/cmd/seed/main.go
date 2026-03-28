@@ -12,8 +12,8 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/nmn3m/pulsar/backend/internal/config"
 	"github.com/nmn3m/pulsar/backend/internal/adapter/outbound/postgres"
+	"github.com/nmn3m/pulsar/backend/internal/config"
 	"github.com/nmn3m/pulsar/backend/internal/core/domain"
 	"github.com/nmn3m/pulsar/backend/internal/core/port/outbound"
 )

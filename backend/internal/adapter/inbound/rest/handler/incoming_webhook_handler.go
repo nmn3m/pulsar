@@ -125,10 +125,10 @@ func (h *IncomingWebhookHandler) ReceiveWebhook(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-	"message":         "Alerts created successfully",
-	"alerts_created":  len(createdAlerts),
-	"alerts_received": len(alerts),
-	"alert_ids":       createdAlerts,
+		"message":         "Alerts created successfully",
+		"alerts_created":  len(createdAlerts),
+		"alerts_received": len(alerts),
+		"alert_ids":       createdAlerts,
 	})
 }
 

@@ -234,9 +234,9 @@ func (h *WebhookHandler) ListDeliveries(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-	"deliveries": deliveries,
-	"limit":      limit,
-	"offset":     offset,
+		"deliveries": deliveries,
+		"limit":      limit,
+		"offset":     offset,
 	})
 }
 

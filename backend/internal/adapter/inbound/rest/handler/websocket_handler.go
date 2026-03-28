@@ -174,8 +174,8 @@ func (h *WebSocketHandler) GetStats(c *gin.Context) {
 	orgID, _ := middleware.GetOrganizationID(c)
 
 	stats := gin.H{
-	"organization_client_count": h.wsService.GetClientCount(orgID),
-	"total_client_count":        h.wsService.GetTotalClientCount(),
+		"organization_client_count": h.wsService.GetClientCount(orgID),
+		"total_client_count":        h.wsService.GetTotalClientCount(),
 	}
 
 	c.JSON(http.StatusOK, stats)

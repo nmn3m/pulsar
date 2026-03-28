@@ -13,18 +13,18 @@ import (
 )
 
 type AlertService struct {
-	alertRepo  outbound.AlertRepository
-	notifier   outbound.AlertNotificationSender
+	alertRepo   outbound.AlertRepository
+	notifier    outbound.AlertNotificationSender
 	broadcaster outbound.EventBroadcaster
-	dispatcher outbound.WebhookDispatcher
+	dispatcher  outbound.WebhookDispatcher
 }
 
 func NewAlertService(alertRepo outbound.AlertRepository, notifier outbound.AlertNotificationSender, broadcaster outbound.EventBroadcaster, dispatcher outbound.WebhookDispatcher) *AlertService {
 	return &AlertService{
-		alertRepo:  alertRepo,
-		notifier:   notifier,
+		alertRepo:   alertRepo,
+		notifier:    notifier,
 		broadcaster: broadcaster,
-		dispatcher: dispatcher,
+		dispatcher:  dispatcher,
 	}
 }
 
